@@ -149,7 +149,7 @@ export default function AnalogiesDashboardPage() {
                           type="button"
                           className="mt-1 text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
                         >
-                          View / edit
+                          Edit
                         </button>
                       </Link>
                     </div>
