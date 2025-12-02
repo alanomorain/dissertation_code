@@ -30,7 +30,7 @@ export default function UploadSlidesPage() {
     }
 
     // For now, just log – this is where you'll later call an API
-    console.log("Slides upload (mock):", {
+    console.log("Slides upload: ", {
       moduleCode,
       slidesFile,
       notes,
@@ -53,7 +53,7 @@ export default function UploadSlidesPage() {
         <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold">
-              Upload lecture slides for analogy generation
+              Upload Lecture Slides
             </h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
