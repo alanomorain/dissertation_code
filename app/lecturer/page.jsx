@@ -125,7 +125,7 @@ export default function LecturerDashboard() {
                                 type="button"
                                 className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition"
                             >
-                                Manage analogies
+                                Manage Analogies
                             </button>
                         </Link>
                         <button className="text-xs rounded-lg border border-indigo-400 px-3 py-1 hover:bg-indigo-500 hover:text-white transition">

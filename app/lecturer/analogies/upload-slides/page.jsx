@@ -61,7 +61,7 @@ export default function UploadSlidesPage() {
               href="/lecturer/analogies"
               className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
             >
-              Back to analogies
+              Back to Analogies
             </Link>
           </div>
         </div>
