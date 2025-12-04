@@ -98,9 +98,14 @@ export default function StudentDashboard() {
                           Progress: {module.progress}%
                         </p>
                       </div>
-                      <button className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition">
-                        View analogies
-                      </button>
+                      <Link href="/student/analogies">
+                        <button
+                          type="button"
+                          className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition"
+                        >
+                          View analogies
+                        </button>
+                      </Link>
                     </div>
                     <div className="mt-2 h-1.5 rounded-full bg-slate-800">
                       <div
