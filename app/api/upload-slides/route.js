@@ -1,3 +1,4 @@
+// app/api/upload-slides/route.js
 import OpenAI from "openai"
 
 export const runtime = "nodejs" // needed for Buffer & Node libs
@@ -6,50 +7,52 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Very simple “key point picker” – for now based on notes or a stub
-function pickKeyPoints(notes, maxPoints = 5) {
-  if (notes && notes.trim().length > 0) {
-    const parts = notes
+// Fallback topic picker – deterministic, based on text we have (notes for now)
+function fallbackTopicsFromText(text, maxTopics = 7) {
+  if (text && text.trim().length > 0) {
+    const parts = text
       .split(/[\.\n]/) // split on sentences / new lines
       .map((p) => p.trim())
       .filter((p) => p.length > 10)
 
     const unique = Array.from(new Set(parts))
-    return unique.slice(0, maxPoints)
+    return unique.slice(0, maxTopics)
   }
 
-  // Fallback: pretend these are the main slide points
+  // Very rough stub if we somehow have no text at all
   return [
     "Introduction to microservices vs monolithic architectures",
     "Benefits and trade-offs of microservices",
-    "How microservices relate to teaching via analogies",
-  ].slice(0, maxPoints)
+    "Microservices and teaching via analogies",
+  ].slice(0, maxTopics)
 }
 
-async function generateAnalogiesForPoints(points, moduleCode) {
-  const systemPrompt = 
-`You are an educational assistant helping university lecturers explain complex concepts using clear analogies.
-Given a key teaching point, generate 2–3 concise analogies suitable for MSc Software Development students.
-You MUST respond with valid JSON only, no explanation, no commentary.`.trim()
+// Call OpenAI to turn raw lecture text into a clean list of topics
+async function suggestTopicsFromText(text, moduleCode) {
+  const systemPrompt = `
+You are an educational assistant helping university lecturers prepare teaching material.
+Given some lecture text, you identify 5–10 key topics or concepts that would be good
+candidates for analogies.
+
+You MUST respond with valid JSON only, no explanation, no commentary.
+`.trim()
 
   const userPrompt = `
-Here are the key points from a lecture. For EACH point, generate 2–3 analogies.
+Module code: ${moduleCode || "UNKNOWN_MODULE"}
 
-Return strictly in this JSON format (no prose, no explanation):
+Lecture text:
+"""${text.slice(0, 8000)}"""
 
-[
-  {
-    "original": "the original key point text here",
-    "analogies": [
-      "first analogy",
-      "second analogy"
-    ]
-  }
-]
+Return STRICTLY in this JSON format (no extra keys, no prose):
 
-Key points:
-${points.map((p, i) => `${i + 1}. ${p}`).join("\n")}
-  `.trim()
+{
+  "topics": [
+    "topic 1 in short natural language",
+    "topic 2",
+    "topic 3"
+  ]
+}
+`.trim()
 
   const response = await client.responses.create({
     model: "gpt-4.1-mini",
@@ -59,29 +62,26 @@ ${points.map((p, i) => `${i + 1}. ${p}`).join("\n")}
     ],
   })
 
-  // NEW — The SDK now exposes the final output as response.output_text
-  const text = response.output_text
+  const textOut = response.output_text
 
-  if (!text) {
+  if (!textOut) {
     console.error("OpenAI returned unexpected shape:", response)
     throw new Error("No output_text received from OpenAI")
   }
 
   let parsed
   try {
-    parsed = JSON.parse(text)
+    parsed = JSON.parse(textOut)
   } catch (err) {
-    console.error("Failed to parse LLM JSON:", text)
+    console.error("Failed to parse topics JSON from LLM:", textOut)
     throw new Error("Invalid JSON returned from OpenAI response")
   }
 
-  if (Array.isArray(parsed)) return parsed
-  if (Array.isArray(parsed.points)) return parsed.points
+  if (Array.isArray(parsed.topics)) return parsed.topics
+  if (Array.isArray(parsed)) return parsed // in case it returns a bare array
 
-  throw new Error("OpenAI JSON did not match expected structure")
+  throw new Error("OpenAI JSON did not contain a 'topics' array")
 }
-
-
 
 export async function POST(req) {
   try {
@@ -100,7 +100,7 @@ export async function POST(req) {
       )
     }
 
-    // Read the file into a buffer (we'll use this later for real slide parsing)
+    // Read the file into a buffer (so we're ready to do real slide parsing later)
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
@@ -111,14 +111,26 @@ export async function POST(req) {
       moduleCode,
     })
 
-    // TODO (later): actually parse the PDF/PPTX using buffer.
-    // For now we'll derive key points from notes / stub so the pipeline works.
-    const keyPoints = pickKeyPoints(notes.toString())
+    // TODO (later): actually parse the PDF/PPTX using `buffer`.
+    // For now, we treat `notes` as our "extractedText".
+    const extractedText = notes.toString()
 
-    const analogies = await generateAnalogiesForPoints(keyPoints, moduleCode)
+    let topics
+    try {
+      // Try to get smart topics from OpenAI
+      topics = await suggestTopicsFromText(extractedText || file.name, moduleCode)
+    } catch (err) {
+      console.error("Falling back to local topic picker:", err)
+      topics = fallbackTopicsFromText(extractedText || file.name)
+    }
 
     return new Response(
-      JSON.stringify({ points: analogies }),
+      JSON.stringify({
+        topics,
+        extractedText, // so the UI can show a preview
+        moduleCode,
+        filename: file.name,
+      }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },

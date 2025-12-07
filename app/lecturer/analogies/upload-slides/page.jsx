@@ -9,7 +9,11 @@ export default function UploadSlidesPage() {
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
-  const [analogies, setAnalogies] = useState(null) // NEW: store results
+
+  // NEW: suggested topics + text preview
+  const [topics, setTopics] = useState([])
+  const [newTopic, setNewTopic] = useState("")
+  const [extractedText, setExtractedText] = useState("")
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -20,7 +24,8 @@ export default function UploadSlidesPage() {
     e.preventDefault()
     setSaving(true)
     setMessage(null)
-    setAnalogies(null)
+    setTopics([])
+    setExtractedText("")
 
     if (!slidesFile) {
       setMessage({
@@ -49,11 +54,15 @@ export default function UploadSlidesPage() {
 
       const data = await res.json()
 
+      // EXPECTED SHAPE FROM API:
+      // { topics: ["Topic 1", "Topic 2", ...], extractedText: "..." }
+      setTopics(data.topics || [])
+      setExtractedText(data.extractedText || "")
+
       setMessage({
         type: "success",
-        text: "Slides processed. Generated analogies are shown below.",
+        text: "Slides processed. Suggested topics are shown below.",
       })
-      setAnalogies(data.points || [])
     } catch (err) {
       console.error(err)
       setMessage({
@@ -63,6 +72,32 @@ export default function UploadSlidesPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleRemoveTopic = (topicToRemove) => {
+    setTopics((prev) => prev.filter((t) => t !== topicToRemove))
+  }
+
+  const handleAddTopic = () => {
+    if (!newTopic.trim()) return
+    setTopics((prev) => [...prev, newTopic.trim()])
+    setNewTopic("")
+  }
+
+  // TODO: hook this up to a second API route that actually generates analogies
+  const handleGenerateAnalogies = async () => {
+    console.log("Generate analogies for:", topics)
+
+    // Example (once you create /api/generate-analogies):
+    /*
+    const res = await fetch("/api/generate-analogies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ moduleCode, topics, notes }),
+    })
+    const data = await res.json()
+    // then maybe redirect to /lecturer/analogies or show a message
+    */
   }
 
   return (
@@ -176,7 +211,7 @@ export default function UploadSlidesPage() {
                 />
                 <p className="text-xs text-slate-400">
                   These notes are passed to the LLM as extra context
-                  or constraints when generating analogies.
+                  or constraints when suggesting topics and later generating analogies.
                 </p>
               </div>
 
@@ -187,7 +222,7 @@ export default function UploadSlidesPage() {
                   disabled={saving}
                   className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
                 >
-                  {saving ? "Processing..." : "Upload & generate analogies"}
+                  {saving ? "Processing..." : "Upload & suggest topics"}
                 </button>
                 <Link
                   href="/lecturer/analogies"
@@ -198,36 +233,75 @@ export default function UploadSlidesPage() {
               </div>
             </form>
 
-            {/* Generated analogies */}
-            {analogies && analogies.length > 0 && (
+            {/* Extracted text preview */}
+            {extractedText && (
+              <section className="mt-8 border-t border-slate-800 pt-4">
+                <h2 className="text-base font-semibold mb-2">
+                  Extracted text (preview)
+                </h2>
+                <p className="text-xs text-slate-400 mb-2">
+                  This is a shortened preview of the text extracted from your slides.
+                </p>
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-200 whitespace-pre-wrap">
+                  {extractedText.slice(0, 1500)}
+                  {extractedText.length > 1500 && "…"}
+                </div>
+              </section>
+            )}
+
+            {/* Suggested topics */}
+            {topics.length > 0 && (
               <section className="mt-8 border-t border-slate-800 pt-4">
                 <h2 className="text-base font-semibold mb-3">
-                  Generated analogies
+                  Suggested topics for analogies
                 </h2>
                 <p className="text-xs text-slate-400 mb-3">
-                  These are based on the most important points detected in your slide deck.
+                  Remove anything that doesn't fit and add any extra topics you want analogies for.
                 </p>
 
-                <div className="space-y-3">
-                  {analogies.map((point, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {topics.map((topic) => (
+                    <span
+                      key={topic}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs"
                     >
-                      <p className="text-xs font-semibold text-slate-100 mb-1">
-                        Key point {idx + 1}
-                      </p>
-                      <p className="text-sm text-slate-200 mb-2">
-                        {point.original}
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-slate-300 space-y-1">
-                        {point.analogies?.map((a, i) => (
-                          <li key={i}>{a}</li>
-                        ))}
-                      </ul>
-                    </div>
+                      {topic}
+                      <button
+                        type="button"
+                        className="text-slate-400 hover:text-red-300"
+                        onClick={() => handleRemoveTopic(topic)}
+                      >
+                        ✕
+                      </button>
+                    </span>
                   ))}
                 </div>
+
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    value={newTopic}
+                    onChange={(e) => setNewTopic(e.target.value)}
+                    placeholder="Add a new topic…"
+                    className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTopic}
+                    className="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium hover:bg-slate-600"
+                  >
+                    Add
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleGenerateAnalogies}
+                  disabled={topics.length === 0}
+                  className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                >
+                  Generate analogies for selected topics
+                </button>
               </section>
             )}
           </div>
