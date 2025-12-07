@@ -7,13 +7,17 @@ export default function UploadSlidesPage() {
   const [moduleCode, setModuleCode] = useState("CSC7058")
   const [slidesFile, setSlidesFile] = useState(null)
   const [notes, setNotes] = useState("")
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState(false)          // for upload+topics
   const [message, setMessage] = useState(null)
 
-  // NEW: suggested topics + text preview
+  // topics + extracted text
   const [topics, setTopics] = useState([])
   const [newTopic, setNewTopic] = useState("")
   const [extractedText, setExtractedText] = useState("")
+
+  // NEW: analogy generation state
+  const [generating, setGenerating] = useState(false)
+  const [analogies, setAnalogies] = useState([])
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -26,6 +30,7 @@ export default function UploadSlidesPage() {
     setMessage(null)
     setTopics([])
     setExtractedText("")
+    setAnalogies([])
 
     if (!slidesFile) {
       setMessage({
@@ -54,8 +59,6 @@ export default function UploadSlidesPage() {
 
       const data = await res.json()
 
-      // EXPECTED SHAPE FROM API:
-      // { topics: ["Topic 1", "Topic 2", ...], extractedText: "..." }
       setTopics(data.topics || [])
       setExtractedText(data.extractedText || "")
 
@@ -84,20 +87,51 @@ export default function UploadSlidesPage() {
     setNewTopic("")
   }
 
-  // TODO: hook this up to a second API route that actually generates analogies
   const handleGenerateAnalogies = async () => {
-    console.log("Generate analogies for:", topics)
+    if (topics.length === 0) {
+      setMessage({
+        type: "error",
+        text: "Please keep at least one topic before generating analogies.",
+      })
+      return
+    }
 
-    // Example (once you create /api/generate-analogies):
-    /*
-    const res = await fetch("/api/generate-analogies", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ moduleCode, topics, notes }),
-    })
-    const data = await res.json()
-    // then maybe redirect to /lecturer/analogies or show a message
-    */
+    setGenerating(true)
+    setMessage(null)
+    setAnalogies([])
+
+    try {
+      const res = await fetch("/api/generate-analogies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleCode,
+          topics,
+          notes,
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Analogy generation failed.")
+      }
+
+      const data = await res.json()
+      setAnalogies(data.analogies || data.points || [])
+
+      setMessage({
+        type: "success",
+        text: "Analogies generated for the selected topics.",
+      })
+    } catch (err) {
+      console.error(err)
+      setMessage({
+        type: "error",
+        text: err.message || "Something went wrong while generating analogies.",
+      })
+    } finally {
+      setGenerating(false)
+    }
   }
 
   return (
@@ -141,6 +175,7 @@ export default function UploadSlidesPage() {
               </div>
             )}
 
+            {/* Upload + topic suggestion form */}
             <form onSubmit={handleSubmit} className="space-y-4 text-sm">
               {/* Module selection */}
               <div className="space-y-1">
@@ -210,8 +245,8 @@ export default function UploadSlidesPage() {
                   placeholder="E.g. focus on explaining microservices vs monolith, avoid going too deep into deployment details..."
                 />
                 <p className="text-xs text-slate-400">
-                  These notes are passed to the LLM as extra context
-                  or constraints when suggesting topics and later generating analogies.
+                  These notes are passed to the LLM as extra context for suggesting topics
+                  and generating analogies.
                 </p>
               </div>
 
@@ -285,7 +320,7 @@ export default function UploadSlidesPage() {
                     placeholder="Add a new topic…"
                     className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
                   />
-                  <button
+                <button
                     type="button"
                     onClick={handleAddTopic}
                     className="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium hover:bg-slate-600"
@@ -297,11 +332,44 @@ export default function UploadSlidesPage() {
                 <button
                   type="button"
                   onClick={handleGenerateAnalogies}
-                  disabled={topics.length === 0}
+                  disabled={topics.length === 0 || generating}
                   className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
                 >
-                  Generate analogies for selected topics
+                  {generating ? "Generating analogies..." : "Generate analogies for selected topics"}
                 </button>
+              </section>
+            )}
+
+            {/* Generated analogies */}
+            {analogies.length > 0 && (
+              <section className="mt-8 border-t border-slate-800 pt-4">
+                <h2 className="text-base font-semibold mb-3">
+                  Generated analogies
+                </h2>
+                <p className="text-xs text-slate-400 mb-3">
+                  These analogies were generated based on the topics you selected.
+                </p>
+
+                <div className="space-y-3">
+                  {analogies.map((point, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
+                    >
+                      <p className="text-xs font-semibold text-slate-100 mb-1">
+                        Topic {idx + 1}
+                      </p>
+                      <p className="text-sm text-slate-200 mb-2">
+                        {point.original}
+                      </p>
+                      <ul className="list-disc list-inside text-xs text-slate-300 space-y-1">
+                        {point.analogies?.map((a, i) => (
+                          <li key={i}>{a}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </section>
             )}
           </div>
