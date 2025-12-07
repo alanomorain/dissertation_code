@@ -27,16 +27,15 @@ function pickKeyPoints(notes, maxPoints = 5) {
 }
 
 async function generateAnalogiesForPoints(points, moduleCode) {
-  const systemPrompt = `
-You are an educational assistant helping university lecturers explain complex concepts using clear analogies.
+  const systemPrompt = 
+`You are an educational assistant helping university lecturers explain complex concepts using clear analogies.
 Given a key teaching point, generate 2–3 concise analogies suitable for MSc Software Development students.
-You MUST respond with valid JSON only, no extra commentary.
-  `.trim()
+You MUST respond with valid JSON only, no explanation, no commentary.`.trim()
 
   const userPrompt = `
 Here are the key points from a lecture. For EACH point, generate 2–3 analogies.
 
-Return strictly in this JSON format (no extra text):
+Return strictly in this JSON format (no prose, no explanation):
 
 [
   {
@@ -58,31 +57,30 @@ ${points.map((p, i) => `${i + 1}. ${p}`).join("\n")}
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
-    // ❌ no response_format – we rely on the prompt instead
   })
 
-  let text
-  try {
-    // Depending on SDK version, this path may vary slightly, but this is the current one:
-    text = response.output[0].content[0].text
-  } catch (e) {
-    console.error("Unexpected OpenAI response shape:", response)
-    throw new Error("Unexpected OpenAI response format")
+  // NEW — The SDK now exposes the final output as response.output_text
+  const text = response.output_text
+
+  if (!text) {
+    console.error("OpenAI returned unexpected shape:", response)
+    throw new Error("No output_text received from OpenAI")
   }
 
   let parsed
   try {
     parsed = JSON.parse(text)
-  } catch (e) {
-    console.error("Failed to parse JSON from OpenAI:", text)
-    throw new Error("Could not parse JSON from OpenAI")
+  } catch (err) {
+    console.error("Failed to parse LLM JSON:", text)
+    throw new Error("Invalid JSON returned from OpenAI response")
   }
 
   if (Array.isArray(parsed)) return parsed
   if (Array.isArray(parsed.points)) return parsed.points
 
-  throw new Error("OpenAI JSON did not have the expected structure")
+  throw new Error("OpenAI JSON did not match expected structure")
 }
+
 
 
 export async function POST(req) {
@@ -127,7 +125,7 @@ export async function POST(req) {
       },
     )
   } catch (err) {
-    console.error("Error in /api/upload-slides:", err)
+    console.error("Error in /api/upload-slides:", err?.response?.data || err)
     return new Response(
       JSON.stringify({
         error: "Server error while processing slides",
