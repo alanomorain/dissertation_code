@@ -121,7 +121,7 @@ export default function UploadSlidesPage() {
 
       setMessage({
         type: "success",
-        text: "Analogies generated for the selected topics.",
+        text: "Analogies generated :)",
       })
     } catch (err) {
       console.error(err)
