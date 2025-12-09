@@ -8,7 +8,7 @@ const client = new OpenAI({
 })
 
 // Fallback topic picker – deterministic, based on text we have (notes for now)
-function fallbackTopicsFromText(text, maxTopics = 7) {
+function fallbackTopicsFromText(text, maxTopics = 5) {
   if (text && text.trim().length > 0) {
     const parts = text
       .split(/[\.\n]/) // split on sentences / new lines
@@ -31,7 +31,7 @@ function fallbackTopicsFromText(text, maxTopics = 7) {
 async function suggestTopicsFromText(text, moduleCode) {
   const systemPrompt = `
 You are an educational assistant helping university lecturers prepare teaching material.
-Given some lecture text, you identify 5–10 key topics or concepts that would be good
+Given some lecture text, you identify up to 5 key topics or concepts that would be good
 candidates for analogies.
 
 You MUST respond with valid JSON only, no explanation, no commentary.
@@ -52,6 +52,7 @@ Return STRICTLY in this JSON format (no extra keys, no prose):
     "topic 3"
   ]
 }
+  You MUST return 5 or fewer topics.
 `.trim()
 
   const response = await client.responses.create({
@@ -77,10 +78,11 @@ Return STRICTLY in this JSON format (no extra keys, no prose):
     throw new Error("Invalid JSON returned from OpenAI response")
   }
 
-  if (Array.isArray(parsed.topics)) return parsed.topics
-  if (Array.isArray(parsed)) return parsed // in case it returns a bare array
+  if (Array.isArray(parsed.topics)) return parsed.topics.slice(0, 5)
+  if (Array.isArray(parsed)) return parsed.slice(0, 5)
 
   throw new Error("OpenAI JSON did not contain a 'topics' array")
+
 }
 
 export async function POST(req) {

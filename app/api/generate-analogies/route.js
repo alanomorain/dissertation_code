@@ -11,7 +11,7 @@ const client = new OpenAI({
 async function generateAnalogiesForTopics(topics, moduleCode, notes) {
   const systemPrompt = `
 You are an educational assistant helping university lecturers explain complex concepts 
-using clear analogies. Given a teaching topic, generate 2–3 concise analogies suitable 
+using clear analogies. Given a teaching topic, generate 1 concise analogy suitable 
 for MSc Software Development students.
 
 You MUST respond with valid JSON only, no explanation, no commentary.
@@ -24,7 +24,7 @@ Additional lecturer notes (may be empty):
 """${(notes || "").toString().slice(0, 1000)}"""
 
 Here are the topics the lecturer wants analogies for. 
-For EACH topic, generate 2–3 analogies.
+For EACH topic, generate exactly 1 analogy.
 
 Return STRICTLY in this JSON format (no prose, no other keys):
 
@@ -32,8 +32,7 @@ Return STRICTLY in this JSON format (no prose, no other keys):
   {
     "original": "the original topic here",
     "analogies": [
-      "first analogy",
-      "second analogy"
+      "the single analogy for this topic"
     ]
   }
 ]
