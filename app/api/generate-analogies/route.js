@@ -64,10 +64,34 @@ ${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
     throw new Error("Invalid JSON returned from OpenAI response")
   }
 
-  if (Array.isArray(parsed)) return parsed
-  if (Array.isArray(parsed.points)) return parsed.points
+  // NEW: ensure each item has at most 1 analogy
+  const normalizeToSingleAnalogy = (arr) =>
+    arr.map((item) => {
+      // handle a few possible shapes defensively
+      let analogiesArray = []
+
+      if (Array.isArray(item.analogies)) {
+        analogiesArray = item.analogies
+      } else if (typeof item.analogies === "string") {
+        analogiesArray = [item.analogies]
+      }
+
+      return {
+        ...item,
+        analogies: analogiesArray.slice(0, 1), // 👈 keep only the first analogy
+      }
+    })
+
+  if (Array.isArray(parsed)) {
+    return normalizeToSingleAnalogy(parsed)
+  }
+
+  if (Array.isArray(parsed.points)) {
+    return normalizeToSingleAnalogy(parsed.points)
+  }
 
   throw new Error("OpenAI JSON did not match expected structure")
+
 }
 
 export async function POST(req) {
