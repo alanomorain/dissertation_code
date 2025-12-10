@@ -18,6 +18,8 @@ export default function UploadSlidesPage() {
   // NEW: analogy generation state
   const [generating, setGenerating] = useState(false)
   const [analogies, setAnalogies] = useState([])
+  // For regenerating single analogies
+  const [regeneratingIndex, setRegeneratingIndex] = useState(null) 
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -133,6 +135,59 @@ export default function UploadSlidesPage() {
       setGenerating(false)
     }
   }
+
+  const handleRegenerateTopic = async (idx) => {
+  const topic = topics[idx]
+  if (!topic) return
+
+  setRegeneratingIndex(idx)
+  setMessage(null)
+
+  try {
+    const res = await fetch("/api/generate-analogies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        moduleCode,
+        topics: [topic], // only regenerate this one
+        notes,
+      }),
+    })
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}))
+      throw new Error(errorData.error || "Analogy regeneration failed.")
+    }
+
+    const data = await res.json()
+    const newSet = (data.analogies || data.points || [])[0]
+
+    if (!newSet) {
+      throw new Error("No analogies returned for this topic.")
+    }
+
+    // Replace only this topic's analogies in state
+    setAnalogies((prev) => {
+      const copy = [...prev]
+      copy[idx] = newSet
+      return copy
+    })
+
+    setMessage({
+      type: "success",
+      text: `Analogies regenerated for "${topic}".`,
+    })
+  } catch (err) {
+    console.error(err)
+    setMessage({
+      type: "error",
+      text: err.message || "Something went wrong while regenerating analogies.",
+    })
+  } finally {
+    setRegeneratingIndex(null)
+  }
+}
+
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
@@ -347,7 +402,7 @@ export default function UploadSlidesPage() {
                   Generated analogies
                 </h2>
                 <p className="text-xs text-slate-400 mb-3">
-                  These analogies were generated based on the topics you selected.
+                  You can regenerate the analogy for any topic without affecting the others.
                 </p>
 
                 <div className="space-y-3">
@@ -356,13 +411,27 @@ export default function UploadSlidesPage() {
                       key={idx}
                       className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
                     >
-                      <p className="text-xs font-semibold text-slate-100 mb-1">
-                        Topic {idx + 1}
-                      </p>
-                      <p className="text-sm text-slate-200 mb-2">
-                        {point.original}
-                      </p>
-                      <ul className="list-disc list-inside text-xs text-slate-300 space-y-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-100 mb-1">
+                            Topic {idx + 1}
+                          </p>
+                          <p className="text-sm text-slate-200 mb-2">
+                            {point.original}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRegenerateTopic(idx)}
+                          disabled={regeneratingIndex === idx}
+                          className="rounded-lg border border-slate-600 px-2 py-1 text-xs text-slate-200 hover:border-indigo-400 hover:text-indigo-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {regeneratingIndex === idx ? "Regenerating…" : "Regenerate"}
+                        </button>
+                      </div>
+
+                      <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 mt-2">
                         {point.analogies?.map((a, i) => (
                           <li key={i}>{a}</li>
                         ))}
