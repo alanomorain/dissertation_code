@@ -27,22 +27,22 @@ export default function StudentDashboard() {
   ]
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 text-slate-100 flex flex-col">
       {/* Top bar */}
-      <header className="border-b border-slate-800">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+      <header className="border-b border-slate-800/50 backdrop-blur-sm bg-slate-900/50 animate-fade-in">
+        <div className="mx-auto max-w-6xl px-4 py-5 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-semibold">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
               Student Dashboard
             </h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
-              Signed in as <span className="font-medium">Student User</span>
+              Signed in as <span className="font-semibold text-indigo-300">Student User</span>
             </span>
             <Link
               href="/"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className="rounded-xl border-2 border-slate-600 px-4 py-2 hover:border-indigo-400 hover:bg-slate-800 hover:text-indigo-200 transition-all duration-200"
             >
               Log out
             </Link>
@@ -52,64 +52,70 @@ export default function StudentDashboard() {
 
       {/* Main content */}
       <section className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
+        <div className="mx-auto max-w-6xl px-4 py-8 space-y-8">
           {/* Greeting  */}
-          <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-              <h2 className="text-xl font-semibold mb-2">
+          <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
+            <div className="glass border border-slate-700/50 rounded-3xl p-6 shadow-xl animate-scale-in">
+              <h2 className="text-2xl font-bold mb-3 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                 Welcome back, Student 👋
               </h2>
-              <p className="text-sm text-slate-300 mb-3">
+              <p className="text-base text-slate-300 leading-relaxed">
                 Continue exploring analogies for your modules, review recent
                 explanations, and take short quizzes to check your understanding.
               </p>
             </div>
 
             {/* Stats  */}
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5 text-sm">
-              <h3 className="text-base font-semibold">Quick Stats</h3>
-              <ul className="space-y-1 text-slate-300">
-                <li>• 3 active modules</li>
-                <li>• 2 upcoming quizzes</li>
-                <li>• 5 new analogies added this week</li>
+            <div className="glass border border-slate-700/50 rounded-3xl p-6 shadow-xl animate-scale-in animate-delay-100">
+              <h3 className="text-lg font-bold mb-3 text-indigo-300">Quick Stats</h3>
+              <ul className="space-y-2 text-slate-300">
+                <li className="flex items-center gap-2">
+                  <span className="text-indigo-400">●</span> 3 active modules
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-400">●</span> 2 upcoming quizzes
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-pink-400">●</span> 5 new analogies this week
+                </li>
               </ul>
             </div>
           </div>
 
           {/* Modules & analogies */}
-          <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
+          <div className="grid gap-8 lg:grid-cols-[2fr,1.5fr]">
             {/* Modules list */}
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold">Your modules</h3>
+            <div className="glass border border-slate-700/50 rounded-3xl p-6 shadow-xl animate-slide-in">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-xl font-bold text-slate-100">Your modules</h3>
               </div>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-4">
                 {modules.map((module) => (
                   <div
                     key={module.code}
-                    className="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3"
+                    className="rounded-2xl border border-slate-700/50 bg-slate-800/50 px-5 py-4 card-hover"
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-3">
                       <div>
-                        <p className="font-medium">
+                        <p className="font-semibold text-slate-100 mb-1">
                           {module.code} · {module.name}
                         </p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm text-slate-400">
                           Progress: {module.progress}%
                         </p>
                       </div>
                       <Link href="/student/analogies">
                         <button
                           type="button"
-                          className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition"
+                          className="text-sm rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-4 py-2 font-semibold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 transition-all duration-200"
                         >
                           View analogies
                         </button>
                       </Link>
                     </div>
-                    <div className="mt-2 h-1.5 rounded-full bg-slate-800">
+                    <div className="h-2 rounded-full bg-slate-700/50 overflow-hidden">
                       <div
-                        className="h-1.5 rounded-full bg-indigo-500"
+                        className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
                         style={{ width: `${module.progress}%` }}
                       />
                     </div>
