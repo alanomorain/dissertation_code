@@ -119,6 +119,17 @@ button, .btn {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Focus ring modern style */
 *:focus-visible {
   outline: 2px solid rgb(99, 102, 241);
@@ -131,4 +142,28 @@ button, .btn {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: #667eea; /* Fallback color for accessibility */
+}
+
+/* Support for gradient text in JSX - provides fallback */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.text-transparent {
+  -webkit-text-fill-color: transparent;
+}
+
+/* High contrast mode support - make text visible */
+@media (prefers-contrast: high) {
+  .text-transparent {
+    -webkit-text-fill-color: currentColor;
+    color: #a5b4fc; /* Visible color in high contrast */
+  }
+  
+  .glass {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: none;
+  }
 }
