@@ -11,7 +11,7 @@ This is a dissertation project for **CSC7058: Individual Software Development Pr
 - **Backend**: Next.js API routes
 - **Database**: PostgreSQL with Prisma ORM
 - **AI Integration**: OpenAI API for analogy generation
-- **Build Tools**: ESLint 9, Babel React Compiler
+- **Build Tools**: ESLint 9, babel-plugin-react-compiler
 
 ## Architecture
 
@@ -28,7 +28,7 @@ This is a dissertation project for **CSC7058: Individual Software Development Pr
 
 ### Component Guidelines
 - Use functional React components with hooks
-- File extensions: `.jsx` for React components
+- File extensions: `.jsx` for React components, `.js` for API routes
 - Use modern React patterns (React 19 features)
 - Components should use Tailwind CSS for styling
 
@@ -51,7 +51,7 @@ This is a dissertation project for **CSC7058: Individual Software Development Pr
 - Generate client with: `npx prisma generate`
 
 ### API Routes
-- Use Next.js 16 App Router API routes (`route.js`)
+- Use Next.js 16 App Router API routes (named `route.js` in `/app/api/` directories)
 - Handle errors gracefully with appropriate HTTP status codes
 - Use async/await for database operations
 
@@ -106,10 +106,11 @@ This is a dissertation project for **CSC7058: Individual Software Development Pr
 4. Import from `next/link` for navigation
 
 ### Adding a New API Route
-1. Create under `/app/api/[route-name]`
-2. Add `route.js` with exported HTTP method handlers
-3. Use Prisma client for database operations
-4. Return proper JSON responses with status codes
+1. Create a new directory under `/app/api/[route-name]`
+2. Add `route.js` file (this naming is required for Next.js App Router API routes)
+3. Export HTTP method handlers (GET, POST, etc.)
+4. Use Prisma client for database operations
+5. Return proper JSON responses with status codes
 
 ### Database Changes
 1. Update `/prisma/schema.prisma`
