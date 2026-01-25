@@ -1,5 +1,6 @@
 // app/api/generate-analogies/route.js
 import OpenAI from "openai"
+import { prisma } from "../../lib/db.js"
 
 export const runtime = "nodejs"
 
@@ -7,8 +8,9 @@ const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-// Given topics, ask OpenAI for 2–3 analogies per topic
-async function generateAnalogiesForTopics(topics, moduleCode, notes) {
+// Given a single topic, ask OpenAI for 1 analogy
+async function generateAnalogyForTopic(topic, notes) {
+  // Remove moduleCode parameter
   const systemPrompt = `
 You are an educational assistant helping university lecturers explain complex concepts 
 using clear analogies. Given a teaching topic, generate 1 concise analogy suitable 
@@ -18,42 +20,34 @@ You MUST respond with valid JSON only, no explanation, no commentary.
 `.trim()
 
   const userPrompt = `
-Module code: ${moduleCode || "UNKNOWN_MODULE"}
-
 Additional lecturer notes (may be empty):
 """${(notes || "").toString().slice(0, 1000)}"""
 
-Here are the topics the lecturer wants analogies for. 
-For EACH topic, generate exactly 1 analogy.
+Generate exactly 1 analogy for this topic suitable for students:
+
+Topic: ${topic}
 
 Return STRICTLY in this JSON format (no prose, no other keys):
 
-[
-  {
-    "original": "the original topic here",
-    "analogies": [
-      "the single analogy for this topic"
-    ]
-  }
-]
-
-Topics:
-${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+{
+  "topic": "the topic here",
+  "analogy": "the single analogy for this topic"
+}
 `.trim()
 
-  const response = await client.responses.create({
-    model: "gpt-4.1-mini",
-    input: [
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
   })
 
-  const text = response.output_text
+  const text = response.choices[0]?.message?.content || ""
 
   if (!text) {
     console.error("OpenAI returned unexpected shape:", response)
-    throw new Error("No output_text received from OpenAI")
+    throw new Error("No content received from OpenAI")
   }
 
   let parsed
@@ -64,46 +58,20 @@ ${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
     throw new Error("Invalid JSON returned from OpenAI response")
   }
 
-  // NEW: ensure each item has at most 1 analogy
-  const normalizeToSingleAnalogy = (arr) =>
-    arr.map((item) => {
-      // handle a few possible shapes defensively
-      let analogiesArray = []
-
-      if (Array.isArray(item.analogies)) {
-        analogiesArray = item.analogies
-      } else if (typeof item.analogies === "string") {
-        analogiesArray = [item.analogies]
-      }
-
-      return {
-        ...item,
-        analogies: analogiesArray.slice(0, 1), // 👈 keep only the first analogy
-      }
-    })
-
-  if (Array.isArray(parsed)) {
-    return normalizeToSingleAnalogy(parsed)
-  }
-
-  if (Array.isArray(parsed.points)) {
-    return normalizeToSingleAnalogy(parsed.points)
-  }
-
-  throw new Error("OpenAI JSON did not match expected structure")
-
+  return parsed
 }
 
 export async function POST(req) {
+  let analogySetId = null
+
   try {
     const body = await req.json()
-    const topics = body.topics || []
-    const moduleCode = body.moduleCode || "UNKNOWN_MODULE"
-    const notes = body.notes || ""
+    const { title, concept, moduleCode, notes } = body
 
-    if (!Array.isArray(topics) || topics.length === 0) {
+    // Validate required fields
+    if (!concept || !notes) {
       return new Response(
-        JSON.stringify({ error: "No topics provided" }),
+        JSON.stringify({ error: "concept and notes are required" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -111,20 +79,87 @@ export async function POST(req) {
       )
     }
 
-    const analogies = await generateAnalogiesForTopics(topics, moduleCode, notes)
+    // Create initial AnalogySet row with processing status
+    const analogySet = await prisma.analogySet.create({
+      data: {
+        status: "processing",
+        ownerRole: "lecturer",
+        title: title || concept,
+        source: "manual",
+        sourceText: notes,
+      },
+    })
+
+    analogySetId = analogySet.id
+
+    // Generate analogy using OpenAI
+    let generated
+    try {
+      generated = await generateAnalogyForTopic(concept, notes)
+    } catch (err) {
+      // Update row with error status
+      await prisma.analogySet.update({
+        where: { id: analogySetId },
+        data: {
+          status: "failed",
+          errorMessage: err.message || "Failed to generate analogy",
+        },
+      })
+
+      return new Response(
+        JSON.stringify({
+          error: "Failed to generate analogy",
+          details: err.message,
+          id: analogySetId,
+          status: "failed",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
+    }
+
+    // Update row with generated analogy
+    const updated = await prisma.analogySet.update({
+      where: { id: analogySetId },
+      data: {
+        status: "ready",
+        topicsJson: {
+          topics: [
+            {
+              topic: generated.topic || concept,
+              analogy: generated.analogy || "",
+            },
+          ],
+        },
+      },
+    })
 
     return new Response(
-      JSON.stringify({ analogies }),
+      JSON.stringify({ id: updated.id, status: updated.status }),
       {
         status: 200,
         headers: { "Content-Type": "application/json" },
       },
     )
   } catch (err) {
-    console.error("Error in /api/generate-analogies:", err?.response?.data || err)
+    console.error("Error in /api/generate-analogies:", err)
+
+    // If we created a row but hit an unexpected error, mark it failed
+    if (analogySetId) {
+      await prisma.analogySet.update({
+        where: { id: analogySetId },
+        data: {
+          status: "failed",
+          errorMessage: err.message || "Unexpected server error",
+        },
+      }).catch((e) => console.error("Failed to update error status:", e))
+    }
+
     return new Response(
       JSON.stringify({
-        error: "Server error while generating analogies",
+        error: "Server error while generating analogy",
         details: err.message || String(err),
       }),
       {

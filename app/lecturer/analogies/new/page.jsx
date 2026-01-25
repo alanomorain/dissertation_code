@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
 export default function NewAnalogyPage() {
+  const router = useRouter()
   const [title, setTitle] = useState("")
   const [concept, setConcept] = useState("")
   const [moduleCode, setModuleCode] = useState("CSC7058")
@@ -13,8 +15,7 @@ export default function NewAnalogyPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
-  // Later this will POST to an API route and store in DB
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
     setMessage(null)
@@ -29,28 +30,43 @@ export default function NewAnalogyPage() {
       return
     }
 
-    // this is where I'll call an API route later
-    console.log("New analogy data:", {
-      title,
-      concept,
-      moduleCode,
-      analogyText,
-      imageFile,
-    })
-
-    setTimeout(() => {
-      setSaving(false)
-      setMessage({
-        type: "success",
-        text: "Analogy saved! (Later this will save to the DB)",
+    try {
+      // Call the API to create analogy and generate via OpenAI
+      const res = await fetch("/api/generate-analogies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          concept,
+          moduleCode,
+          notes: analogyText,
+        }),
       })
 
-    //   clear the form
-      setTitle("")
-      setConcept("")
-      setAnalogyText("")
-      setImageFile(null)
-    }, 800)
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to create analogy")
+      }
+
+      const data = await res.json()
+
+      setMessage({
+        type: "success",
+        text: "Analogy created successfully! Redirecting...",
+      })
+
+      // Redirect to the detail page
+      setTimeout(() => {
+        router.push(`/lecturer/analogies/${data.id}`)
+      }, 500)
+    } catch (err) {
+      console.error(err)
+      setMessage({
+        type: "error",
+        text: err.message || "Failed to create analogy",
+      })
+      setSaving(false)
+    }
   }
 
   const handleFileChange = (e) => {
@@ -222,7 +238,7 @@ export default function NewAnalogyPage() {
                   disabled={saving}
                   className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
-                  {saving ? "Saving..." : "Save analogy "}
+                  {saving ? "Creating..." : "Create Analogy"}
                 </button>
                 <Link
                   href="/lecturer"
