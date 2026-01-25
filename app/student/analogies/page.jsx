@@ -60,7 +60,7 @@ export default async function StudentAnalogiesPage() {
                 {analogies.map((analogy) => {
                   // Parse topicsJson if available
                   let topics = []
-                  if (analogy.topicsJson && typeof analogy.topicsJson === "object") {
+                  if (analogy.topicsJson !== null && analogy.topicsJson !== undefined && typeof analogy.topicsJson === "object") {
                     topics = analogy.topicsJson.topics || []
                   }
                   
