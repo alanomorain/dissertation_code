@@ -1,36 +1,13 @@
 import Link from "next/link"
+import { prisma } from "../../lib/db"
 
-export default function AnalogiesDashboardPage() {
-  // Mock data for now 
-  const analogies = [
-    {
-      id: 1,
-      moduleCode: "CSC7058",
-      moduleName: "Individual Software Development Project",
-      title: "Microservices as a fleet of food trucks",
-      concept: "Microservices architecture",
-      createdAt: "2025-11-20",
-      hasImage: true,
+export default async function AnalogiesDashboardPage() {
+  // Query AnalogySet table, newest first
+  const analogies = await prisma.analogySet.findMany({
+    orderBy: {
+      createdAt: "desc",
     },
-    {
-      id: 2,
-      moduleCode: "CSC7084",
-      moduleName: "Web Development",
-      title: "HTTP requests as sending letters",
-      concept: "HTTP & REST",
-      createdAt: "2025-11-18",
-      hasImage: false,
-    },
-    {
-      id: 3,
-      moduleCode: "CSC7072",
-      moduleName: "Databases",
-      title: "Indexes as a book index",
-      concept: "Database indexing",
-      createdAt: "2025-11-15",
-      hasImage: true,
-    },
-  ]
+  })
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
@@ -86,18 +63,18 @@ export default function AnalogiesDashboardPage() {
             </div>
             <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
               <p className="text-xs text-slate-400 mb-1">
-                Modules represented
+                Ready analogies
               </p>
               <p className="text-2xl font-semibold">
-                {new Set(analogies.map((a) => a.moduleCode)).size}
+                {analogies.filter((a) => a.status === "ready").length}
               </p>
             </div>
             <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4">
               <p className="text-xs text-slate-400 mb-1">
-                With supporting image
+                Processing
               </p>
               <p className="text-2xl font-semibold">
-                {analogies.filter((a) => a.hasImage).length}
+                {analogies.filter((a) => a.status === "processing").length}
               </p>
             </div>
           </div>
@@ -125,31 +102,37 @@ export default function AnalogiesDashboardPage() {
                   >
                     <div>
                       <p className="text-xs uppercase tracking-wide text-indigo-300">
-                        {analogy.moduleCode} · {analogy.moduleName}
+                        {analogy.title || "Untitled"}
                       </p>
                       <p className="font-medium">
-                        {analogy.title}
+                        {analogy.source || "N/A"}
                       </p>
                       <p className="text-xs text-slate-400">
-                        Concept: {analogy.concept}
+                        Status: {analogy.status}
                       </p>
                       <p className="text-xs text-slate-500">
-                        Created: {analogy.createdAt}
+                        Created: {new Date(analogy.createdAt).toLocaleString()}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-2 md:flex-col md:items-end">
-                      {analogy.hasImage && (
-                        <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-200">
-                          Has image
-                        </span>
-                      )}
-                      <Link href={`/lecturer/analogies/${analogy.id}/edit`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          analogy.status === "ready"
+                            ? "bg-green-900/50 text-green-200"
+                            : analogy.status === "failed"
+                              ? "bg-red-900/50 text-red-200"
+                              : "bg-yellow-900/50 text-yellow-200"
+                        }`}
+                      >
+                        {analogy.status}
+                      </span>
+                      <Link href={`/lecturer/analogies/${analogy.id}`}>
                         <button
                           type="button"
                           className="mt-1 text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
                         >
-                          Edit
+                          View
                         </button>
                       </Link>
                     </div>

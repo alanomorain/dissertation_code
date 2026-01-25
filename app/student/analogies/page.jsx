@@ -1,36 +1,16 @@
 import Link from "next/link"
+import { prisma } from "../../lib/db"
 
-export default function StudentAnalogiesPage() {
-  // Mock data for now 
-  const analogies = [
-    {
-      id: 1,
-      moduleCode: "CSC7058",
-      moduleName: "Individual Software Development Project",
-      title: "Microservices as a fleet of food trucks",
-      concept: "Microservices architecture",
-      explanation:
-        "Each microservice is like a separate food truck, specialising in one type of food. If one truck breaks, the others keep serving.",
+export default async function StudentAnalogiesPage() {
+  // Query only "ready" analogies, newest first
+  const analogies = await prisma.analogySet.findMany({
+    where: {
+      status: "ready",
     },
-    {
-      id: 2,
-      moduleCode: "CSC7084",
-      moduleName: "Web Development",
-      title: "HTTP requests as sending letters",
-      concept: "HTTP & REST",
-      explanation:
-        "An HTTP request is like sending a letter to an address (URL). You include details (headers/body) and wait for a reply (response).",
+    orderBy: {
+      createdAt: "desc",
     },
-    {
-      id: 3,
-      moduleCode: "CSC7072",
-      moduleName: "Databases",
-      title: "Indexes as a book index",
-      concept: "Database indexing",
-      explanation:
-        "A database index is like the index at the back of a book: it lets you jump straight to the right page instead of scanning everything.",
-    },
-  ]
+  })
 
   return (
     <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
@@ -77,23 +57,36 @@ export default function StudentAnalogiesPage() {
               </p>
             ) : (
               <div className="space-y-4 text-sm">
-                {analogies.map((analogy) => (
-                  <article
-                    key={analogy.id}
-                    className="rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3"
-                  >
-                    <p className="text-xs uppercase tracking-wide text-indigo-300 mb-1">
-                      {analogy.moduleCode} · {analogy.moduleName}
-                    </p>
-                    <h3 className="text-sm font-semibold mb-1">
-                      {analogy.title}
-                    </h3>
-                    <p className="text-xs text-slate-400 mb-2">
-                      Concept: {analogy.concept}
-                    </p>
-                    <p className="text-slate-200">{analogy.explanation}</p>
-                  </article>
-                ))}
+                {analogies.map((analogy) => {
+                  // Parse topicsJson if available
+                  let topics = []
+                  if (analogy.topicsJson !== null && analogy.topicsJson !== undefined && typeof analogy.topicsJson === "object") {
+                    topics = analogy.topicsJson.topics || []
+                  }
+                  
+                  return (
+                    <Link
+                      key={analogy.id}
+                      href={`/student/analogies/${analogy.id}`}
+                      className="block rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 hover:border-indigo-400 transition"
+                    >
+                      <p className="text-xs uppercase tracking-wide text-indigo-300 mb-1">
+                        {analogy.title || "Untitled"}
+                      </p>
+                      <h3 className="text-sm font-semibold mb-1">
+                        {analogy.source || "N/A"}
+                      </h3>
+                      <p className="text-xs text-slate-400 mb-2">
+                        {topics.length} {topics.length === 1 ? "topic" : "topics"} • Created: {new Date(analogy.createdAt).toLocaleDateString()}
+                      </p>
+                      {topics.length > 0 && (
+                        <p className="text-slate-200 text-sm line-clamp-2">
+                          {topics[0].analogy || ""}
+                        </p>
+                      )}
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>
