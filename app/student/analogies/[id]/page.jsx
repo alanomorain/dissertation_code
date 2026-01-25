@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { prisma } from "../../../lib/db"
 import { notFound } from "next/navigation"
+import * as ui from "../../../styles/ui"
 
 export default async function StudentAnalogyDetailPage({ params }) {
   const { id } = await params
@@ -22,12 +23,12 @@ export default async function StudentAnalogyDetailPage({ params }) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
-        <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
+      <header className={ui.header}>
+        <div className={ui.headerContentNarrow}>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">
+            <p className={ui.textLabel}>
               Student · Analogy
             </p>
             <h1 className="text-lg font-semibold">
@@ -37,7 +38,7 @@ export default async function StudentAnalogyDetailPage({ params }) {
           <div className="flex items-center gap-3 text-sm">
             <Link
               href="/student/analogies"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               ← Back to library
             </Link>
@@ -46,19 +47,19 @@ export default async function StudentAnalogyDetailPage({ params }) {
       </header>
 
       {/* Content */}
-      <section className="flex-1">
-        <div className="mx-auto max-w-5xl px-4 py-6 space-y-4">
+      <section className={ui.pageSection}>
+        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
           {/* Header Info */}
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+          <div className={ui.cardFull}>
             <div className="space-y-2 text-sm">
               <div>
-                <span className="text-slate-400">Source:</span>{" "}
+                <span className={ui.textMuted}>Source:</span>{" "}
                 <span className="text-slate-200">
                   {analogy.source || "N/A"}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400">Created:</span>{" "}
+                <span className={ui.textMuted}>Created:</span>{" "}
                 <span className="text-slate-200">
                   {new Date(analogy.createdAt).toLocaleString()}
                 </span>
@@ -68,15 +69,15 @@ export default async function StudentAnalogyDetailPage({ params }) {
 
           {/* Topics and Analogies */}
           {topics.length > 0 ? (
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-              <h3 className="text-base font-semibold mb-3">
+            <div className={ui.cardFull}>
+              <h3 className={ui.cardHeader}>
                 Topics & Analogies
               </h3>
               <div className="space-y-4">
                 {topics.map((item, index) => (
                   <div
                     key={index}
-                    className="bg-slate-900/70 border border-slate-800 rounded-xl p-4"
+                    className={ui.cardInner}
                   >
                     <h4 className="font-medium text-indigo-300 mb-2">
                       {item.topic || "Unknown Topic"}
@@ -89,8 +90,8 @@ export default async function StudentAnalogyDetailPage({ params }) {
               </div>
             </div>
           ) : (
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-              <p className="text-sm text-slate-400">
+            <div className={ui.cardFull}>
+              <p className={ui.textSmall}>
                 No topics and analogies available.
               </p>
             </div>

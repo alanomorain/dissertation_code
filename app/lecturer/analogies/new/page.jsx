@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import * as ui from "../../../styles/ui"
 
 export default function NewAnalogyPage() {
   const [title, setTitle] = useState("")
@@ -58,9 +59,9 @@ export default function NewAnalogyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* top bar */}
-      <header className="border-b border-slate-800">
+      <header className={ui.header}>
         <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold">
@@ -69,7 +70,7 @@ export default function NewAnalogyPage() {
           </div>
           <Link
             href="/lecturer"
-            className="text-sm rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+            className={ui.buttonSecondary}
           >
             Back to dashboard
           </Link>
@@ -77,9 +78,9 @@ export default function NewAnalogyPage() {
       </header>
 
       {/* Content */}
-      <section className="flex-1">
+      <section className={ui.pageSection}>
         <div className="mx-auto max-w-4xl px-4 py-6">
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 md:p-8">
+          <div className={`${ui.card} p-6 md:p-8`}>
             <p className="text-sm text-slate-300 mb-4">
               Here you can submit a new analogy to add to your selected module
             </p>
@@ -219,7 +220,7 @@ export default function NewAnalogyPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                  className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
                   {saving ? "Saving..." : "Save analogy "}
                 </button>

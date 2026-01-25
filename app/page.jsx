@@ -145,14 +145,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="relative border-t border-slate-800/50 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-500 gap-3">
-          <span>MSc Software Development · Dissertation</span>
-          <span>Alan Moran</span>
-        </div>
-      </footer>
     </main>
   )
 }

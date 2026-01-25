@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { prisma } from "../../lib/db"
+import * as ui from "../../styles/ui"
 
 export default async function StudentAnalogiesPage() {
   // Query only "ready" analogies, newest first
@@ -13,12 +14,12 @@ export default async function StudentAnalogiesPage() {
   })
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
-        <div className="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
+      <header className={ui.header}>
+        <div className={ui.headerContentNarrow}>
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">
+            <p className={ui.textLabel}>
               Student · Analogies
             </p>
             <h1 className="text-lg font-semibold">Analogy library</h1>
@@ -26,7 +27,7 @@ export default async function StudentAnalogiesPage() {
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/student"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Back to dashboard
             </Link>
@@ -35,23 +36,23 @@ export default async function StudentAnalogiesPage() {
       </header>
 
       {/* Content */}
-      <section className="flex-1">
-        <div className="mx-auto max-w-5xl px-4 py-6 space-y-4">
+      <section className={ui.pageSection}>
+        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
           {/* Intro text */}
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5 text-sm">
-            <p className="text-slate-300 mb-2">
+          <div className={ui.cardFull}>
+            <p className="text-slate-300 mb-2 text-sm">
               This page shows analogies for different modules.
             </p>
           </div>
 
           {/* Analogy list */}
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+          <div className={ui.cardFull}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold">All analogies</h2>
+              <h2 className={ui.cardHeader}>All analogies</h2>
             </div>
 
             {analogies.length === 0 ? (
-              <p className="text-sm text-slate-400">
+              <p className={ui.textSmall}>
                 No analogies are available yet. Your lecturer hasn't added
                 any for your modules.
               </p>
@@ -68,9 +69,9 @@ export default async function StudentAnalogiesPage() {
                     <Link
                       key={analogy.id}
                       href={`/student/analogies/${analogy.id}`}
-                      className="block rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3 hover:border-indigo-400 transition"
+                      className={ui.linkCard}
                     >
-                      <p className="text-xs uppercase tracking-wide text-indigo-300 mb-1">
+                      <p className={`${ui.textHighlight} mb-1`}>
                         {analogy.title || "Untitled"}
                       </p>
                       <h3 className="text-sm font-semibold mb-1">

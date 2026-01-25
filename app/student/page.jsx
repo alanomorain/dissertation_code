@@ -1,4 +1,5 @@
 import Link from "next/link"
+import * as ui from "../styles/ui"
 
 export default function StudentDashboard() {
   // Temporary mock data 
@@ -27,10 +28,10 @@ export default function StudentDashboard() {
   ]
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+      <header className={ui.header}>
+        <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">
               Student Dashboard
@@ -42,7 +43,7 @@ export default function StudentDashboard() {
             </span>
             <Link
               href="/"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Log out
             </Link>
@@ -51,11 +52,11 @@ export default function StudentDashboard() {
       </header>
 
       {/* Main content */}
-      <section className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
+      <section className={ui.pageSection}>
+        <div className={`${ui.container} py-6 space-y-6`}>
           {/* Greeting  */}
           <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+            <div className={ui.cardFull}>
               <h2 className="text-xl font-semibold mb-2">
                 Welcome back, Student 👋
               </h2>
@@ -66,7 +67,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Stats  */}
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5 text-sm">
+            <div className={`${ui.cardFull} text-sm`}>
               <h3 className="text-base font-semibold">Quick Stats</h3>
               <ul className="space-y-1 text-slate-300">
                 <li>• 3 active modules</li>
@@ -79,15 +80,15 @@ export default function StudentDashboard() {
           {/* Modules & analogies */}
           <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
             {/* Modules list */}
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+            <div className={ui.cardFull}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold">Your modules</h3>
+                <h3 className={ui.cardHeader}>Your modules</h3>
               </div>
               <div className="space-y-3 text-sm">
                 {modules.map((module) => (
                   <div
                     key={module.code}
-                    className="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3"
+                    className={ui.cardList}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div>
@@ -120,17 +121,17 @@ export default function StudentDashboard() {
 
             {/* Recent analogies */}
             <div className="space-y-6">
-              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-                <h3 className="text-base font-semibold mb-3">
+              <div className={ui.cardFull}>
+                <h3 className={ui.cardHeader}>
                   Recent analogies
                 </h3>
                 <div className="space-y-3 text-sm">
                   {recentAnalogies.map((item) => (
                     <div
                       key={item.id}
-                      className="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3"
+                      className={ui.cardInner}
                     >
-                      <p className="text-xs uppercase tracking-wide text-indigo-300 mb-1">
+                      <p className={`${ui.textHighlight} mb-1`}>
                         {item.concept}
                       </p>
                       <p className="text-slate-200">{item.analogy}</p>
@@ -140,20 +141,20 @@ export default function StudentDashboard() {
               </div>
 
               {/* Upcoming quizzes */}
-              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-                <h3 className="text-base font-semibold mb-3">
+              <div className={ui.cardFull}>
+                <h3 className={ui.cardHeader}>
                   Upcoming quizzes
                 </h3>
                 {upcomingQuizzes.length === 0 ? (
-                  <p className="text-sm text-slate-400">
-                    No quizzes scheduled. Your lecturer hasn’t created any yet.
+                  <p className={ui.textSmall}>
+                    No quizzes scheduled. Your lecturer hasn't created any yet.
                   </p>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     {upcomingQuizzes.map((quiz) => (
                       <li
                         key={quiz.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2"
+                        className={`${ui.cardInner} flex items-center justify-between`}
                       >
                         <div>
                           <p className="font-medium">{quiz.title}</p>

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import * as ui from "../../../../styles/ui"
 
 // Mock data for now – later you'll fetch from DB/API
 const MOCK_ANALOGIES = [
@@ -35,16 +36,16 @@ export default function EditAnalogyPage() {
 
   const existing = MOCK_ANALOGIES.find((a) => a.id === numericId)
 
-  // If nothing matches, show a simple “not found” message
+  // If nothing matches, show a simple "not found" message
   if (!existing) {
     return (
-      <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-        <header className="border-b border-slate-800">
+      <main className={ui.page}>
+        <header className={ui.header}>
           <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold">Analogy not found</h1>
             <Link
               href="/lecturer/analogies"
-              className="text-sm rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Back to analogies
             </Link>
@@ -109,12 +110,12 @@ export default function EditAnalogyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
+      <header className={ui.header}>
         <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-400">
+            <p className={ui.textLabel}>
               Lecturer · Edit Analogy
             </p>
             <h1 className="text-lg font-semibold">
@@ -124,7 +125,7 @@ export default function EditAnalogyPage() {
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/lecturer/analogies"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Back to analogies
             </Link>
@@ -133,9 +134,9 @@ export default function EditAnalogyPage() {
       </header>
 
       {/* Content */}
-      <section className="flex-1">
+      <section className={ui.pageSection}>
         <div className="mx-auto max-w-4xl px-4 py-6">
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 md:p-8">
+          <div className={`${ui.card} p-6 md:p-8`}>
             <p className="text-sm text-slate-300 mb-4">
               You're editing an existing analogy. 
             </p>
@@ -262,7 +263,7 @@ export default function EditAnalogyPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                  className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
                   {saving ? "Saving changes..." : "Save changes"}
                 </button>

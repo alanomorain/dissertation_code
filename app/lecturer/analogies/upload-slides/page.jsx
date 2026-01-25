@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import * as ui from "../../../styles/ui"
 
 export default function UploadSlidesPage() {
   const [moduleCode, setModuleCode] = useState("CSC7058")
@@ -190,9 +191,9 @@ export default function UploadSlidesPage() {
 
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
+      <header className={ui.header}>
         <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold">
@@ -202,7 +203,7 @@ export default function UploadSlidesPage() {
           <div className="flex items-center gap-2 text-sm">
             <Link
               href="/lecturer/analogies"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Back to Analogies
             </Link>
@@ -211,9 +212,9 @@ export default function UploadSlidesPage() {
       </header>
 
       {/* Content */}
-      <section className="flex-1">
+      <section className={ui.pageSection}>
         <div className="mx-auto max-w-4xl px-4 py-6">
-          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6 md:p-8">
+          <div className={`${ui.card} p-6 md:p-8`}>
             <p className="text-sm text-slate-300 mb-4">
               This page represents the first step in the LLM pipeline.
             </p>
@@ -310,7 +311,7 @@ export default function UploadSlidesPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                  className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
                   {saving ? "Processing..." : "Upload & suggest topics"}
                 </button>
@@ -326,7 +327,7 @@ export default function UploadSlidesPage() {
             {/* Extracted text preview */}
             {extractedText && (
               <section className="mt-8 border-t border-slate-800 pt-4">
-                <h2 className="text-base font-semibold mb-2">
+                <h2 className={ui.cardHeader}>
                   Extracted text (preview)
                 </h2>
                 <p className="text-xs text-slate-400 mb-2">
@@ -342,7 +343,7 @@ export default function UploadSlidesPage() {
             {/* Suggested topics */}
             {topics.length > 0 && (
               <section className="mt-8 border-t border-slate-800 pt-4">
-                <h2 className="text-base font-semibold mb-3">
+                <h2 className={`${ui.cardHeader} mb-3`}>
                   Suggested topics for analogies
                 </h2>
                 <p className="text-xs text-slate-400 mb-3">
@@ -388,7 +389,7 @@ export default function UploadSlidesPage() {
                   type="button"
                   onClick={handleGenerateAnalogies}
                   disabled={topics.length === 0 || generating}
-                  className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+                  className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
                   {generating ? "Generating analogies..." : "Generate analogies for selected topics"}
                 </button>
@@ -398,7 +399,7 @@ export default function UploadSlidesPage() {
             {/* Generated analogies */}
             {analogies.length > 0 && (
               <section className="mt-8 border-t border-slate-800 pt-4">
-                <h2 className="text-base font-semibold mb-3">
+                <h2 className={`${ui.cardHeader} mb-3`}>
                   Generated analogies
                 </h2>
                 <p className="text-xs text-slate-400 mb-3">
@@ -409,7 +410,7 @@ export default function UploadSlidesPage() {
                   {analogies.map((point, idx) => (
                     <div
                       key={idx}
-                      className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
+                      className={ui.cardInner}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>

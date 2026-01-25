@@ -1,4 +1,5 @@
 import Link from "next/link"
+import * as ui from "../styles/ui"
 
 export default function LecturerDashboard() {
   // Mock data for now 
@@ -48,10 +49,10 @@ export default function LecturerDashboard() {
   ]
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <main className={ui.page}>
       {/* Top bar */}
-      <header className="border-b border-slate-800">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
+      <header className={ui.header}>
+        <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">
               Lecturer Dashboard
@@ -63,7 +64,7 @@ export default function LecturerDashboard() {
             </span>
             <Link
               href="/"
-              className="rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition"
+              className={ui.buttonSecondary}
             >
               Log out
             </Link>
@@ -72,11 +73,11 @@ export default function LecturerDashboard() {
       </header>
 
       {/* Main content */}
-      <section className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-6 space-y-6">
+      <section className={ui.pageSection}>
+        <div className={`${ui.container} py-6 space-y-6`}>
           {/* Intro cards */}
           <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+            <div className={ui.cardFull}>
               <h2 className="text-xl font-semibold mb-2">
                 Welcome back, Lecturer 👋
               </h2>
@@ -86,7 +87,7 @@ export default function LecturerDashboard() {
               </p>
             </div>
 
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5 text-sm">
+            <div className={`${ui.cardFull} text-sm`}>
               <h3 className="text-base font-semibold">Quick Overview</h3>
               <ul className="space-y-1 text-slate-300">
                 <li>• You teach {taughtModules.length} modules</li>
@@ -99,16 +100,16 @@ export default function LecturerDashboard() {
           {/* Main grid: modules + side panels */}
           <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
             {/* Modules you teach */}
-            <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
+            <div className={ui.cardFull}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-base font-semibold">Modules you teach</h3>
+                <h3 className={ui.cardHeader}>Modules you teach</h3>
               </div>
 
               <div className="space-y-3 text-sm">
                 {taughtModules.map((mod) => (
                   <div
                     key={mod.code}
-                    className="rounded-xl border border-slate-800 bg-slate-900/70 px-3 py-3"
+                    className={ui.cardList}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div>
@@ -128,7 +129,7 @@ export default function LecturerDashboard() {
                                 Manage Analogies
                             </button>
                         </Link>
-                        <button className="text-xs rounded-lg border border-indigo-400 px-3 py-1 hover:bg-indigo-500 hover:text-white transition">
+                        <button className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition">
                           Create quiz
                         </button>
                       </div>
@@ -141,8 +142,8 @@ export default function LecturerDashboard() {
             {/* Right column: uploads + quizzes */}
             <div className="space-y-6">
               {/* Recent analogy uploads */}
-              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-                <h3 className="text-base font-semibold mb-3">
+              <div className={ui.cardFull}>
+                <h3 className={`${ui.cardHeader} mb-3`}>
                   Recent analogy uploads
                 </h3>
                 {recentUploads.length === 0 ? (
@@ -154,7 +155,7 @@ export default function LecturerDashboard() {
                     {recentUploads.map((item) => (
                       <li
                         key={item.id}
-                        className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2"
+                        className={ui.cardInner}
                       >
                         <p className="font-medium">{item.title}</p>
                         <p className="text-xs text-slate-400">
@@ -167,12 +168,12 @@ export default function LecturerDashboard() {
               </div>
 
               {/* Quizzes in progress */}
-              <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
-                <h3 className="text-base font-semibold mb-3">
+              <div className={ui.cardFull}>
+                <h3 className={ui.cardHeader}>
                   Quizzes in progress
                 </h3>
                 {pendingQuizzes.length === 0 ? (
-                  <p className="text-sm text-slate-400">
+                  <p className={ui.textSmall}>
                     No quizzes in draft state.
                   </p>
                 ) : (
@@ -180,7 +181,7 @@ export default function LecturerDashboard() {
                     {pendingQuizzes.map((quiz) => (
                       <li
                         key={quiz.id}
-                        className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2"
+                        className={`${ui.cardInner} flex items-center justify-between`}
                       >
                         <div>
                           <p className="font-medium">{quiz.title}</p>
@@ -188,7 +189,7 @@ export default function LecturerDashboard() {
                             Module: {quiz.module} · Status: {quiz.status}
                           </p>
                         </div>
-                        <button className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition">
+                        <button className={ui.buttonSmall}>
                           Continue
                         </button>
                       </li>
