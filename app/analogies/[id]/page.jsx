@@ -129,7 +129,7 @@ export default async function AnalogyDetailPage({ params }) {
             </div>
           )}
 
-          {/* No topics message */}
+          {/* No topics message - only show if no error and no topics */}
           {topics.length === 0 && !analogy.errorMessage && (
             <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-5">
               <p className="text-sm text-slate-400">
