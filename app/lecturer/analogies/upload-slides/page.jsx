@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
 export default function UploadSlidesPage() {
+  const router = useRouter()
   const [moduleCode, setModuleCode] = useState("CSC7058")
   const [slidesFile, setSlidesFile] = useState(null)
   const [notes, setNotes] = useState("")
@@ -20,7 +22,9 @@ export default function UploadSlidesPage() {
   const [generating, setGenerating] = useState(false)
   const [analogies, setAnalogies] = useState([])
   // For regenerating single analogies
-  const [regeneratingIndex, setRegeneratingIndex] = useState(null) 
+  const [regeneratingIndex, setRegeneratingIndex] = useState(null)
+  // For persisting to DB
+  const [persisting, setPersisting] = useState(false) 
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -188,6 +192,58 @@ export default function UploadSlidesPage() {
     setRegeneratingIndex(null)
   }
 }
+
+  const handlePersistAnalogies = async () => {
+    if (topics.length === 0) {
+      setMessage({
+        type: "error",
+        text: "No topics available to persist.",
+      })
+      return
+    }
+
+    setPersisting(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch("/api/generate-analogies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          persist: true,
+          topics,
+          sourceText: extractedText,
+          notes,
+          title: `Slides: ${slidesFile?.name || "Untitled"}`,
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to persist analogies.")
+      }
+
+      const data = await res.json()
+
+      setMessage({
+        type: "success",
+        text: "Analogies saved! Redirecting...",
+      })
+
+      // Redirect to the detail page
+      setTimeout(() => {
+        router.push(`/lecturer/analogies/${data.id}`)
+      }, 500)
+    } catch (err) {
+      console.error(err)
+      setMessage({
+        type: "error",
+        text: err.message || "Something went wrong while saving analogies.",
+      })
+    } finally {
+      setPersisting(false)
+    }
+  }
 
 
   return (
@@ -393,6 +449,17 @@ export default function UploadSlidesPage() {
                 >
                   {generating ? "Generating analogies..." : "Generate analogies for selected topics"}
                 </button>
+
+                {analogies.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handlePersistAnalogies}
+                    disabled={persisting}
+                    className={`ml-3 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed`}
+                  >
+                    {persisting ? "Saving..." : "Save to database & view"}
+                  </button>
+                )}
               </section>
             )}
 
