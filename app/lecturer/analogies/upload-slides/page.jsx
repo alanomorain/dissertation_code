@@ -24,7 +24,15 @@ export default function UploadSlidesPage() {
   // For regenerating single analogies
   const [regeneratingIndex, setRegeneratingIndex] = useState(null)
   // For persisting to DB
-  const [persisting, setPersisting] = useState(false) 
+  const [persisting, setPersisting] = useState(false)
+
+  // Module creation modal state
+  const [showModuleModal, setShowModuleModal] = useState(false)
+  const [newModuleCode, setNewModuleCode] = useState("")
+  const [newModuleName, setNewModuleName] = useState("")
+  const [newModuleDescription, setNewModuleDescription] = useState("")
+  const [creatingModule, setCreatingModule] = useState(false)
+  const [moduleError, setModuleError] = useState("") 
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -245,6 +253,52 @@ export default function UploadSlidesPage() {
     }
   }
 
+  const handleCreateModule = async () => {
+    if (!newModuleCode.trim() || !newModuleName.trim()) {
+      setModuleError("Module code and name are required")
+      return
+    }
+
+    setCreatingModule(true)
+    setModuleError("")
+
+    try {
+      const res = await fetch("/api/modules/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: newModuleCode.trim(),
+          name: newModuleName.trim(),
+          description: newModuleDescription.trim(),
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to create module")
+      }
+
+      const data = await res.json()
+
+      // Select the newly created module
+      setModuleCode(data.code)
+      setShowModuleModal(false)
+      setNewModuleCode("")
+      setNewModuleName("")
+      setNewModuleDescription("")
+
+      setMessage({
+        type: "success",
+        text: `Module "${data.name}" created successfully!`,
+      })
+    } catch (err) {
+      console.error(err)
+      setModuleError(err.message || "Something went wrong")
+    } finally {
+      setCreatingModule(false)
+    }
+  }
+
 
   return (
     <main className={ui.page}>
@@ -300,7 +354,14 @@ export default function UploadSlidesPage() {
                 <select
                   id="module"
                   value={moduleCode}
-                  onChange={(e) => setModuleCode(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    if (val === "new") {
+                      setShowModuleModal(true)
+                    } else {
+                      setModuleCode(val)
+                    }
+                  }}
                   className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
                 >
                   <option value="CSC7058">
@@ -308,9 +369,12 @@ export default function UploadSlidesPage() {
                   </option>
                   <option value="CSC7084">CSC7084 · Web Development</option>
                   <option value="CSC7072">CSC7072 · Databases</option>
+                  <option value="new" className="text-indigo-300">
+                    ➕ Create new module...
+                  </option>
                 </select>
                 <p className="text-xs text-slate-400">
-                  Choose which module these slides belong to.
+                  Choose which module these slides belong to, or create a new one.
                 </p>
               </div>
 
@@ -512,6 +576,99 @@ export default function UploadSlidesPage() {
           </div>
         </div>
       </section>
+
+      {/* Module creation modal */}
+      {showModuleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className={`${ui.card} p-6 w-full max-w-md rounded-lg border border-slate-700`}>
+            <h2 className="text-lg font-semibold text-slate-100 mb-4">
+              Create New Module
+            </h2>
+
+            <div className="space-y-3">
+              {/* Module code input */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Module Code
+                </label>
+                <input
+                  type="text"
+                  value={newModuleCode}
+                  onChange={(e) => setNewModuleCode(e.target.value.toUpperCase())}
+                  placeholder="e.g., CSC7099"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Unique identifier (e.g., CSC7099, 3-10 characters)
+                </p>
+              </div>
+
+              {/* Module name input */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Module Name
+                </label>
+                <input
+                  type="text"
+                  value={newModuleName}
+                  onChange={(e) => setNewModuleName(e.target.value)}
+                  placeholder="e.g., Advanced Cloud Computing"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Full name of the module
+                </p>
+              </div>
+
+              {/* Optional description */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-1">
+                  Description (optional)
+                </label>
+                <textarea
+                  value={newModuleDescription}
+                  onChange={(e) => setNewModuleDescription(e.target.value)}
+                  placeholder="Brief description of the module..."
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                />
+              </div>
+
+              {/* Error message in modal */}
+              {moduleError && (
+                <div className="rounded-lg bg-red-900/40 border border-red-600 px-3 py-2 text-xs text-red-100">
+                  {moduleError}
+                </div>
+              )}
+
+              {/* Modal actions */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowModuleModal(false)
+                    setNewModuleCode("")
+                    setNewModuleName("")
+                    setNewModuleDescription("")
+                    setModuleError("")
+                  }}
+                  className="flex-1 rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateModule}
+                  disabled={creatingModule}
+                  className={`flex-1 ${ui.buttonPrimary} py-2 disabled:opacity-60 disabled:cursor-not-allowed transition-colors`}
+                >
+                  {creatingModule ? "Creating..." : "Create Module"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -12,6 +12,15 @@ datasource db {
   provider = "postgresql"
 }
 
+model Module {
+  id          String        @id @default(cuid())
+  code        String        @unique // e.g., "CSC7058"
+  name        String        // e.g., "Individual Software Development Project"
+  description String?       // optional description
+  createdAt   DateTime      @default(now())
+  
+  analogySets AnalogySet[]
+}
 
 model AnalogySet {
   id        String   @id @default(cuid())
@@ -22,6 +31,10 @@ model AnalogySet {
   ownerRole String   @default("lecturer") // lecturer (later: actual userId)
   title     String?  // e.g. "Week 3 - Databases"
   source    String?  // e.g. filename or "pasted text"
+
+  // module association
+  moduleId  String?
+  module    Module?  @relation(fields: [moduleId], references: [id])
 
   // content
   sourceText String?  // optional: extracted/pasted text
