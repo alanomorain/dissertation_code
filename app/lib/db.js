@@ -4,7 +4,7 @@ import pg from "pg"
 
 const { Pool } = pg
 
-let prismaInstance
+let prismaInstance 
 
 const initPrisma = () => {
   if (prismaInstance) {
