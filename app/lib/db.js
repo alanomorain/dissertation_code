@@ -4,25 +4,19 @@ import pg from "pg"
 
 const { Pool } = pg
 
-const globalForPrisma = globalThis
+let prismaInstance
 
-const pool =
-  globalForPrisma.__pgPool ??
-  new Pool({ connectionString: process.env.DATABASE_URL })
+const initPrisma = () => {
+  if (prismaInstance) {
+    return prismaInstance
+  }
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.__pgPool = pool
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const adapter = new PrismaPg(pool)
+  
+  prismaInstance = new PrismaClient({ adapter, log: ["error", "warn"] })
+  
+  return prismaInstance
 }
 
-const adapter =
-  globalForPrisma.__prismaAdapter ??
-  new PrismaPg(pool)
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.__prismaAdapter = adapter
-}
-
-export const prisma =
-  globalForPrisma.prisma ?? new PrismaClient({ adapter, log: ["error", "warn"] })
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
+export const prisma = initPrisma()

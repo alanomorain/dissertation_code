@@ -7,8 +7,11 @@ export async function POST(req) {
     const body = await req.json()
     const { code, name, description } = body
 
+    console.log("📝 Module creation request:", { code, name, description })
+
     // Validate required fields
     if (!code || !name) {
+      console.log("❌ Missing required fields")
       return new Response(
         JSON.stringify({ error: "Module code and name are required" }),
         {
@@ -20,6 +23,7 @@ export async function POST(req) {
 
     // Validate code format (alphanumeric, uppercase)
     if (!/^[A-Z0-9]{3,10}$/.test(code)) {
+      console.log("❌ Invalid code format:", code)
       return new Response(
         JSON.stringify({
           error: "Module code must be 3-10 uppercase alphanumeric characters (e.g., CSC7099)",
@@ -32,11 +36,13 @@ export async function POST(req) {
     }
 
     // Check if code already exists
+    console.log("🔍 Checking for existing module with code:", code)
     const existing = await prisma.module.findUnique({
       where: { code },
     })
 
     if (existing) {
+      console.log("⚠️ Module code already exists:", code)
       return new Response(
         JSON.stringify({
           error: `Module code "${code}" already exists`,
@@ -49,6 +55,7 @@ export async function POST(req) {
     }
 
     // Create the module
+    console.log("✅ Creating module...")
     const module = await prisma.module.create({
       data: {
         code: code.trim(),
@@ -56,6 +63,8 @@ export async function POST(req) {
         description: description?.trim() || null,
       },
     })
+
+    console.log("✅ Module created:", module.id)
 
     return new Response(
       JSON.stringify({
@@ -70,7 +79,7 @@ export async function POST(req) {
       },
     )
   } catch (err) {
-    console.error("Error in /api/modules/create:", err)
+    console.error("❌ Error in /api/modules/create:", err)
 
     return new Response(
       JSON.stringify({
