@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
 export default function UploadSlidesPage() {
   const router = useRouter()
-  const [moduleCode, setModuleCode] = useState("CSC7058")
+  const [modules, setModules] = useState([])
+  const [moduleCode, setModuleCode] = useState("")
   const [slidesFile, setSlidesFile] = useState(null)
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)          // for upload+topics
@@ -32,7 +33,26 @@ export default function UploadSlidesPage() {
   const [newModuleName, setNewModuleName] = useState("")
   const [newModuleDescription, setNewModuleDescription] = useState("")
   const [creatingModule, setCreatingModule] = useState(false)
-  const [moduleError, setModuleError] = useState("") 
+  const [moduleError, setModuleError] = useState("")
+
+  // Fetch modules on mount
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        const res = await fetch("/api/modules")
+        if (res.ok) {
+          const data = await res.json()
+          setModules(data)
+          if (data.length > 0) {
+            setModuleCode(data[0].code)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch modules:", err)
+      }
+    }
+    fetchModules()
+  }, []) 
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -280,6 +300,9 @@ export default function UploadSlidesPage() {
 
       const data = await res.json()
 
+      // Add the new module to the modules list
+      setModules((prev) => [...prev, data])
+
       // Select the newly created module
       setModuleCode(data.code)
       setShowModuleModal(false)
@@ -364,11 +387,11 @@ export default function UploadSlidesPage() {
                   }}
                   className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
                 >
-                  <option value="CSC7058">
-                    CSC7058 · Individual Software Development Project
-                  </option>
-                  <option value="CSC7084">CSC7084 · Web Development</option>
-                  <option value="CSC7072">CSC7072 · Databases</option>
+                  {modules.map((module) => (
+                    <option key={module.id} value={module.code}>
+                      {module.code} · {module.name}
+                    </option>
+                  ))}
                   <option value="new" className="text-indigo-300">
                     ➕ Create new module...
                   </option>
