@@ -32,6 +32,7 @@ export default function RootLayout({ children }) {
           {children}
         </div>
 
+
         {/* Global footer */}
         <footer className="relative z-10 border-t border-slate-800/50 backdrop-blur-sm">
           <div className="mx-auto max-w-6xl px-4 py-4 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-500 gap-3">

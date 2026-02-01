@@ -1,4 +1,5 @@
 import Link from "next/link"
+import * as ui from "./styles/ui"
 
 export default function Home() {
   return (
@@ -9,8 +10,8 @@ export default function Home() {
       <div className="absolute top-1/2 right-0 w-72 h-72 bg-slate-600/5 rounded-full blur-3xl -z-10 opacity-20"></div>
 
       {/* Header */}
-      <header className="relative w-full border-b border-slate-800/50 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-5 flex items-center justify-between">
+      <header className={ui.header}>
+        <div className={ui.headerContent}>
           <h1 className="text-lg sm:text-xl font-semibold tracking-tight">
             Learning Through Analogies
           </h1>
@@ -56,7 +57,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-16 sm:mb-20">
             {/* Student Card */}
             <Link href="/student" className="group">
-              <div className="h-full bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 hover:border-indigo-500/50 rounded-2xl p-6 sm:p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10">
+              <div className="h-full bg-gradient-to-br from-indigo-950/40 to-slate-900/60 border border-indigo-500/30 hover:border-indigo-400/60 rounded-2xl p-6 sm:p-8 backdrop-blur-md transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/20 hover:from-indigo-950/50">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:bg-indigo-500/30 transition-colors">
                     <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,10 +77,10 @@ export default function Home() {
 
             {/* Lecturer Card */}
             <Link href="/lecturer" className="group">
-              <div className="h-full bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/50 hover:border-purple-500/50 rounded-2xl p-6 sm:p-8 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10">
+              <div className="h-full bg-gradient-to-br from-indigo-950/40 to-slate-900/60 border border-indigo-500/30 hover:border-indigo-400/60 rounded-2xl p-6 sm:p-8 backdrop-blur-md transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/20 hover:from-indigo-950/50">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/30 group-hover:bg-purple-500/30 transition-colors">
-                    <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:bg-indigo-500/30 transition-colors">
+                    <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
@@ -88,7 +89,7 @@ export default function Home() {
                 <p className="text-slate-400 mb-6 leading-relaxed">
                   Generate powerful analogies to enhance your lectures. Create personalized content that resonates with your students.
                 </p>
-                <button className="w-full border-2 border-slate-600 hover:border-purple-500/50 text-slate-100 hover:text-purple-200 font-medium py-3 px-4 rounded-xl transition-all duration-200 group-hover:shadow-lg group-hover:shadow-purple-500/10">
+                <button className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 group-hover:shadow-lg group-hover:shadow-indigo-500/20">
                   Continue as Lecturer
                 </button>
               </div>

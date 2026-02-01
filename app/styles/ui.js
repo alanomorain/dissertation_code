@@ -18,9 +18,9 @@ export const cardInner = "bg-slate-900/70 border border-slate-800/50 backdrop-bl
 export const cardList = "rounded-xl border border-slate-800/50 bg-slate-900/70 px-4 py-3 backdrop-blur"
 
 // Headers
-export const header = "border-b border-slate-800/50 backdrop-blur-sm"
-export const headerContent = "mx-auto max-w-6xl px-4 py-4 flex items-center justify-between"
-export const headerContentNarrow = "mx-auto max-w-5xl px-4 py-4 flex items-center justify-between"
+export const header = "sticky top-0 z-30 w-full border-b border-slate-800/50 bg-slate-950/70 backdrop-blur-md"
+export const headerContent = "mx-auto max-w-6xl px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between"
+export const headerContentNarrow = "mx-auto max-w-5xl px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between"
 export const cardHeader = "text-base font-semibold mb-3"
 
 // Buttons
