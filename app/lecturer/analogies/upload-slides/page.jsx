@@ -22,6 +22,7 @@ export default function UploadSlidesPage() {
   // NEW: analogy generation state
   const [generating, setGenerating] = useState(false)
   const [analogies, setAnalogies] = useState([])
+  const [selectedAnalogies, setSelectedAnalogies] = useState([])
   // For regenerating single analogies
   const [regeneratingIndex, setRegeneratingIndex] = useState(null)
   // For persisting to DB
@@ -66,6 +67,7 @@ export default function UploadSlidesPage() {
     setTopics([])
     setExtractedText("")
     setAnalogies([])
+    setSelectedAnalogies([])
 
     if (!slidesFile) {
       setMessage({
@@ -152,7 +154,9 @@ export default function UploadSlidesPage() {
       }
 
       const data = await res.json()
-      setAnalogies(data.analogies || data.points || [])
+      const generated = data.analogies || data.points || []
+      setAnalogies(generated)
+      setSelectedAnalogies(generated.map((item) => item.analogies?.[0] || ""))
 
       setMessage({
         type: "success",
@@ -206,6 +210,14 @@ export default function UploadSlidesPage() {
       return copy
     })
 
+    setSelectedAnalogies((prev) => {
+      const next = [...prev]
+      const current = prev[idx]
+      const list = newSet.analogies || []
+      next[idx] = list.includes(current) ? current : (list[0] || "")
+      return next
+    })
+
     setMessage({
       type: "success",
       text: `Analogies regenerated for "${topic}".`,
@@ -234,12 +246,18 @@ export default function UploadSlidesPage() {
     setMessage(null)
 
     try {
+      const selectedTopics = analogies.map((point, idx) => ({
+        topic: point.original || topics[idx] || "",
+        analogy: selectedAnalogies[idx] || point.analogies?.[0] || "",
+      }))
+
       const res = await fetch("/api/generate-analogies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           persist: true,
           topics,
+          selectedAnalogies: selectedTopics,
           sourceText: extractedText,
           notes,
           title: `Slides: ${slidesFile?.name || "Untitled"}`,
@@ -586,11 +604,25 @@ export default function UploadSlidesPage() {
                         </button>
                       </div>
 
-                      <ul className="list-disc list-inside text-xs text-slate-300 space-y-1 mt-2">
-                        {point.analogies?.map((a, i) => (
-                          <li key={i}>{a}</li>
+                      <div className="mt-2 space-y-2">
+                        {(point.analogies || []).map((a, i) => (
+                          <label key={i} className="flex items-start gap-2 text-xs text-slate-300">
+                            <input
+                              type="radio"
+                              name={`analogy-${idx}`}
+                              checked={selectedAnalogies[idx] === a}
+                              onChange={() =>
+                                setSelectedAnalogies((prev) => {
+                                  const next = [...prev]
+                                  next[idx] = a
+                                  return next
+                                })
+                              }
+                            />
+                            <span>{a}</span>
+                          </label>
                         ))}
-                      </ul>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -123,7 +123,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json()
-    const { title, concept, topics, notes, persist, sourceText } = body
+    const { title, concept, topics, notes, persist, sourceText, selectedAnalogies } = body
 
     // Two modes: single concept or batch topics
     const isSingleMode = !!concept
@@ -209,16 +209,14 @@ export async function POST(req) {
         
         if (persist) {
           // Convert [ { original, analogies: [...] } ] to { topics: [{ topic, analogy }] }
-          const topicsArray = []
-          for (const item of generated) {
-            if (item.analogies && item.analogies.length > 0) {
-              // Use first analogy for persistence
-              topicsArray.push({
-                topic: item.original || "",
-                analogy: item.analogies[0] || "",
-              })
-            }
-          }
+          const topicsArray = Array.isArray(selectedAnalogies) && selectedAnalogies.length > 0
+            ? selectedAnalogies.filter((item) => item?.topic && item?.analogy)
+            : generated
+                .filter((item) => item.analogies && item.analogies.length > 0)
+                .map((item) => ({
+                  topic: item.original || "",
+                  analogy: item.analogies[0] || "",
+                }))
 
           const updated = await prisma.analogySet.update({
             where: { id: analogySetId },
