@@ -1,43 +1,175 @@
 "use client"
 
-import { useState } from "react"
-import { useParams } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../../styles/ui"
 
-// Mock data for now – later you'll fetch from DB/API
-const MOCK_ANALOGIES = [
-  {
-    id: 1,
-    moduleCode: "CSC7058",
-    moduleName: "Individual Software Development Project",
-    title: "Microservices as a fleet of food trucks",
-    concept: "Microservices architecture",
-    analogyText:
-      "Imagine each microservice is like an individual food truck, each specialising in one type of food...",
-    hasImage: true,
-  },
-  {
-    id: 2,
-    moduleCode: "CSC7084",
-    moduleName: "Web Development",
-    title: "HTTP requests as sending letters",
-    concept: "HTTP & REST",
-    analogyText:
-      "Think of an HTTP request as sending a letter to a specific address (URL)...",
-    hasImage: false,
-  },
-]
-
 export default function EditAnalogyPage() {
   const params = useParams()
-    const id = params.id
-  const numericId = Number(id)
+  const router = useRouter()
+  const id = params.id
 
-  const existing = MOCK_ANALOGIES.find((a) => a.id === numericId)
+  const [analogy, setAnalogy] = useState(null)
+  const [modules, setModules] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
 
-  // If nothing matches, show a simple "not found" message
-  if (!existing) {
+  const [title, setTitle] = useState("")
+  const [concept, setConcept] = useState("")
+  const [moduleCode, setModuleCode] = useState("")
+  const [analogyText, setAnalogyText] = useState("")
+  const [imageFile, setImageFile] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState(null)
+
+  // Fetch analogy and modules on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch analogy
+        const analogyRes = await fetch(`/api/analogies/${id}`)
+        if (!analogyRes.ok) {
+          setNotFound(true)
+          setLoading(false)
+          return
+        }
+        const analogyData = await analogyRes.json()
+        setAnalogy(analogyData)
+
+        // Parse topicsJson to get concept and analogy text
+        let concept = ""
+        let analogyTextFromDb = ""
+        if (
+          analogyData.topicsJson &&
+          analogyData.topicsJson.topics &&
+          analogyData.topicsJson.topics.length > 0
+        ) {
+          const firstTopic = analogyData.topicsJson.topics[0]
+          concept = firstTopic.topic || ""
+          analogyTextFromDb = firstTopic.analogy || ""
+        }
+
+        // Pre-fill form from DB data
+        setTitle(analogyData.title || "")
+        setConcept(concept)
+        setAnalogyText(analogyTextFromDb)
+
+        // Find module code from moduleId
+        if (analogyData.moduleId) {
+          const modulesRes = await fetch("/api/modules")
+          if (modulesRes.ok) {
+            const modulesData = await modulesRes.json()
+            setModules(modulesData)
+
+            // Find the module code that matches this analogy's moduleId
+            const matchingModule = modulesData.find(
+              (m) => m.id === analogyData.moduleId
+            )
+            if (matchingModule) {
+              setModuleCode(matchingModule.code)
+            }
+          }
+        } else {
+          // Fetch modules if no module assigned
+          const modulesRes = await fetch("/api/modules")
+          if (modulesRes.ok) {
+            const modulesData = await modulesRes.json()
+            setModules(modulesData)
+            if (modulesData.length > 0) {
+              setModuleCode(modulesData[0].code)
+            }
+          }
+        }
+
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching data:", err)
+        setNotFound(true)
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [id])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    setMessage(null)
+
+    if (!title || !concept || !analogyText || !moduleCode) {
+      setMessage({
+        type: "error",
+        text: "Please fill in all required fields.",
+      })
+      setSaving(false)
+      return
+    }
+
+    try {
+      const res = await fetch("/api/generate-analogies", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          title,
+          concept,
+          analogyText,
+          moduleCode,
+        }),
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || "Failed to update analogy")
+      }
+
+      const data = await res.json()
+
+      setMessage({
+        type: "success",
+        text: "Analogy updated successfully! Redirecting...",
+      })
+
+      // Redirect to the detail page
+      setTimeout(() => {
+        router.push(`/lecturer/analogies/${data.id}`)
+      }, 500)
+    } catch (err) {
+      console.error(err)
+      setMessage({
+        type: "error",
+        text: err.message || "Failed to update analogy",
+      })
+      setSaving(false)
+    }
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    setImageFile(file || null)
+  }
+
+  if (loading) {
+    return (
+      <main className={ui.page}>
+        <header className={ui.header}>
+          <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
+            <h1 className="text-lg font-semibold">Loading...</h1>
+            <Link href="/lecturer/analogies" className={ui.buttonSecondary}>
+              Back to analogies
+            </Link>
+          </div>
+        </header>
+        <section className="flex-1 flex items-center justify-center">
+          <div className="text-slate-300">Loading analogy...</div>
+        </section>
+      </main>
+    )
+  }
+
+  if (notFound) {
     return (
       <main className={ui.page}>
         <header className={ui.header}>
@@ -53,60 +185,11 @@ export default function EditAnalogyPage() {
         </header>
         <section className="flex-1 flex items-center">
           <div className="mx-auto max-w-4xl px-4 py-6 text-sm text-slate-300">
-            No analogy exists with ID {id}. In the real system, this would be
-            handled by the router / database.
+            No analogy exists with ID {id}.
           </div>
         </section>
       </main>
     )
-  }
-
-  // Pre-fill state from the existing analogy
-  const [title, setTitle] = useState(existing.title)
-  const [concept, setConcept] = useState(existing.concept)
-  const [moduleCode, setModuleCode] = useState(existing.moduleCode)
-  const [analogyText, setAnalogyText] = useState(existing.analogyText ?? "")
-  const [imageFile, setImageFile] = useState(null)
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState(null)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setSaving(true)
-    setMessage(null)
-
-    if (!title || !concept || !analogyText) {
-      setMessage({
-        type: "error",
-        text: "Please fill in the title, concept and analogy text.",
-      })
-      setSaving(false)
-      return
-    }
-
-    // For now, just log – later this will PATCH to your API/DB
-    console.log("Updated analogy data:", {
-      id: numericId,
-      title,
-      concept,
-      moduleCode,
-      analogyText,
-      imageFile,
-    })
-
-    setTimeout(() => {
-      setSaving(false)
-      setMessage({
-        type: "success",
-        text:
-          "Analogy updated (mock). In the final system this would save to the database.",
-      })
-    }, 800)
-  }
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    setImageFile(file || null)
   }
 
   return (
@@ -115,12 +198,8 @@ export default function EditAnalogyPage() {
       <header className={ui.header}>
         <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
           <div>
-            <p className={ui.textLabel}>
-              Lecturer · Edit Analogy
-            </p>
-            <h1 className="text-lg font-semibold">
-              Edit analogy #{id}
-            </h1>
+            <p className={ui.textLabel}>Lecturer · Edit Analogy</p>
+            <h1 className="text-lg font-semibold">Edit analogy #{id}</h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link
@@ -138,7 +217,7 @@ export default function EditAnalogyPage() {
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className={`${ui.card} p-6 md:p-8`}>
             <p className="text-sm text-slate-300 mb-4">
-              You're editing an existing analogy. 
+              You're editing an existing analogy.
             </p>
 
             {message && (
@@ -168,15 +247,11 @@ export default function EditAnalogyPage() {
                   onChange={(e) => setModuleCode(e.target.value)}
                   className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
                 >
-                  <option value="CSC7058">
-                    CSC7058 · Individual Software Development Project
-                  </option>
-                  <option value="CSC7084">
-                    CSC7084 · Web Development
-                  </option>
-                  <option value="CSC7072">
-                    CSC7072 · Databases
-                  </option>
+                  {modules.map((module) => (
+                    <option key={module.id} value={module.code}>
+                      {module.code} · {module.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -247,8 +322,7 @@ export default function EditAnalogyPage() {
                   className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-indigo-400"
                 />
                 <p className="text-xs text-slate-400">
-                  {" "}
-                  {existing.hasImage ? "An image is attached" : "No image yet"}.
+                  Optional: upload a new image to replace the current one.
                 </p>
                 {imageFile && (
                   <p className="text-xs text-slate-300 mt-1">

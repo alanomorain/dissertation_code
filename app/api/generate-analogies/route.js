@@ -299,3 +299,86 @@ export async function POST(req) {
     )
   }
 }
+
+export async function PATCH(req) {
+  try {
+    const body = await req.json()
+    const { id, title, concept, analogyText, moduleCode } = body
+
+    if (!id) {
+      return new Response(
+        JSON.stringify({ error: "Analogy ID is required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
+    }
+
+    if (!title || !concept || !analogyText) {
+      return new Response(
+        JSON.stringify({
+          error: "Title, concept, and analogy text are required",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
+    }
+
+    // Find the module by code if provided
+    let moduleId = null
+    if (moduleCode) {
+      const module = await prisma.module.findUnique({
+        where: { code: moduleCode },
+      })
+      if (module) {
+        moduleId = module.id
+      }
+    }
+
+    // Update the analogy
+    const updated = await prisma.analogySet.update({
+      where: { id },
+      data: {
+        title,
+        sourceText: analogyText,
+        topicsJson: {
+          topics: [
+            {
+              topic: concept,
+              analogy: analogyText,
+            },
+          ],
+        },
+        moduleId,
+      },
+    })
+
+    return new Response(
+      JSON.stringify({
+        id: updated.id,
+        title: updated.title,
+        status: updated.status,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    )
+  } catch (err) {
+    console.error("Error in PATCH /api/generate-analogies:", err)
+
+    return new Response(
+      JSON.stringify({
+        error: "Server error while updating analogy",
+        details: err.message || String(err),
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    )
+  }
+}
