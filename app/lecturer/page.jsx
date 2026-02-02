@@ -58,7 +58,25 @@ export default function LecturerDashboard() {
               Lecturer Dashboard
             </h1>
           </div>
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-2 text-sm">
+            <Link
+              href="/lecturer/analogies/upload-slides"
+              className={ui.buttonSecondary}
+            >
+              Upload slides
+            </Link>
+            <Link
+              href="/lecturer/analogies/new"
+              className={ui.buttonSecondary}
+            >
+              New analogy
+            </Link>
+            <Link
+              href="/lecturer/modules/create"
+              className={ui.buttonPrimary}
+            >
+              Create module
+            </Link>
             <span className="hidden sm:inline text-slate-300">
               Signed in as <span className="font-medium">Lecturer User</span>
             </span>
@@ -85,6 +103,17 @@ export default function LecturerDashboard() {
                 Create and manage analogies for your modules, set quizzes, and
                 review how students are engaging with the material.
               </p>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/lecturer/analogies/upload-slides" className={ui.buttonSecondary}>
+                  Upload slides
+                </Link>
+                <Link href="/lecturer/analogies/new" className={ui.buttonSecondary}>
+                  New analogy
+                </Link>
+                <Link href="/lecturer/modules/create" className={ui.buttonPrimary}>
+                  Create module
+                </Link>
+              </div>
             </div>
 
             <div className={`${ui.cardFull} text-sm`}>
