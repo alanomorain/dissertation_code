@@ -116,12 +116,17 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                     key={index}
                     className={ui.cardInner}
                   >
-                    <h4 className="font-medium text-indigo-300 mb-2">
-                      {item.topic || "Unknown Topic"}
-                    </h4>
-                    <p className="text-sm text-slate-300">
-                      {item.analogy || "No analogy provided"}
-                    </p>
+                    <Link
+                      href={`/lecturer/analogies/${analogy.id}/topics/${index}`}
+                      className="block rounded-md border border-transparent hover:border-indigo-400/40 transition p-2 -m-2"
+                    >
+                      <h4 className="font-medium text-indigo-300 mb-2">
+                        {item.topic || "Unknown Topic"}
+                      </h4>
+                      <p className="text-sm text-slate-300">
+                        {item.analogy || "No analogy provided"}
+                      </p>
+                    </Link>
 
                     <div className="mt-4 rounded-lg border border-slate-800/70 bg-slate-900/60 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
