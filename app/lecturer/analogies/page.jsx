@@ -97,9 +97,10 @@ export default async function AnalogiesDashboardPage() {
             ) : (
               <div className="space-y-3 text-sm">
                 {analogies.map((analogy) => (
-                  <div
+                  <Link
                     key={analogy.id}
-                    className={`${ui.cardList} flex flex-col gap-2 md:flex-row md:items-center md:justify-between`}
+                    href={`/lecturer/analogies/${analogy.id}`}
+                    className={`${ui.cardList} flex flex-col gap-2 md:flex-row md:items-center md:justify-between hover:border-indigo-400 transition`}
                   >
                     <div>
                       <p className={ui.textHighlight}>
@@ -122,16 +123,8 @@ export default async function AnalogiesDashboardPage() {
                       >
                         {analogy.status}
                       </span>
-                      <Link href={`/lecturer/analogies/${analogy.id}`}>
-                        <button
-                          type="button"
-                          className={`mt-1 ${ui.buttonSmall}`}
-                        >
-                          View
-                        </button>
-                      </Link>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
