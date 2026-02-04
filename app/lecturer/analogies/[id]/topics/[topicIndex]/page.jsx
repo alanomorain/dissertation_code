@@ -25,6 +25,8 @@ export default async function LecturerTopicDetailPage({ params }) {
   }
 
   const topic = topics[index] || {}
+  const prevIndex = index > 0 ? index - 1 : null
+  const nextIndex = index < topics.length - 1 ? index + 1 : null
 
   return (
     <main className={ui.page}>
@@ -37,12 +39,28 @@ export default async function LecturerTopicDetailPage({ params }) {
             </h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
+            {prevIndex !== null && (
+              <Link
+                href={`/lecturer/analogies/${id}/topics/${prevIndex}`}
+                className={ui.buttonSecondary}
+              >
+                ← Previous topic
+              </Link>
+            )}
             <Link
               href={`/lecturer/analogies/${id}`}
               className={ui.buttonSecondary}
             >
               ← Back to analogy
             </Link>
+            {nextIndex !== null && (
+              <Link
+                href={`/lecturer/analogies/${id}/topics/${nextIndex}`}
+                className={ui.buttonSecondary}
+              >
+                Next topic →
+              </Link>
+            )}
           </div>
         </div>
       </header>
