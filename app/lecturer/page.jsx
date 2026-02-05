@@ -1,7 +1,8 @@
 import Link from "next/link"
+import { prisma } from "../lib/db"
 import * as ui from "../styles/ui"
 
-export default function LecturerDashboard() {
+export default async function LecturerDashboard() {
   // Mock data for now 
   const taughtModules = [
     {
@@ -18,20 +19,11 @@ export default function LecturerDashboard() {
     },
   ]
 
-  const recentUploads = [
-    {
-      id: 1,
-      module: "CSC7058",
-      title: "Microservices vs Monolith",
-      createdAt: "2025-11-24",
-    },
-    {
-      id: 2,
-      module: "CSC7084",
-      title: "HTTP Requests as Sending Letters",
-      createdAt: "2025-11-22",
-    },
-  ]
+  const recentUploads = await prisma.analogySet.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 5,
+    include: { module: true },
+  })
 
   const pendingQuizzes = [
     {
@@ -186,9 +178,9 @@ export default function LecturerDashboard() {
                         key={item.id}
                         className={ui.cardInner}
                       >
-                        <p className="font-medium">{item.title}</p>
+                        <p className="font-medium">{item.title || "Untitled"}</p>
                         <p className="text-xs text-slate-400">
-                          Module: {item.module} · Created: {item.createdAt}
+                          Module: {item.module?.code || "Unassigned"} · Created: {new Date(item.createdAt).toLocaleDateString()}
                         </p>
                       </li>
                     ))}
