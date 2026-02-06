@@ -217,7 +217,7 @@ export default function EditAnalogyPage() {
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className={`${ui.card} p-6 md:p-8`}>
             <p className="text-sm text-slate-300 mb-4">
-              You're editing an existing analogy.
+              You&apos;re editing an existing analogy.
             </p>
 
             {message && (

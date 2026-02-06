@@ -2,6 +2,7 @@ import Link from "next/link"
 import { prisma } from "../../../lib/db"
 import { notFound } from "next/navigation"
 import * as ui from "../../../styles/ui"
+import MediaImagePanel from "../components/MediaImagePanel"
 
 export default async function LecturerAnalogyDetailPage({ params }) {
   const { id } = await params
@@ -128,37 +129,10 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                       </p>
                     </Link>
 
-                    <div className="mt-4 rounded-lg border border-slate-800/70 bg-slate-900/60 p-3">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-xs text-slate-400">
-                          Media: <span className="text-slate-200">Not generated</span>
-                        </p>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
-                          >
-                            Generate Image
-                          </button>
-                          <button
-                            type="button"
-                            className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
-                          >
-                            Generate Video
-                          </button>
-                        </div>
-                      </div>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
-                          <p className="text-xs text-slate-400">Image preview</p>
-                          <div className="mt-2 h-24 rounded bg-slate-800/40"></div>
-                        </div>
-                        <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
-                          <p className="text-xs text-slate-400">Video preview</p>
-                          <div className="mt-2 h-24 rounded bg-slate-800/40"></div>
-                        </div>
-                      </div>
-                    </div>
+                    <MediaImagePanel
+                      analogyText={item.analogy || ""}
+                      topicTitle={item.topic || ""}
+                    />
                   </div>
                 ))}
               </div>

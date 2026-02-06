@@ -328,11 +328,11 @@ export async function PATCH(req) {
     // Find the module by code if provided
     let moduleId = null
     if (moduleCode) {
-      const module = await prisma.module.findUnique({
+      const moduleRecord = await prisma.module.findUnique({
         where: { code: moduleCode },
       })
-      if (module) {
-        moduleId = module.id
+      if (moduleRecord) {
+        moduleId = moduleRecord.id
       }
     }
 

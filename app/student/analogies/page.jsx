@@ -53,7 +53,7 @@ export default async function StudentAnalogiesPage() {
 
             {analogies.length === 0 ? (
               <p className={ui.textSmall}>
-                No analogies are available yet. Your lecturer hasn't added
+                No analogies are available yet. Your lecturer hasn&apos;t added
                 any for your modules.
               </p>
             ) : (

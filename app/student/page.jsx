@@ -147,7 +147,7 @@ export default function StudentDashboard() {
                 </h3>
                 {upcomingQuizzes.length === 0 ? (
                   <p className={ui.textSmall}>
-                    No quizzes scheduled. Your lecturer hasn't created any yet.
+                    No quizzes scheduled. Your lecturer hasn&apos;t created any yet.
                   </p>
                 ) : (
                   <ul className="space-y-2 text-sm">

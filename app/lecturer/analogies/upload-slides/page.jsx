@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
+import MediaImagePanel from "../components/MediaImagePanel"
 
 export default function UploadSlidesPage() {
   const router = useRouter()
@@ -508,7 +509,7 @@ export default function UploadSlidesPage() {
                   Suggested topics for analogies
                 </h2>
                 <p className="text-xs text-slate-400 mb-3">
-                  Remove anything that doesn't fit and add any extra topics you want analogies for.
+                  Remove anything that doesn&apos;t fit and add any extra topics you want analogies for.
                 </p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -624,37 +625,10 @@ export default function UploadSlidesPage() {
                         ))}
                       </div>
 
-                      <div className="mt-4 rounded-lg border border-slate-800/70 bg-slate-900/60 p-3">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="text-xs text-slate-400">
-                            Media: <span className="text-slate-200">Not generated</span>
-                          </p>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
-                            >
-                              Generate Image
-                            </button>
-                            <button
-                              type="button"
-                              className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
-                            >
-                              Generate Video
-                            </button>
-                          </div>
-                        </div>
-                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
-                            <p className="text-xs text-slate-400">Image preview</p>
-                            <div className="mt-2 h-24 rounded bg-slate-800/40"></div>
-                          </div>
-                          <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
-                            <p className="text-xs text-slate-400">Video preview</p>
-                            <div className="mt-2 h-24 rounded bg-slate-800/40"></div>
-                          </div>
-                        </div>
-                      </div>
+                      <MediaImagePanel
+                        analogyText={selectedAnalogies[idx] || point.analogies?.[0] || ""}
+                        topicTitle={point.original || ""}
+                      />
                     </div>
                   ))}
                 </div>

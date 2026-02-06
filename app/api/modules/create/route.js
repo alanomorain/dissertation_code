@@ -56,7 +56,7 @@ export async function POST(req) {
 
     // Create the module
     console.log("✅ Creating module...")
-    const module = await prisma.module.create({
+    const createdModule = await prisma.module.create({
       data: {
         code: code.trim(),
         name: name.trim(),
@@ -64,14 +64,14 @@ export async function POST(req) {
       },
     })
 
-    console.log("✅ Module created:", module.id)
+    console.log("✅ Module created:", createdModule.id)
 
     return new Response(
       JSON.stringify({
-        id: module.id,
-        code: module.code,
-        name: module.name,
-        description: module.description,
+        id: createdModule.id,
+        code: createdModule.code,
+        name: createdModule.name,
+        description: createdModule.description,
       }),
       {
         status: 201,
