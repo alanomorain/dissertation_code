@@ -1,12 +1,10 @@
 import Link from "next/link"
 import { prisma } from "../../lib/db"
+import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
 export default async function AnalogiesDashboardPage() {
-  const lecturerUser = await prisma.user.findUnique({
-    where: { email: "lecturer@example.com" },
-    select: { id: true },
-  })
+  const lecturerUser = await getCurrentUser("LECTURER", { id: true })
 
   const analogies = lecturerUser
     ? await prisma.analogySet.findMany({

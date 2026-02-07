@@ -1,4 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
+import DemoRoleSwitcher from "./components/DemoRoleSwitcher";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,8 @@ export default function RootLayout({ children }) {
         <div className="flex-1 relative z-0">
           {children}
         </div>
+
+        <DemoRoleSwitcher />
 
 
         {/* Global footer */}

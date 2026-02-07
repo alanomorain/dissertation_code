@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { prisma } from "../lib/db"
+import { getCurrentUser } from "../lib/currentUser"
 import * as ui from "../styles/ui"
 
 export default async function StudentDashboard() {
-  const studentUser = await prisma.user.findUnique({
-    where: { email: "student@example.com" },
-    select: { id: true, email: true },
+  const studentUser = await getCurrentUser("STUDENT", {
+    id: true,
+    email: true,
   })
 
   const enrollments = studentUser

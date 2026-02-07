@@ -1,12 +1,10 @@
 import Link from "next/link"
 import { prisma } from "../../lib/db"
+import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
 export default async function StudentAnalogiesPage() {
-  const studentUser = await prisma.user.findUnique({
-    where: { email: "student@example.com" },
-    select: { id: true },
-  })
+  const studentUser = await getCurrentUser("STUDENT", { id: true })
 
   const enrollments = studentUser
     ? await prisma.moduleEnrollment.findMany({
