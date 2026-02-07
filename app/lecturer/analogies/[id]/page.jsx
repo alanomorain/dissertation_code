@@ -10,6 +10,7 @@ export default async function LecturerAnalogyDetailPage({ params }) {
   // Query single AnalogySet by ID
   const analogy = await prisma.analogySet.findUnique({
     where: { id },
+    include: { owner: true },
   })
 
   if (!analogy) {
@@ -73,14 +74,16 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                 </span>
               </div>
               <div>
+                <span className={ui.textMuted}>Owner:</span>{" "}
+                <span className="text-slate-200">
+                  {analogy.owner?.email || "Unassigned"}
+                </span>
+              </div>
+              <div>
                 <span className={ui.textMuted}>Created:</span>{" "}
                 <span className="text-slate-200">
                   {new Date(analogy.createdAt).toLocaleString()}
                 </span>
-              </div>
-              <div>
-                <span className={ui.textMuted}>Owner Role:</span>{" "}
-                <span className="text-slate-200">{analogy.ownerRole}</span>
               </div>
             </div>
           </div>

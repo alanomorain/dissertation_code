@@ -1,31 +1,39 @@
 import Link from "next/link"
+import { prisma } from "../lib/db"
 import * as ui from "../styles/ui"
 
-export default function StudentDashboard() {
-  // Temporary mock data 
-  const modules = [
-    { code: "CSC7058", name: "Software Development Project", progress: 60 },
-    { code: "CSC7084", name: "Web Development", progress: 80 },
-    { code: "CSC7082", name: "Databases", progress: 45 },
-  ]
+export default async function StudentDashboard() {
+  const studentUser = await prisma.user.findUnique({
+    where: { email: "student@example.com" },
+    select: { id: true, email: true },
+  })
 
-  const upcomingQuizzes = [
-    { id: 1, title: "OOP Concepts via Analogies", due: "2025-12-05" },
-    { id: 2, title: "HTTP & REST Analogy Quiz", due: "2025-12-12" },
-  ]
+  const enrollments = studentUser
+    ? await prisma.moduleEnrollment.findMany({
+        where: { userId: studentUser.id },
+        include: { module: true },
+        orderBy: { createdAt: "desc" },
+      })
+    : []
 
-  const recentAnalogies = [
-    {
-      id: 1,
-      concept: "Client–Server Architecture",
-      analogy: "Restaurant waiter taking orders to the kitchen",
-    },
-    {
-      id: 2,
-      concept: "Queues in Data Structures",
-      analogy: "People lining up at a bus stop, first in first out",
-    },
-  ]
+  const activeEnrollments = enrollments.filter(
+    (enrollment) => enrollment.status === "ACTIVE",
+  )
+
+  const moduleIds = enrollments.map((enrollment) => enrollment.moduleId)
+
+  const recentAnalogies = moduleIds.length
+    ? await prisma.analogySet.findMany({
+        where: {
+          status: "ready",
+          moduleId: { in: moduleIds },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 4,
+      })
+    : []
+
+  const upcomingQuizzes = []
 
   return (
     <main className={ui.page}>
@@ -39,7 +47,10 @@ export default function StudentDashboard() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
-              Signed in as <span className="font-medium">Student User</span>
+              Signed in as{" "}
+              <span className="font-medium">
+                {studentUser?.email || "Student User"}
+              </span>
             </span>
             <Link
               href="/"
@@ -70,9 +81,9 @@ export default function StudentDashboard() {
             <div className={`${ui.cardFull} text-sm`}>
               <h3 className="text-base font-semibold">Quick Stats</h3>
               <ul className="space-y-1 text-slate-300">
-                <li>• 3 active modules</li>
+                <li>• {activeEnrollments.length} active modules</li>
                 <li>• 2 upcoming quizzes</li>
-                <li>• 5 new analogies added this week</li>
+                <li>• {recentAnalogies.length} recent analogies</li>
               </ul>
             </div>
           </div>
@@ -85,18 +96,18 @@ export default function StudentDashboard() {
                 <h3 className={ui.cardHeader}>Your modules</h3>
               </div>
               <div className="space-y-3 text-sm">
-                {modules.map((module) => (
+                {enrollments.map((enrollment) => (
                   <div
-                    key={module.code}
+                    key={enrollment.id}
                     className={ui.cardList}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div>
                         <p className="font-medium">
-                          {module.code} · {module.name}
+                          {enrollment.module.code} · {enrollment.module.name}
                         </p>
                         <p className="text-xs text-slate-400">
-                          Progress: {module.progress}%
+                          Status: {enrollment.status}
                         </p>
                       </div>
                       <Link href="/student/analogies">
@@ -111,11 +122,18 @@ export default function StudentDashboard() {
                     <div className="mt-2 h-1.5 rounded-full bg-slate-800">
                       <div
                         className="h-1.5 rounded-full bg-indigo-500"
-                        style={{ width: `${module.progress}%` }}
+                        style={{
+                          width: enrollment.status === "ACTIVE" ? "80%" : "30%",
+                        }}
                       />
                     </div>
                   </div>
                 ))}
+                {enrollments.length === 0 && (
+                  <p className={ui.textSmall}>
+                    No module enrollments available yet.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -132,11 +150,18 @@ export default function StudentDashboard() {
                       className={ui.cardInner}
                     >
                       <p className={`${ui.textHighlight} mb-1`}>
-                        {item.concept}
+                        {item.title || "Untitled"}
                       </p>
-                      <p className="text-slate-200">{item.analogy}</p>
+                      <p className="text-slate-200">
+                        {item.moduleId ? "Module linked" : "Unassigned"}
+                      </p>
                     </div>
                   ))}
+                  {recentAnalogies.length === 0 && (
+                    <p className={ui.textSmall}>
+                      No recent analogies for your modules.
+                    </p>
+                  )}
                 </div>
               </div>
 

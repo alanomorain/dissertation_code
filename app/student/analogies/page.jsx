@@ -3,15 +3,31 @@ import { prisma } from "../../lib/db"
 import * as ui from "../../styles/ui"
 
 export default async function StudentAnalogiesPage() {
-  // Query only "ready" analogies, newest first
-  const analogies = await prisma.analogySet.findMany({
-    where: {
-      status: "ready",
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const studentUser = await prisma.user.findUnique({
+    where: { email: "student@example.com" },
+    select: { id: true },
   })
+
+  const enrollments = studentUser
+    ? await prisma.moduleEnrollment.findMany({
+        where: { userId: studentUser.id, status: "ACTIVE" },
+        select: { moduleId: true },
+      })
+    : []
+
+  const moduleIds = enrollments.map((enrollment) => enrollment.moduleId)
+
+  const analogies = moduleIds.length
+    ? await prisma.analogySet.findMany({
+        where: {
+          status: "ready",
+          moduleId: { in: moduleIds },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    : []
 
   return (
     <main className={ui.page}>

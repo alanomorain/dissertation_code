@@ -3,27 +3,30 @@ import { prisma } from "../lib/db"
 import * as ui from "../styles/ui"
 
 export default async function LecturerDashboard() {
-  // Mock data for now 
-  const taughtModules = [
-    {
-      code: "CSC7058",
-      name: "Software Development Project",
-      students: 24,
-      analogies: 12,
-    },
-    {
-      code: "CSC7084",
-      name: "Web Development",
-      students: 32,
-      analogies: 18,
-    },
-  ]
-
-  const recentUploads = await prisma.analogySet.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 5,
-    include: { module: true },
+  const lecturerUser = await prisma.user.findUnique({
+    where: { email: "lecturer@example.com" },
+    select: { id: true, email: true },
   })
+
+  const taughtModules = lecturerUser
+    ? await prisma.module.findMany({
+        where: { lecturerId: lecturerUser.id },
+        include: {
+          enrollments: true,
+          analogySets: true,
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    : []
+
+  const recentUploads = lecturerUser
+    ? await prisma.analogySet.findMany({
+        where: { ownerId: lecturerUser.id },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        include: { module: true },
+      })
+    : []
 
   const pendingQuizzes = [
     {
@@ -70,7 +73,10 @@ export default async function LecturerDashboard() {
               Create module
             </Link>
             <span className="hidden sm:inline text-slate-300">
-              Signed in as <span className="font-medium">Lecturer User</span>
+              Signed in as{" "}
+              <span className="font-medium">
+                {lecturerUser?.email || "Lecturer User"}
+              </span>
             </span>
             <Link
               href="/"
@@ -129,7 +135,7 @@ export default async function LecturerDashboard() {
               <div className="space-y-3 text-sm">
                 {taughtModules.map((mod) => (
                   <div
-                    key={mod.code}
+                    key={mod.id}
                     className={ui.cardList}
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -138,7 +144,7 @@ export default async function LecturerDashboard() {
                           {mod.code} · {mod.name}
                         </p>
                         <p className="text-xs text-slate-400">
-                          {mod.students} students · {mod.analogies} analogies
+                          {mod.enrollments.length} students · {mod.analogySets.length} analogies
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -157,6 +163,11 @@ export default async function LecturerDashboard() {
                     </div>
                   </div>
                 ))}
+                {taughtModules.length === 0 && (
+                  <p className={ui.textSmall}>
+                    No modules assigned yet.
+                  </p>
+                )}
               </div>
             </div>
 

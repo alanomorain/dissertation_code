@@ -12,13 +12,42 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  ADMIN
+  LECTURER
+  STUDENT
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  INVITED
+  DROPPED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  studentNumber String?  @unique
+  role          Role     @default(STUDENT)
+  createdAt     DateTime @default(now())
+
+  modulesTaught Module[]           @relation("LecturerModules")
+  enrollments   ModuleEnrollment[]
+  analogySets   AnalogySet[]       @relation("AnalogyOwner")
+
+  @@index([studentNumber])
+}
+
 model Module {
-  id          String        @id @default(cuid())
-  code        String        @unique // e.g., "CSC7058"
-  name        String        // e.g., "Individual Software Development Project"
-  description String?       // optional description
-  createdAt   DateTime      @default(now())
-  
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g., "CSC7058"
+  name        String // e.g., "Individual Software Development Project"
+  description String? // optional description
+  createdAt   DateTime @default(now())
+
+  lecturerId  String?
+  lecturer    User?              @relation("LecturerModules", fields: [lecturerId], references: [id])
+  enrollments ModuleEnrollment[]
   analogySets AnalogySet[]
 }
 
@@ -28,17 +57,34 @@ model AnalogySet {
   status    String   @default("processing") // processing | ready | failed
 
   // provenance
-  ownerRole String   @default("lecturer") // lecturer (later: actual userId)
-  title     String?  // e.g. "Week 3 - Databases"
-  source    String?  // e.g. filename or "pasted text"
+  title  String? // e.g. "Week 3 - Databases"
+  source String? // e.g. filename or "pasted text"
+
+  ownerId String?
+  owner   User?   @relation("AnalogyOwner", fields: [ownerId], references: [id])
 
   // module association
-  moduleId  String?
-  module    Module?  @relation(fields: [moduleId], references: [id])
+  moduleId String?
+  module   Module? @relation(fields: [moduleId], references: [id])
 
   // content
-  sourceText String?  // optional: extracted/pasted text
-  topicsJson Json?    // { topics: [{ topic, analogy }] }
+  sourceText String? // optional: extracted/pasted text
+  topicsJson Json? // { topics: [{ topic, analogy }] }
 
   errorMessage String?
+}
+
+model ModuleEnrollment {
+  id        String           @id @default(cuid())
+  status    EnrollmentStatus @default(ACTIVE)
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id])
+
+  @@unique([userId, moduleId])
+  @@index([moduleId])
 }

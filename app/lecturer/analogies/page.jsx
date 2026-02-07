@@ -3,12 +3,19 @@ import { prisma } from "../../lib/db"
 import * as ui from "../../styles/ui"
 
 export default async function AnalogiesDashboardPage() {
-  // Query AnalogySet table, newest first
-  const analogies = await prisma.analogySet.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
+  const lecturerUser = await prisma.user.findUnique({
+    where: { email: "lecturer@example.com" },
+    select: { id: true },
   })
+
+  const analogies = lecturerUser
+    ? await prisma.analogySet.findMany({
+        where: { ownerId: lecturerUser.id },
+        orderBy: {
+          createdAt: "desc",
+        },
+      })
+    : []
 
   return (
     <main className={ui.page}>

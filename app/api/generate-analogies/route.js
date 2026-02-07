@@ -154,7 +154,6 @@ export async function POST(req) {
       const analogySet = await prisma.analogySet.create({
         data: {
           status: "processing",
-          ownerRole: "lecturer",
           title: title || (isSingleMode ? concept : `Batch: ${topics.join(", ")}`),
           source: isBatchMode ? "slides" : "manual",
           sourceText: sourceText || notes || "",
