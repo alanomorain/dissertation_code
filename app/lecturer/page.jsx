@@ -74,10 +74,10 @@ export default async function LecturerDashboard() {
               Create module
             </Link>
             <span className="hidden sm:inline text-slate-300">
-              Signed in as{" "}
               <span className="font-medium">
-                {lecturerUser?.email || "Lecturer User"}
-              </span>
+                {lecturerUser?.email || "lecturer@example.com"}
+              </span>{" "}
+              signed in as a Lecturer
             </span>
             <Link
               href="/"

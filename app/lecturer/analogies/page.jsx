@@ -4,7 +4,10 @@ import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
 export default async function AnalogiesDashboardPage() {
-  const lecturerUser = await getCurrentUser("LECTURER", { id: true })
+  const lecturerUser = await getCurrentUser("LECTURER", {
+    id: true,
+    email: true,
+  })
 
   const analogies = lecturerUser
     ? await prisma.analogySet.findMany({
@@ -27,6 +30,12 @@ export default async function AnalogiesDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3 text-sm">
+            <span className="hidden sm:inline text-slate-300">
+              <span className="font-medium">
+                {lecturerUser?.email || "lecturer@example.com"}
+              </span>{" "}
+              signed in as a Lecturer
+            </span>
             <Link
               href="/lecturer"
               className={ui.buttonSecondary}

@@ -48,10 +48,10 @@ export default async function StudentDashboard() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
-              Signed in as{" "}
               <span className="font-medium">
-                {studentUser?.email || "Student User"}
-              </span>
+                {studentUser?.email || "student@example.com"}
+              </span>{" "}
+              signed in as a Student
             </span>
             <Link
               href="/"
