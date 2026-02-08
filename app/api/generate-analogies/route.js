@@ -118,6 +118,17 @@ Return STRICTLY in this JSON format (no prose, no other keys):
   return parsed
 }
 
+function normalizeTopics(topics) {
+  if (!Array.isArray(topics)) return []
+  return topics
+    .filter((item) => item && (item.topic || item.analogy))
+    .map((item) => ({
+      topic: item.topic || "",
+      analogy: item.analogy || "",
+      feedback: item.feedback || "",
+    }))
+}
+
 export async function POST(req) {
   let analogySetId = null
 
@@ -154,6 +165,8 @@ export async function POST(req) {
       const analogySet = await prisma.analogySet.create({
         data: {
           status: "processing",
+          reviewStatus: "DRAFT",
+          approvedAt: null,
           title: title || (isSingleMode ? concept : `Batch: ${topics.join(", ")}`),
           source: isBatchMode ? "slides" : "manual",
           sourceText: sourceText || notes || "",
@@ -175,11 +188,14 @@ export async function POST(req) {
             where: { id: analogySetId },
             data: {
               status: "ready",
+              reviewStatus: "DRAFT",
+              approvedAt: null,
               topicsJson: {
                 topics: [
                   {
                     topic: generated.topic || concept,
                     analogy: generated.analogy || "",
+                    feedback: "",
                   },
                 ],
               },
@@ -209,18 +225,27 @@ export async function POST(req) {
         if (persist) {
           // Convert [ { original, analogies: [...] } ] to { topics: [{ topic, analogy }] }
           const topicsArray = Array.isArray(selectedAnalogies) && selectedAnalogies.length > 0
-            ? selectedAnalogies.filter((item) => item?.topic && item?.analogy)
+            ? selectedAnalogies
+                .filter((item) => item?.topic && item?.analogy)
+                .map((item) => ({
+                  topic: item.topic,
+                  analogy: item.analogy,
+                  feedback: item.feedback || "",
+                }))
             : generated
                 .filter((item) => item.analogies && item.analogies.length > 0)
                 .map((item) => ({
                   topic: item.original || "",
                   analogy: item.analogies[0] || "",
+                  feedback: "",
                 }))
 
           const updated = await prisma.analogySet.update({
             where: { id: analogySetId },
             data: {
               status: "ready",
+              reviewStatus: "DRAFT",
+              approvedAt: null,
               topicsJson: { topics: topicsArray },
             },
           })
@@ -300,11 +325,164 @@ export async function POST(req) {
 export async function PATCH(req) {
   try {
     const body = await req.json()
-    const { id, title, concept, analogyText, moduleCode } = body
+    const { id, title, concept, analogyText, moduleCode, action, topics, notes } = body
 
     if (!id) {
       return new Response(
         JSON.stringify({ error: "Analogy ID is required" }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
+    }
+
+    if (action) {
+      if (action === "approve") {
+        const updated = await prisma.analogySet.update({
+          where: { id },
+          data: {
+            reviewStatus: "APPROVED",
+            approvedAt: new Date(),
+          },
+        })
+
+        return new Response(
+          JSON.stringify({
+            id: updated.id,
+            reviewStatus: updated.reviewStatus,
+            approvedAt: updated.approvedAt,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        )
+      }
+
+      if (action === "requestChanges") {
+        const nextTopics = normalizeTopics(topics)
+
+        const updated = await prisma.analogySet.update({
+          where: { id },
+          data: {
+            reviewStatus: "CHANGES",
+            approvedAt: null,
+            topicsJson: nextTopics.length ? { topics: nextTopics } : undefined,
+          },
+        })
+
+        return new Response(
+          JSON.stringify({
+            id: updated.id,
+            reviewStatus: updated.reviewStatus,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        )
+      }
+
+      if (action === "updateFeedback") {
+        const nextTopics = normalizeTopics(topics)
+
+        if (nextTopics.length === 0) {
+          return new Response(
+            JSON.stringify({ error: "Topics with feedback are required" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          )
+        }
+
+        const updated = await prisma.analogySet.update({
+          where: { id },
+          data: {
+            topicsJson: { topics: nextTopics },
+          },
+        })
+
+        return new Response(
+          JSON.stringify({
+            id: updated.id,
+            reviewStatus: updated.reviewStatus,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        )
+      }
+
+      if (action === "regenerate") {
+        const existing = await prisma.analogySet.findUnique({
+          where: { id },
+        })
+
+        if (!existing) {
+          return new Response(
+            JSON.stringify({ error: "Analogy not found" }),
+            {
+              status: 404,
+              headers: { "Content-Type": "application/json" },
+            },
+          )
+        }
+
+        const existingTopics = normalizeTopics(existing.topicsJson?.topics || [])
+        const topicNames = existingTopics.map((item) => item.topic).filter(Boolean)
+
+        if (topicNames.length === 0) {
+          return new Response(
+            JSON.stringify({ error: "No topics available to regenerate" }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          )
+        }
+
+        const regenerated = await generateAnalogiesForTopics(
+          topicNames,
+          notes || existing.sourceText || "",
+        )
+
+        const regeneratedTopics = topicNames.map((topic, index) => {
+          const match = Array.isArray(regenerated) ? regenerated[index] : null
+          const analogy = match?.analogies?.[0] || ""
+          return {
+            topic,
+            analogy,
+            feedback: "",
+          }
+        })
+
+        const updated = await prisma.analogySet.update({
+          where: { id },
+          data: {
+            status: "ready",
+            reviewStatus: "DRAFT",
+            approvedAt: null,
+            topicsJson: { topics: regeneratedTopics },
+          },
+        })
+
+        return new Response(
+          JSON.stringify({
+            id: updated.id,
+            reviewStatus: updated.reviewStatus,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          },
+        )
+      }
+
+      return new Response(
+        JSON.stringify({ error: "Unknown action" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
@@ -346,10 +524,13 @@ export async function PATCH(req) {
             {
               topic: concept,
               analogy: analogyText,
+              feedback: "",
             },
           ],
         },
         moduleId,
+        reviewStatus: "DRAFT",
+        approvedAt: null,
       },
     })
 

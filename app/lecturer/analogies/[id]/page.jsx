@@ -39,6 +39,12 @@ export default async function LecturerAnalogyDetailPage({ params }) {
               ← Back to list
             </Link>
             <Link
+              href={`/lecturer/analogies/${analogy.id}/review`}
+              className={ui.buttonSecondary}
+            >
+              Review
+            </Link>
+            <Link
               href={`/lecturer/analogies/${analogy.id}/edit`}
               className={ui.buttonPrimary}
             >
@@ -62,6 +68,9 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                   <span className={ui.getBadgeClass(analogy.status)}>
                     {analogy.status}
                   </span>
+                  <span className={ui.getReviewBadgeClass(analogy.reviewStatus || "DRAFT")}>
+                    {(analogy.reviewStatus || "DRAFT").toLowerCase()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -83,6 +92,14 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                 <span className={ui.textMuted}>Created:</span>{" "}
                 <span className="text-slate-200">
                   {new Date(analogy.createdAt).toLocaleString()}
+                </span>
+              </div>
+              <div>
+                <span className={ui.textMuted}>Approved:</span>{" "}
+                <span className="text-slate-200">
+                  {analogy.approvedAt
+                    ? new Date(analogy.approvedAt).toLocaleString()
+                    : "Not approved"}
                 </span>
               </div>
             </div>

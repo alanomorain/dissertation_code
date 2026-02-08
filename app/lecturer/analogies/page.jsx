@@ -126,6 +126,9 @@ export default async function AnalogiesDashboardPage() {
                       <p className="text-xs text-slate-400">
                         Status: {analogy.status}
                       </p>
+                      <p className="text-xs text-slate-400">
+                        Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()}
+                      </p>
                       <p className="text-xs text-slate-500">
                         Created: {new Date(analogy.createdAt).toLocaleString()}
                       </p>
@@ -136,6 +139,11 @@ export default async function AnalogiesDashboardPage() {
                         className={ui.getBadgeClass(analogy.status)}
                       >
                         {analogy.status}
+                      </span>
+                      <span
+                        className={ui.getReviewBadgeClass(analogy.reviewStatus || "DRAFT")}
+                      >
+                        {(analogy.reviewStatus || "DRAFT").toLowerCase()}
                       </span>
                     </div>
                   </Link>

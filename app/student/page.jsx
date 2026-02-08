@@ -27,6 +27,7 @@ export default async function StudentDashboard() {
     ? await prisma.analogySet.findMany({
         where: {
           status: "ready",
+          reviewStatus: "APPROVED",
           moduleId: { in: moduleIds },
         },
         orderBy: { createdAt: "desc" },

@@ -11,8 +11,8 @@ export default async function StudentAnalogyDetailPage({ params }) {
     where: { id },
   })
 
-  // Return 404 if not found or not ready
-  if (!analogy || analogy.status !== "ready") {
+  // Return 404 if not found or not ready/approved
+  if (!analogy || analogy.status !== "ready" || analogy.reviewStatus !== "APPROVED") {
     notFound()
   }
 

@@ -22,6 +22,7 @@ export default async function StudentAnalogiesPage() {
     ? await prisma.analogySet.findMany({
         where: {
           status: "ready",
+          reviewStatus: "APPROVED",
           moduleId: { in: moduleIds },
         },
         orderBy: {

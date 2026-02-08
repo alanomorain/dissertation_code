@@ -32,12 +32,21 @@ export const buttonSmall = "text-xs rounded-lg border border-slate-600 px-3 py-1
 export const badgeReady = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-900/50 text-green-200"
 export const badgeProcessing = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-yellow-900/50 text-yellow-200"
 export const badgeFailed = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-900/50 text-red-200"
+export const badgeApproved = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-emerald-900/50 text-emerald-200"
+export const badgeDraft = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-slate-800/60 text-slate-200"
+export const badgeChanges = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-amber-900/50 text-amber-200"
 
 // Status badge helper (use in components)
 export const getBadgeClass = (status) => {
   if (status === "ready") return badgeReady
   if (status === "failed") return badgeFailed
   return badgeProcessing
+}
+
+export const getReviewBadgeClass = (status) => {
+  if (status === "APPROVED") return badgeApproved
+  if (status === "CHANGES") return badgeChanges
+  return badgeDraft
 }
 
 // Links
