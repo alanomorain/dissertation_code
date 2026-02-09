@@ -157,9 +157,11 @@ export default async function LecturerDashboard() {
                                 Manage Analogies
                             </button>
                         </Link>
-                        <button className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition">
-                          Create quiz
-                        </button>
+                        <Link href="/lecturer/quizzes/new">
+                          <button className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition">
+                            Create quiz
+                          </button>
+                        </Link>
                       </div>
                     </div>
                   </div>
