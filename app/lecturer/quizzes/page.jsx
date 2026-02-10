@@ -1,4 +1,5 @@
 import Link from "next/link"
+import QuizStatusBadge from "../../components/QuizStatusBadge"
 import * as ui from "../../styles/ui"
 
 const sampleQuizzes = [
@@ -65,7 +66,7 @@ export default function LecturerQuizzesPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 md:flex-col md:items-end">
-                    <span className={ui.buttonSmall}>{quiz.status}</span>
+                    <QuizStatusBadge status={quiz.status} />
                   </div>
                 </Link>
               ))}

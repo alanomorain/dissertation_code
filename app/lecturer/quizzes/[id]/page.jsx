@@ -1,4 +1,5 @@
 import Link from "next/link"
+import QuizStatusBadge from "../../../components/QuizStatusBadge"
 import * as ui from "../../../styles/ui"
 
 export default function LecturerQuizDetailPage({ params }) {
@@ -32,7 +33,10 @@ export default function LecturerQuizDetailPage({ params }) {
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
               <p><span className={ui.textMuted}>Module:</span> CSC7058</p>
-              <p><span className={ui.textMuted}>Status:</span> Draft</p>
+              <p className="flex items-center gap-2">
+                <span className={ui.textMuted}>Status:</span>
+                <QuizStatusBadge status="Draft" />
+              </p>
               <p><span className={ui.textMuted}>Questions:</span> 12</p>
               <p><span className={ui.textMuted}>Time limit:</span> 20 minutes</p>
             </div>

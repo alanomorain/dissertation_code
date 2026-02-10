@@ -1,7 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import * as ui from "../../../styles/ui"
 
 const steps = [
@@ -35,6 +36,9 @@ const sampleQuestions = [
 ]
 
 export default function LecturerQuizWizardPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialStep = Number(searchParams.get("step") || "1")
   const [currentStep, setCurrentStep] = useState(1)
   const [moduleCode, setModuleCode] = useState("")
   const [scopeMode, setScopeMode] = useState("all")
@@ -53,6 +57,18 @@ export default function LecturerQuizWizardPage() {
   const [scheduleAt, setScheduleAt] = useState("")
 
   const activeStep = useMemo(() => steps.find((s) => s.id === currentStep), [currentStep])
+
+  useEffect(() => {
+    if (Number.isNaN(initialStep)) return
+    if (initialStep < 1 || initialStep > steps.length) return
+    setCurrentStep(initialStep)
+  }, [initialStep])
+
+  const updateStep = (nextStep) => {
+    const safeStep = Math.min(Math.max(nextStep, 1), steps.length)
+    setCurrentStep(safeStep)
+    router.replace(`/lecturer/quizzes/new?step=${safeStep}`)
+  }
 
   const canProceed = () => {
     if (currentStep === 1) {
@@ -109,9 +125,13 @@ export default function LecturerQuizWizardPage() {
                   >
                     {step.id}
                   </span>
-                  <span className={step.id === currentStep ? "text-slate-100" : "text-slate-400"}>
+                  <button
+                    type="button"
+                    onClick={() => updateStep(step.id)}
+                    className={step.id === currentStep ? "text-slate-100" : "text-slate-400"}
+                  >
                     {step.title}
-                  </span>
+                  </button>
                 </li>
               ))}
             </ol>
@@ -356,7 +376,7 @@ export default function LecturerQuizWizardPage() {
             <div className="flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
+                onClick={() => updateStep(currentStep - 1)}
                 className={ui.buttonSecondary}
                 disabled={currentStep === 1}
               >
@@ -366,7 +386,7 @@ export default function LecturerQuizWizardPage() {
                 <button type="button" className={ui.buttonSecondary}>Save draft</button>
                 <button
                   type="button"
-                  onClick={() => setCurrentStep((prev) => Math.min(4, prev + 1))}
+                  onClick={() => updateStep(currentStep + 1)}
                   className={ui.buttonPrimary}
                   disabled={!canProceed()}
                 >

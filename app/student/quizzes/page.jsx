@@ -1,4 +1,5 @@
 import Link from "next/link"
+import QuizStatusBadge from "../../components/QuizStatusBadge"
 import * as ui from "../../styles/ui"
 
 const sampleQuizzes = [
@@ -47,9 +48,13 @@ export default function StudentQuizzesPage() {
                   className={ui.linkCard}
                 >
                   <p className={ui.textHighlight}>{quiz.title}</p>
-                  <p className="text-xs text-slate-400">
-                    Module: {quiz.module} · {quiz.status} · Due: {quiz.due}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span>Module: {quiz.module}</span>
+                    <span>·</span>
+                    <QuizStatusBadge status={quiz.status} />
+                    <span>·</span>
+                    <span>Due: {quiz.due}</span>
+                  </div>
                 </Link>
               ))}
             </div>
