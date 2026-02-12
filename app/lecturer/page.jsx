@@ -91,7 +91,7 @@ export default async function LecturerDashboard() {
 
       {/* Main content */}
       <section className={ui.pageSection}>
-        <div className={`${ui.container} py-6 space-y-6`}>
+        <div className={`${ui.container} py-6 space-y-5`}>
           {/* Intro */}
           <div className={ui.cardFull}>
             <h2 className="text-xl font-semibold mb-2">
