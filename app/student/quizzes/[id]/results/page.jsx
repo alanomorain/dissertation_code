@@ -28,7 +28,6 @@ export default function StudentQuizResultsPage({ params }) {
               <p><span className={ui.textMuted}>Quiz ID:</span> {id}</p>
               <p><span className={ui.textMuted}>Score:</span> 82%</p>
               <p><span className={ui.textMuted}>Correct:</span> 10 / 12</p>
-              <p><span className={ui.textMuted}>Time:</span> 16m 20s</p>
             </div>
           </div>
 

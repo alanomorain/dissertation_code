@@ -27,7 +27,6 @@ export default function StudentQuizStartPage({ params }) {
             <div className="space-y-2 text-sm">
               <p><span className={ui.textMuted}>Quiz ID:</span> {id}</p>
               <p><span className={ui.textMuted}>Questions:</span> 12</p>
-              <p><span className={ui.textMuted}>Time limit:</span> 20 minutes</p>
               <p><span className={ui.textMuted}>Attempts:</span> 1</p>
             </div>
           </div>

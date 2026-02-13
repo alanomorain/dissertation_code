@@ -25,7 +25,6 @@ export default function StudentQuizTakePage({ params }) {
           <div className={ui.cardFull}>
             <div className="flex items-center justify-between text-sm text-slate-400">
               <span>Question 1 of 12</span>
-              <span>Time left: 18:45</span>
             </div>
             <h2 className="mt-3 text-base font-semibold">Which statement best describes microservices?</h2>
             <div className="mt-4 space-y-2 text-sm">

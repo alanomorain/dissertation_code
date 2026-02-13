@@ -45,8 +45,6 @@ export default function LecturerQuizWizardPage() {
   const [selectedTopics, setSelectedTopics] = useState([])
   const [objectives, setObjectives] = useState("")
   const [questionCount, setQuestionCount] = useState(12)
-  const [timeLimit, setTimeLimit] = useState(20)
-  const [hasTimeLimit, setHasTimeLimit] = useState(true)
   const [questionTypes, setQuestionTypes] = useState({ mcq: true, short: true })
   const [difficultyMix, setDifficultyMix] = useState(50)
   const [generated, setGenerated] = useState(false)
@@ -231,25 +229,6 @@ export default function LecturerQuizWizardPage() {
                         className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="font-medium">Time limit (minutes)</label>
-                      <input
-                        type="number"
-                        min="5"
-                        disabled={!hasTimeLimit}
-                        value={timeLimit}
-                        onChange={(event) => setTimeLimit(Number(event.target.value))}
-                        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
-                      />
-                      <label className="flex items-center gap-2 text-xs text-slate-400">
-                        <input
-                          type="checkbox"
-                          checked={!hasTimeLimit}
-                          onChange={(event) => setHasTimeLimit(!event.target.checked)}
-                        />
-                        No time limit
-                      </label>
-                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -403,7 +382,6 @@ export default function LecturerQuizWizardPage() {
               <p><span className={ui.textMuted}>Topics:</span> {scopeMode === "all" ? "All" : selectedTopics.length}</p>
               <p><span className={ui.textMuted}>Questions:</span> {questionCount}</p>
               <p><span className={ui.textMuted}>Types:</span> {questionTypes.mcq ? "MCQ" : ""}{questionTypes.mcq && questionTypes.short ? ", " : ""}{questionTypes.short ? "Short" : ""}</p>
-              <p><span className={ui.textMuted}>Time:</span> {hasTimeLimit ? `${timeLimit} min` : "No limit"}</p>
               <p><span className={ui.textMuted}>Status:</span> {generated ? "Generated" : "Draft"}</p>
             </div>
           </aside>

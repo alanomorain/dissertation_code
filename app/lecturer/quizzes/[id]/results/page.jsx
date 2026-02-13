@@ -42,11 +42,11 @@ export default function LecturerQuizResultsPage({ params }) {
             <div className="space-y-3 text-sm">
               <div className={ui.cardInner}>
                 <p className="text-slate-200">Q1: Microservices definition</p>
-                <p className="text-xs text-slate-400">Correct: 88% · Avg time: 45s</p>
+                <p className="text-xs text-slate-400">Correct: 88%</p>
               </div>
               <div className={ui.cardInner}>
                 <p className="text-slate-200">Q2: Containerization benefits</p>
-                <p className="text-xs text-slate-400">Correct: 61% · Avg time: 1m 12s</p>
+                <p className="text-xs text-slate-400">Correct: 61%</p>
               </div>
             </div>
           </div>
@@ -56,11 +56,11 @@ export default function LecturerQuizResultsPage({ params }) {
             <div className="space-y-3 text-sm">
               <div className={ui.cardInner}>
                 <p className="font-medium">student001@example.com</p>
-                <p className="text-xs text-slate-400">Score: 86% · Time: 14m</p>
+                <p className="text-xs text-slate-400">Score: 86%</p>
               </div>
               <div className={ui.cardInner}>
                 <p className="font-medium">student002@example.com</p>
-                <p className="text-xs text-slate-400">Score: 73% · Time: 18m</p>
+                <p className="text-xs text-slate-400">Score: 73%</p>
               </div>
             </div>
           </div>

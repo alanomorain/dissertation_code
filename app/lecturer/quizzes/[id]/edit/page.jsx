@@ -33,14 +33,6 @@ export default function LecturerQuizEditPage({ params }) {
                   placeholder="Microservices check-in"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="font-medium">Time limit</label>
-                <input
-                  type="number"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
-                  placeholder="20"
-                />
-              </div>
             </div>
           </div>
 

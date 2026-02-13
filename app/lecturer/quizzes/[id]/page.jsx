@@ -38,7 +38,6 @@ export default function LecturerQuizDetailPage({ params }) {
                 <QuizStatusBadge status="Draft" />
               </p>
               <p><span className={ui.textMuted}>Questions:</span> 12</p>
-              <p><span className={ui.textMuted}>Time limit:</span> 20 minutes</p>
             </div>
             <div className="mt-4 flex gap-2">
               <button type="button" className={ui.buttonPrimary}>Publish</button>
