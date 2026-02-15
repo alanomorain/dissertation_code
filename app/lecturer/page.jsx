@@ -123,6 +123,20 @@ export default async function LecturerDashboard() {
             </div>
           </div>
 
+          <div className={ui.cardFull}>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 className="text-base font-semibold">Statistics at a glance</h3>
+                <p className="text-sm text-slate-300">
+                  Track analogy performance, student engagement, and top performers in one place.
+                </p>
+              </div>
+              <Link href="/lecturer/statistics" className={ui.buttonPrimary}>
+                Open statistics dashboard
+              </Link>
+            </div>
+          </div>
+
           {/* Main grid: modules + quizzes + recent analogies */}
           <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
             {/* Modules you teach */}
