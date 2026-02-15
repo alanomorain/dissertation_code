@@ -54,31 +54,7 @@ export default async function LecturerDashboard() {
               Lecturer Dashboard
             </h1>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Link
-              href="/lecturer/statistics"
-              className={ui.buttonSecondary}
-            >
-              Statistics
-            </Link>
-            <Link
-              href="/lecturer/analogies/upload-slides"
-              className={ui.buttonSecondary}
-            >
-              Upload slides
-            </Link>
-            <Link
-              href="/lecturer/analogies/new"
-              className={ui.buttonSecondary}
-            >
-              New analogy
-            </Link>
-            <Link
-              href="/lecturer/modules/create"
-              className={ui.buttonPrimary}
-            >
-              Create module
-            </Link>
+          <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">
                 {lecturerUser?.email || "lecturer@example.com"}
@@ -108,13 +84,13 @@ export default async function LecturerDashboard() {
               review how students are engaging with the material.
             </p>
             <div className="flex flex-wrap gap-2">
-              <Link href="/lecturer/statistics" className={ui.buttonSecondary}>
+              <Link href="/lecturer/statistics" className={ui.buttonPrimary}>
                 View statistics
               </Link>
-              <Link href="/lecturer/analogies/upload-slides" className={ui.buttonSecondary}>
+              <Link href="/lecturer/analogies/upload-slides" className={ui.buttonPrimary}>
                 Upload slides
               </Link>
-              <Link href="/lecturer/analogies/new" className={ui.buttonSecondary}>
+              <Link href="/lecturer/analogies/new" className={ui.buttonPrimary}>
                 New analogy
               </Link>
               <Link href="/lecturer/modules/create" className={ui.buttonPrimary}>
