@@ -56,6 +56,12 @@ export default async function LecturerDashboard() {
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link
+              href="/lecturer/statistics"
+              className={ui.buttonSecondary}
+            >
+              Statistics
+            </Link>
+            <Link
               href="/lecturer/analogies/upload-slides"
               className={ui.buttonSecondary}
             >
@@ -102,6 +108,9 @@ export default async function LecturerDashboard() {
               review how students are engaging with the material.
             </p>
             <div className="flex flex-wrap gap-2">
+              <Link href="/lecturer/statistics" className={ui.buttonSecondary}>
+                View statistics
+              </Link>
               <Link href="/lecturer/analogies/upload-slides" className={ui.buttonSecondary}>
                 Upload slides
               </Link>
