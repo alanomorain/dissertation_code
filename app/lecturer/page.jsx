@@ -87,6 +87,12 @@ export default async function LecturerDashboard() {
               <Link href="/lecturer/statistics" className={ui.buttonPrimary}>
                 View statistics
               </Link>
+              <Link href="/lecturer/analogies" className={ui.buttonPrimary}>
+                Manage analogies
+              </Link>
+              <Link href="/lecturer/quizzes" className={ui.buttonPrimary}>
+                Manage quizzes
+              </Link>
               <Link href="/lecturer/analogies/upload-slides" className={ui.buttonPrimary}>
                 Upload slides
               </Link>
@@ -119,6 +125,11 @@ export default async function LecturerDashboard() {
             <div className={ui.cardFull}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className={ui.cardHeader}>Modules you teach</h3>
+                <div className="flex items-center gap-2">
+                  <Link href="/lecturer/modules/create" className={ui.buttonSmall}>
+                    New module
+                  </Link>
+                </div>
               </div>
 
               <div className="space-y-3 text-sm">
@@ -137,18 +148,14 @@ export default async function LecturerDashboard() {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Link href="/lecturer/analogies">
-                            <button
-                                type="button"
-                                className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition"
-                            >
-                                Manage Analogies
-                            </button>
+                        <Link
+                          href="/lecturer/analogies"
+                          className={ui.buttonSmall}
+                        >
+                          Manage analogies
                         </Link>
-                        <Link href="/lecturer/quizzes/new">
-                          <button className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition">
-                            Create quiz
-                          </button>
+                        <Link href="/lecturer/quizzes/new" className={ui.buttonSmall}>
+                          Create quiz
                         </Link>
                       </div>
                     </div>
@@ -166,9 +173,14 @@ export default async function LecturerDashboard() {
             <div className={ui.cardFull}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className={ui.cardHeader}>Quizzes</h3>
-                <Link href="/lecturer/quizzes/new" className={ui.buttonSmall}>
-                  New quiz
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link href="/lecturer/quizzes" className={ui.buttonSmall}>
+                    Manage
+                  </Link>
+                  <Link href="/lecturer/quizzes/new" className={ui.buttonSmall}>
+                    New quiz
+                  </Link>
+                </div>
               </div>
               {pendingQuizzes.length === 0 ? (
                 <p className={ui.textSmall}>
@@ -187,9 +199,9 @@ export default async function LecturerDashboard() {
                           Module: {quiz.module} · Status: {quiz.status}
                         </p>
                       </div>
-                      <button className={ui.buttonSmall}>
+                      <Link href="/lecturer/quizzes" className={ui.buttonSmall}>
                         Continue
-                      </button>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -198,9 +210,17 @@ export default async function LecturerDashboard() {
 
             {/* Recent analogy uploads */}
             <div className={`${ui.cardFull} lg:col-span-2`}>
-              <h3 className={`${ui.cardHeader} mb-3`}>
-                Recent analogy uploads
-              </h3>
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className={ui.cardHeader}>Recent analogy uploads</h3>
+                <div className="flex items-center gap-2">
+                  <Link href="/lecturer/analogies" className={ui.buttonSmall}>
+                    Manage
+                  </Link>
+                  <Link href="/lecturer/analogies/new" className={ui.buttonSmall}>
+                    New analogy
+                  </Link>
+                </div>
+              </div>
               {recentUploads.length === 0 ? (
                 <p className="text-sm text-slate-400">
                   You haven&apos;t created any analogies yet.
@@ -210,12 +230,17 @@ export default async function LecturerDashboard() {
                   {recentUploads.map((item) => (
                     <li
                       key={item.id}
-                      className={ui.cardInner}
+                      className={`${ui.cardInner} flex items-center justify-between`}
                     >
-                      <p className="font-medium">{item.title || "Untitled"}</p>
-                      <p className="text-xs text-slate-400">
-                        Module: {item.module?.code || "Unassigned"} · Created: {new Date(item.createdAt).toLocaleDateString()}
-                      </p>
+                      <div>
+                        <p className="font-medium">{item.title || "Untitled"}</p>
+                        <p className="text-xs text-slate-400">
+                          Module: {item.module?.code || "Unassigned"} · Created: {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Link href="/lecturer/analogies" className={ui.buttonSmall}>
+                        Continue
+                      </Link>
                     </li>
                   ))}
                 </ul>
