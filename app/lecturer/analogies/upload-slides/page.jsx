@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 import MediaImagePanel from "../components/MediaImagePanel"
 
 export default function UploadSlidesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [modules, setModules] = useState([])
   const [moduleCode, setModuleCode] = useState("")
   const [slidesFile, setSlidesFile] = useState(null)
@@ -37,6 +38,8 @@ export default function UploadSlidesPage() {
   const [creatingModule, setCreatingModule] = useState(false)
   const [moduleError, setModuleError] = useState("")
 
+  const moduleFromUrl = searchParams.get("module") || ""
+
   // Fetch modules on mount
   useEffect(() => {
     const fetchModules = async () => {
@@ -45,9 +48,6 @@ export default function UploadSlidesPage() {
         if (res.ok) {
           const data = await res.json()
           setModules(data)
-          if (data.length > 0) {
-            setModuleCode(data[0].code)
-          }
         }
       } catch (err) {
         console.error("Failed to fetch modules:", err)
@@ -55,6 +55,22 @@ export default function UploadSlidesPage() {
     }
     fetchModules()
   }, []) 
+
+  useEffect(() => {
+    if (!modules.length) return
+
+    if (moduleFromUrl) {
+      const match = modules.find((m) => m.code === moduleFromUrl)
+      if (match && match.code !== moduleCode) {
+        setModuleCode(match.code)
+        return
+      }
+    }
+
+    if (!moduleCode) {
+      setModuleCode(modules[0].code)
+    }
+  }, [modules, moduleFromUrl, moduleCode])
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]

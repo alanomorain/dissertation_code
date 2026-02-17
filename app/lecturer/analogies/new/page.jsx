@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
 export default function NewAnalogyPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [modules, setModules] = useState([])
   const [title, setTitle] = useState("")
   const [concept, setConcept] = useState("")
@@ -24,6 +25,8 @@ export default function NewAnalogyPage() {
   const [creatingModule, setCreatingModule] = useState(false)
   const [moduleError, setModuleError] = useState("")
 
+  const moduleFromUrl = searchParams.get("module") || ""
+
   // Fetch modules on mount
   useEffect(() => {
     const fetchModules = async () => {
@@ -32,9 +35,6 @@ export default function NewAnalogyPage() {
         if (res.ok) {
           const data = await res.json()
           setModules(data)
-          if (data.length > 0) {
-            setModuleCode(data[0].code)
-          }
         }
       } catch (err) {
         console.error("Failed to fetch modules:", err)
@@ -42,6 +42,22 @@ export default function NewAnalogyPage() {
     }
     fetchModules()
   }, [])
+
+  useEffect(() => {
+    if (!modules.length) return
+
+    if (moduleFromUrl) {
+      const match = modules.find((m) => m.code === moduleFromUrl)
+      if (match && match.code !== moduleCode) {
+        setModuleCode(match.code)
+        return
+      }
+    }
+
+    if (!moduleCode) {
+      setModuleCode(modules[0].code)
+    }
+  }, [modules, moduleFromUrl, moduleCode])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

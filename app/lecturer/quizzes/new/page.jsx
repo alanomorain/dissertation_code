@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import * as ui from "../../../styles/ui"
@@ -44,7 +44,9 @@ export default function LecturerQuizWizardPage() {
     if (parsed < 1 || parsed > steps.length) return 1
     return parsed
   }, [searchParams])
-  const [moduleCode, setModuleCode] = useState("")
+  const moduleFromUrl = useMemo(() => searchParams.get("module") || "", [searchParams])
+
+  const [modules, setModules] = useState([])
   const [scopeMode, setScopeMode] = useState("all")
   const [selectedTopics, setSelectedTopics] = useState([])
   const [objectives, setObjectives] = useState("")
@@ -60,14 +62,52 @@ export default function LecturerQuizWizardPage() {
 
   const activeStep = useMemo(() => steps.find((s) => s.id === currentStep), [currentStep])
 
-  const updateStep = (nextStep) => {
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        const res = await fetch("/api/modules")
+        if (!res.ok) return
+        const data = await res.json()
+        setModules(Array.isArray(data) ? data : [])
+      } catch (err) {
+        console.error("Failed to fetch modules:", err)
+      }
+    }
+
+    fetchModules()
+  }, [])
+
+  useEffect(() => {
+    if (!modules.length) return
+
+    const hasMatch = moduleFromUrl && modules.some((m) => m.code === moduleFromUrl)
+    if (hasMatch) return
+
+    router.replace(buildWizardUrl(currentStep, modules[0].code))
+    // Intentionally do not set local state; the URL is the source of truth.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modules, moduleFromUrl, currentStep, router])
+
+  const buildWizardUrl = (nextStep, nextModuleCode) => {
     const safeStep = Math.min(Math.max(nextStep, 1), steps.length)
-    router.replace(`/lecturer/quizzes/new?step=${safeStep}`)
+    const params = new URLSearchParams()
+    params.set("step", String(safeStep))
+
+    const moduleValue = nextModuleCode || moduleFromUrl
+    if (moduleValue) {
+      params.set("module", moduleValue)
+    }
+
+    return `/lecturer/quizzes/new?${params.toString()}`
+  }
+
+  const updateStep = (nextStep) => {
+    router.replace(buildWizardUrl(nextStep))
   }
 
   const canProceed = () => {
     if (currentStep === 1) {
-      if (!moduleCode) return false
+      if (!moduleFromUrl) return false
       if (scopeMode === "selected" && selectedTopics.length === 0) return false
     }
     if (currentStep === 2) {
@@ -141,13 +181,19 @@ export default function LecturerQuizWizardPage() {
                   <div className="space-y-2">
                     <label className="font-medium">Module</label>
                     <select
-                      value={moduleCode}
-                      onChange={(event) => setModuleCode(event.target.value)}
+                      value={moduleFromUrl}
+                      onChange={(event) => {
+                        const next = event.target.value
+                        router.replace(buildWizardUrl(currentStep, next))
+                      }}
                       className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
                     >
                       <option value="">Select a module</option>
-                      <option value="CSC7058">CSC7058 · ISDP</option>
-                      <option value="CSC7082">CSC7082 · Databases</option>
+                      {modules.map((module) => (
+                        <option key={module.id} value={module.code}>
+                          {module.code} · {module.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -375,7 +421,7 @@ export default function LecturerQuizWizardPage() {
           <aside className={`${ui.cardFull} h-fit`}>
             <h2 className={ui.cardHeader}>Summary</h2>
             <div className="space-y-2 text-sm">
-              <p><span className={ui.textMuted}>Module:</span> {moduleCode || "Not selected"}</p>
+              <p><span className={ui.textMuted}>Module:</span> {moduleFromUrl || "Not selected"}</p>
               <p><span className={ui.textMuted}>Topics:</span> {scopeMode === "all" ? "All" : selectedTopics.length}</p>
               <p><span className={ui.textMuted}>Questions:</span> {questionCount}</p>
               <p><span className={ui.textMuted}>Types:</span> {questionTypes.mcq ? "MCQ" : ""}{questionTypes.mcq && questionTypes.short ? ", " : ""}{questionTypes.short ? "Short" : ""}</p>
