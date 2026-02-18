@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
-export default function NewAnalogyPage() {
+function NewAnalogyPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [modules, setModules] = useState([])
@@ -444,5 +444,13 @@ export default function NewAnalogyPage() {
         </div>
       )}
     </main>
+  )
+}
+
+export default function NewAnalogyPage() {
+  return (
+    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className="mx-auto max-w-4xl px-4 py-6 text-sm text-slate-300">Loading…</div></section></main>}>
+      <NewAnalogyPageInner />
+    </Suspense>
   )
 }

@@ -35,7 +35,14 @@ export default async function StudentDashboard() {
       })
     : []
 
-  const upcomingQuizzes = []
+  const upcomingQuizzes = studentUser
+    ? await prisma.quiz.count({
+        where: {
+          status: "PUBLISHED",
+          module: { enrollments: { some: { userId: studentUser.id, status: "ACTIVE" } } },
+        },
+      })
+    : 0
 
   return (
     <main className={ui.page}>
@@ -84,7 +91,7 @@ export default async function StudentDashboard() {
               <h3 className="text-base font-semibold">Quick Stats</h3>
               <ul className="space-y-1 text-slate-300">
                 <li>• {activeEnrollments.length} active modules</li>
-                <li>• 2 upcoming quizzes</li>
+                <li>• {upcomingQuizzes} upcoming quizzes</li>
                 <li>• {recentAnalogies.length} recent analogies</li>
               </ul>
             </div>

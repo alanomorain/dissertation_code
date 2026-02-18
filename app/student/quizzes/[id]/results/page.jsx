@@ -1,8 +1,32 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
+import { prisma } from "../../../../lib/db"
+import { getCurrentUser } from "../../../../lib/currentUser"
 import * as ui from "../../../../styles/ui"
 
-export default function StudentQuizResultsPage({ params }) {
-  const { id } = params
+export default async function StudentQuizResultsPage({ params, searchParams }) {
+  const { id } = await params
+  const attemptId = (await searchParams).attemptId
+  const studentUser = await getCurrentUser("STUDENT", { id: true })
+  if (!studentUser) notFound()
+
+  const attempt = await prisma.quizAttempt.findFirst({
+    where: {
+      id: attemptId || undefined,
+      quizId: id,
+      studentId: studentUser.id,
+      status: "SUBMITTED",
+    },
+    include: {
+      quiz: true,
+      responses: { include: { question: true } },
+    },
+    orderBy: { submittedAt: "desc" },
+  })
+
+  if (!attempt) notFound()
+
+  const correct = attempt.responses.filter((r) => r.isCorrect).length
 
   return (
     <main className={ui.page}>
@@ -13,9 +37,7 @@ export default function StudentQuizResultsPage({ params }) {
             <h1 className="text-lg font-semibold">Your results</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/student/quizzes" className={ui.buttonSecondary}>
-              Back to quizzes
-            </Link>
+            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
           </div>
         </div>
       </header>
@@ -25,23 +47,21 @@ export default function StudentQuizResultsPage({ params }) {
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
-              <p><span className={ui.textMuted}>Quiz ID:</span> {id}</p>
-              <p><span className={ui.textMuted}>Score:</span> 82%</p>
-              <p><span className={ui.textMuted}>Correct:</span> 10 / 12</p>
+              <p><span className={ui.textMuted}>Quiz:</span> {attempt.quiz.title}</p>
+              <p><span className={ui.textMuted}>Score:</span> {attempt.score || 0}%</p>
+              <p><span className={ui.textMuted}>Correct:</span> {correct} / {attempt.responses.length}</p>
             </div>
           </div>
 
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Question feedback</h2>
             <div className="space-y-3 text-sm">
-              <div className={ui.cardInner}>
-                <p className="text-slate-200">Q1: Microservices definition</p>
-                <p className="text-xs text-slate-400">Correct</p>
-              </div>
-              <div className={ui.cardInner}>
-                <p className="text-slate-200">Q2: Query optimization</p>
-                <p className="text-xs text-slate-400">Needs review</p>
-              </div>
+              {attempt.responses.map((response) => (
+                <div key={response.id} className={ui.cardInner}>
+                  <p className="text-slate-200">{response.question.prompt}</p>
+                  <p className="text-xs text-slate-400">{response.isCorrect ? "Correct" : "Needs review"}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

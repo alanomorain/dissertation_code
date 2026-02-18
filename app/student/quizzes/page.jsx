@@ -1,25 +1,36 @@
 import Link from "next/link"
 import QuizStatusBadge from "../../components/QuizStatusBadge"
+import { prisma } from "../../lib/db"
+import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
-const sampleQuizzes = [
-  {
-    id: "quiz-2",
-    title: "Microservices Patterns Check-in",
-    module: "CSC7058",
-    status: "Available",
-    due: "Feb 18",
-  },
-  {
-    id: "quiz-3",
-    title: "Database Indexing Fundamentals",
-    module: "CSC7082",
-    status: "Upcoming",
-    due: "Feb 22",
-  },
-]
+function statusLabel(quiz) {
+  if (quiz.status === "PUBLISHED") {
+    if (quiz.dueAt && new Date(quiz.dueAt) > new Date()) return "Available"
+    if (quiz.dueAt && new Date(quiz.dueAt) <= new Date()) return "Closed"
+    return "Published"
+  }
+  return "Upcoming"
+}
 
-export default function StudentQuizzesPage() {
+export default async function StudentQuizzesPage() {
+  const studentUser = await getCurrentUser("STUDENT", { id: true })
+
+  const quizzes = studentUser
+    ? await prisma.quiz.findMany({
+        where: {
+          status: "PUBLISHED",
+          module: {
+            enrollments: {
+              some: { userId: studentUser.id, status: "ACTIVE" },
+            },
+          },
+        },
+        include: { module: { select: { code: true } } },
+        orderBy: { dueAt: "asc" },
+      })
+    : []
+
   return (
     <main className={ui.page}>
       <header className={ui.header}>
@@ -29,9 +40,7 @@ export default function StudentQuizzesPage() {
             <h1 className="text-lg font-semibold">Quiz library</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/student" className={ui.buttonSecondary}>
-              Back to dashboard
-            </Link>
+            <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
           </div>
         </div>
       </header>
@@ -41,22 +50,19 @@ export default function StudentQuizzesPage() {
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Available quizzes</h2>
             <div className="space-y-3 text-sm">
-              {sampleQuizzes.map((quiz) => (
-                <Link
-                  key={quiz.id}
-                  href={`/student/quizzes/${quiz.id}/start`}
-                  className={ui.linkCard}
-                >
+              {quizzes.map((quiz) => (
+                <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
                   <p className={ui.textHighlight}>{quiz.title}</p>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <span>Module: {quiz.module}</span>
+                    <span>Module: {quiz.module.code}</span>
                     <span>·</span>
-                    <QuizStatusBadge status={quiz.status} />
+                    <QuizStatusBadge status={statusLabel(quiz)} />
                     <span>·</span>
-                    <span>Due: {quiz.due}</span>
+                    <span>Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "No due date"}</span>
                   </div>
                 </Link>
               ))}
+              {quizzes.length === 0 ? <p className={ui.textSmall}>No published quizzes for your active modules.</p> : null}
             </div>
           </div>
         </div>

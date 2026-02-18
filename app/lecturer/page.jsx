@@ -29,21 +29,6 @@ export default async function LecturerDashboard() {
       })
     : []
 
-  const pendingQuizzes = [
-    {
-      id: 1,
-      module: "CSC7084",
-      title: "CSS Layout Analogies",
-      status: "Draft",
-    },
-    {
-      id: 2,
-      module: "CSC7058",
-      title: "Docker & Containers",
-      status: "Needs questions",
-    },
-  ]
-
   return (
     <main className={ui.page}>
       {/* Top bar */}

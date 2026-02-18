@@ -3,9 +3,13 @@ import OpenAI from "openai"
 
 export const runtime = "nodejs" // needed for Buffer & Node libs
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured")
+  }
+  return new OpenAI({ apiKey })
+}
 
 // Fallback topic picker – deterministic, based on text we have (notes for now)
 function fallbackTopicsFromText(text, maxTopics = 5) {
@@ -55,6 +59,7 @@ Return STRICTLY in this JSON format (no extra keys, no prose):
   You MUST return 5 or fewer topics.
 `.trim()
 
+  const client = getOpenAIClient()
   const response = await client.responses.create({
     model: "gpt-4.1-mini",
     input: [
