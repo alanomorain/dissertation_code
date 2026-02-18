@@ -7,6 +7,11 @@ import * as ui from "../../../../styles/ui"
 
 export default function StudentQuizTakePage() {
   const { id } = useParams()
+import { useRouter } from "next/navigation"
+import * as ui from "../../../../styles/ui"
+
+export default function StudentQuizTakePage({ params }) {
+  const { id } = params
   const router = useRouter()
   const [quiz, setQuiz] = useState(null)
   const [answers, setAnswers] = useState({})
