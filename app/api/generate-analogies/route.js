@@ -4,9 +4,13 @@ import { prisma } from "../../lib/db"
 
 export const runtime = "nodejs"
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not configured")
+  }
+  return new OpenAI({ apiKey })
+}
 
 // Given a single topic, ask OpenAI for 1 analogy
 async function generateAnalogyForTopic(topic, notes) {
@@ -34,6 +38,7 @@ Return STRICTLY in this JSON format (no prose, no other keys):
 }
 `.trim()
 
+  const client = getOpenAIClient()
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -92,6 +97,7 @@ Return STRICTLY in this JSON format (no prose, no other keys):
 ]
 `.trim()
 
+  const client = getOpenAIClient()
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [

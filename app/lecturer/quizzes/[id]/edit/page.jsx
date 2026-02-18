@@ -1,8 +1,20 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
+import { prisma } from "../../../../lib/db"
+import { getCurrentUser } from "../../../../lib/currentUser"
 import * as ui from "../../../../styles/ui"
 
-export default function LecturerQuizEditPage({ params }) {
-  const { id } = params
+export default async function LecturerQuizEditPage({ params }) {
+  const { id } = await params
+  const lecturerUser = await getCurrentUser("LECTURER", { id: true })
+  if (!lecturerUser) notFound()
+
+  const quiz = await prisma.quiz.findFirst({
+    where: { id, ownerId: lecturerUser.id },
+    include: { questions: { orderBy: { orderIndex: "asc" } } },
+  })
+
+  if (!quiz) notFound()
 
   return (
     <main className={ui.page}>
@@ -13,44 +25,19 @@ export default function LecturerQuizEditPage({ params }) {
             <p className={ui.textSmall}>Quiz ID: {id}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href={`/lecturer/quizzes/${id}`} className={ui.buttonSecondary}>
-              Back to overview
-            </Link>
-            <button type="button" className={ui.buttonPrimary}>Save changes</button>
+            <Link href={`/lecturer/quizzes/${id}`} className={ui.buttonSecondary}>Back to overview</Link>
           </div>
         </div>
       </header>
-
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz settings</h2>
-            <div className="grid gap-4 md:grid-cols-2 text-sm">
-              <div className="space-y-2">
-                <label className="font-medium">Title</label>
-                <input
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
-                  placeholder="Microservices check-in"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Questions</h2>
-            <div className="space-y-3 text-sm">
-              <div className={ui.cardInner}>
-                <p className="text-xs text-slate-400">MCQ · Medium</p>
-                <textarea
-                  rows={3}
-                  className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
-                  defaultValue="Which statement best describes microservices?"
-                />
-                <div className="mt-3 flex gap-2">
-                  <button type="button" className={ui.buttonSecondary}>Regenerate</button>
-                  <button type="button" className={ui.buttonSecondary}>Delete</button>
-                </div>
-              </div>
+            <p className={ui.textSmall}>Editing from this screen will be added next. Current stored data:</p>
+            <div className="mt-3 text-sm space-y-1">
+              <p><span className={ui.textMuted}>Title:</span> {quiz.title}</p>
+              <p><span className={ui.textMuted}>Status:</span> {quiz.status}</p>
+              <p><span className={ui.textMuted}>Questions:</span> {quiz.questions.length}</p>
             </div>
           </div>
         </div>

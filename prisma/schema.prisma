@@ -30,6 +30,38 @@ enum ReviewStatus {
   CHANGES
 }
 
+enum QuizStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum QuizVisibility {
+  ENROLLED
+  ALL
+}
+
+enum QuestionType {
+  MCQ
+  SHORT
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
+enum AnalogyInteractionType {
+  VIEW
+  REVISIT
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
@@ -40,6 +72,9 @@ model User {
   modulesTaught Module[]           @relation("LecturerModules")
   enrollments   ModuleEnrollment[]
   analogySets   AnalogySet[]       @relation("AnalogyOwner")
+  ownedQuizzes  Quiz[]             @relation("QuizOwner")
+  quizAttempts  QuizAttempt[]
+  interactions  AnalogyInteraction[]
 
   @@index([studentNumber])
 }
@@ -55,6 +90,7 @@ model Module {
   lecturer    User?              @relation("LecturerModules", fields: [lecturerId], references: [id])
   enrollments ModuleEnrollment[]
   analogySets AnalogySet[]
+  quizzes     Quiz[]
 }
 
 model AnalogySet {
@@ -80,6 +116,7 @@ model AnalogySet {
   topicsJson Json? // { topics: [{ topic, analogy, feedback? }] }
 
   errorMessage String?
+  interactions AnalogyInteraction[]
 }
 
 model ModuleEnrollment {
@@ -95,4 +132,117 @@ model ModuleEnrollment {
 
   @@unique([userId, moduleId])
   @@index([moduleId])
+}
+
+model Quiz {
+  id          String         @id @default(cuid())
+  title       String
+  status      QuizStatus     @default(DRAFT)
+  visibility  QuizVisibility @default(ENROLLED)
+  maxAttempts Int            @default(1)
+  dueAt       DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id])
+
+  ownerId String
+  owner   User   @relation("QuizOwner", fields: [ownerId], references: [id])
+
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  @@index([moduleId])
+  @@index([ownerId])
+  @@index([status])
+}
+
+model QuizQuestion {
+  id         String       @id @default(cuid())
+  prompt     String
+  type       QuestionType @default(MCQ)
+  difficulty Difficulty   @default(MEDIUM)
+  orderIndex Int
+  createdAt  DateTime     @default(now())
+
+  quizId String
+  quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  options   QuizOption[]
+  responses QuizResponse[]
+
+  @@unique([quizId, orderIndex])
+  @@index([quizId])
+}
+
+model QuizOption {
+  id         String   @id @default(cuid())
+  text       String
+  isCorrect  Boolean  @default(false)
+  orderIndex Int
+
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  responses QuizResponse[]
+
+  @@unique([questionId, orderIndex])
+  @@index([questionId])
+}
+
+model QuizAttempt {
+  id          String        @id @default(cuid())
+  status      AttemptStatus @default(IN_PROGRESS)
+  score       Int?
+  startedAt   DateTime      @default(now())
+  submittedAt DateTime?
+  createdAt   DateTime      @default(now())
+
+  quizId String
+  quiz   Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  responses QuizResponse[]
+
+  @@index([quizId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model QuizResponse {
+  id         String   @id @default(cuid())
+  textAnswer String?
+  isCorrect  Boolean?
+
+  attemptId String
+  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  selectedOptionId String?
+  selectedOption   QuizOption? @relation(fields: [selectedOptionId], references: [id], onDelete: SetNull)
+
+  @@unique([attemptId, questionId])
+  @@index([questionId])
+}
+
+model AnalogyInteraction {
+  id        String                @id @default(cuid())
+  type      AnalogyInteractionType @default(VIEW)
+  createdAt DateTime              @default(now())
+
+  analogySetId String
+  analogySet   AnalogySet @relation(fields: [analogySetId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([analogySetId])
+  @@index([userId])
+  @@index([type])
 }
