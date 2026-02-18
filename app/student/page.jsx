@@ -35,14 +35,33 @@ export default async function StudentDashboard() {
       })
     : []
 
-  const upcomingQuizzes = studentUser
-    ? await prisma.quiz.count({
-        where: {
-          status: "PUBLISHED",
-          module: { enrollments: { some: { userId: studentUser.id, status: "ACTIVE" } } },
+  const upcomingQuizWhere = studentUser
+    ? {
+        status: "PUBLISHED",
+        module: {
+          enrollments: {
+            some: { userId: studentUser.id, status: "ACTIVE" },
+          },
         },
-      })
+      }
+    : null
+
+  const upcomingQuizzesCount = upcomingQuizWhere
+    ? await prisma.quiz.count({ where: upcomingQuizWhere })
     : 0
+
+  const upcomingQuizzes = upcomingQuizWhere
+    ? await prisma.quiz.findMany({
+        where: upcomingQuizWhere,
+        select: {
+          id: true,
+          title: true,
+          dueAt: true,
+        },
+        orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
+        take: 4,
+      })
+    : []
 
   return (
     <main className={ui.page}>
@@ -91,7 +110,7 @@ export default async function StudentDashboard() {
               <h3 className="text-base font-semibold">Quick Stats</h3>
               <ul className="space-y-1 text-slate-300">
                 <li>• {activeEnrollments.length} active modules</li>
-                <li>• {upcomingQuizzes} upcoming quizzes</li>
+                <li>• {upcomingQuizzesCount} upcoming quizzes</li>
                 <li>• {recentAnalogies.length} recent analogies</li>
               </ul>
             </div>
@@ -193,12 +212,12 @@ export default async function StudentDashboard() {
                         <div>
                           <p className="font-medium">{quiz.title}</p>
                           <p className="text-xs text-slate-400">
-                            Due: {quiz.due}
+                            Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}
                           </p>
                         </div>
-                        <button className="text-xs rounded-lg border border-indigo-400 px-3 py-1 hover:bg-indigo-500 hover:text-white transition">
+                        <Link href={`/student/quizzes/${quiz.id}/start`} className={ui.buttonSmall}>
                           Start
-                        </button>
+                        </Link>
                       </li>
                     ))}
                   </ul>
