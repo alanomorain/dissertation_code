@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 import MediaImagePanel from "../components/MediaImagePanel"
 
-export default function UploadSlidesPage() {
+function UploadSlidesPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [modules, setModules] = useState([])
@@ -747,5 +747,13 @@ export default function UploadSlidesPage() {
         </div>
       )}
     </main>
+  )
+}
+
+export default function UploadSlidesPage() {
+  return (
+    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className="mx-auto max-w-6xl px-4 py-6 text-sm text-slate-300">Loading…</div></section></main>}>
+      <UploadSlidesPageInner />
+    </Suspense>
   )
 }
