@@ -75,10 +75,8 @@ export default async function StudentDashboard() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Student Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-1">Navigate to analogies, quizzes, and your performance statistics.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/student/statistics" className={ui.buttonPrimary}>Statistics</Link>
             <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">{studentUser.email}</span> · Student
@@ -90,12 +88,6 @@ export default async function StudentDashboard() {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} py-6 space-y-5`}>
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <Link href="/student/analogies" className={ui.buttonSmall}>Go to analogies</Link>
-            <Link href="/student/quizzes" className={ui.buttonSmall}>Go to quizzes</Link>
-            <Link href="/student/statistics" className={ui.buttonSmall}>Go to statistics</Link>
-          </div>
-
           <div className={ui.cardFull}>
             <h2 className="text-xl font-semibold mb-2">Welcome back 👋</h2>
             <p className="text-sm text-slate-300 mb-3">
