@@ -56,7 +56,7 @@ export default function Home() {
           {/* Role Selection Cards */}
           <div className="grid md:grid-cols-2 gap-6 sm:gap-8 mb-16 sm:mb-20">
             {/* Student Card */}
-            <Link href="/student" className="group">
+            <Link href="/student/login" className="group">
               <div className="h-full bg-gradient-to-br from-indigo-950/40 to-slate-900/60 border border-indigo-500/30 hover:border-indigo-400/60 rounded-2xl p-6 sm:p-8 backdrop-blur-md transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/20 hover:from-indigo-950/50">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 group-hover:bg-indigo-500/30 transition-colors">
