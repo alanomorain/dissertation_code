@@ -12,6 +12,21 @@ export async function getCurrentUser(role, select) {
   const cookieRole = cookieStore.get("demo-role")?.value || ""
   const normalizedRole = cookieRole.toUpperCase()
   const targetRole = ROLE_ENV_MAP[normalizedRole] ? normalizedRole : role
+
+  if (targetRole === "STUDENT") {
+    const studentEmail = (cookieStore.get("demo-student-email")?.value || "").trim().toLowerCase()
+    if (studentEmail) {
+      const studentUser = await prisma.user.findFirst({
+        where: { email: studentEmail, role: "STUDENT" },
+        select,
+      })
+
+      if (studentUser) {
+        return studentUser
+      }
+    }
+  }
+
   const roleEnvKey = targetRole ? ROLE_ENV_MAP[targetRole] : undefined
   const roleEmail = roleEnvKey ? process.env[roleEnvKey] : undefined
   const fallbackEmail = process.env.DEMO_USER_EMAIL
