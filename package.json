@@ -12,7 +12,9 @@
     "db:seed": "node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
-    "prebuild": "DATABASE_URL=postgresql://postgres:password@localhost:5432/dissertation_db?schema=public prisma generate"
+    "prebuild": "DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@localhost:5432/dissertation_db?schema=public} prisma generate",
+    "predev": "DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@localhost:5432/dissertation_db?schema=public} prisma generate",
+    "prestart": "DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@localhost:5432/dissertation_db?schema=public} prisma generate"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

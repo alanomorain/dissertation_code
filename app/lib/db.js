@@ -4,18 +4,21 @@ import pg from "pg"
 
 const { Pool } = pg
 
-let prismaInstance 
+const DEFAULT_DATABASE_URL = "postgresql://postgres:password@localhost:5432/dissertation_db?schema=public"
+
+let prismaInstance
 
 const initPrisma = () => {
   if (prismaInstance) {
     return prismaInstance
   }
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+  const connectionString = process.env.DATABASE_URL || DEFAULT_DATABASE_URL
+  const pool = new Pool({ connectionString })
   const adapter = new PrismaPg(pool)
-  
+
   prismaInstance = new PrismaClient({ adapter, log: ["error", "warn"] })
-  
+
   return prismaInstance
 }
 
