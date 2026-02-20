@@ -1,4 +1,6 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import StudentSwitcher from "../components/StudentSwitcher"
 import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
 import * as ui from "../styles/ui"
@@ -7,21 +9,24 @@ export default async function StudentDashboard() {
   const studentUser = await getCurrentUser("STUDENT", {
     id: true,
     email: true,
+    studentNumber: true,
   })
 
-  const enrollments = studentUser
-    ? await prisma.moduleEnrollment.findMany({
-        where: { userId: studentUser.id },
-        include: { module: true },
-        orderBy: { createdAt: "desc" },
-      })
-    : []
+  if (!studentUser) redirect("/student/login")
 
-  const activeEnrollments = enrollments.filter(
-    (enrollment) => enrollment.status === "ACTIVE",
-  )
+  const availableStudents = await prisma.user.findMany({
+    where: { role: "STUDENT" },
+    select: { id: true, email: true, studentNumber: true },
+    orderBy: [{ studentNumber: "asc" }, { email: "asc" }],
+  })
 
-  const moduleIds = enrollments.map((enrollment) => enrollment.moduleId)
+  const activeEnrollments = await prisma.moduleEnrollment.findMany({
+    where: { userId: studentUser.id, status: "ACTIVE" },
+    include: { module: true },
+    orderBy: { createdAt: "desc" },
+  })
+
+  const moduleIds = activeEnrollments.map((enrollment) => enrollment.moduleId)
 
   const recentAnalogies = moduleIds.length
     ? await prisma.analogySet.findMany({
@@ -30,198 +35,127 @@ export default async function StudentDashboard() {
           reviewStatus: "APPROVED",
           moduleId: { in: moduleIds },
         },
+        include: { module: { select: { code: true, name: true } } },
         orderBy: { createdAt: "desc" },
         take: 4,
       })
     : []
 
-  const upcomingQuizWhere = studentUser
-    ? {
-        status: "PUBLISHED",
-        module: {
-          enrollments: {
-            some: { userId: studentUser.id, status: "ACTIVE" },
-          },
-        },
-      }
-    : null
+  const quizAttempts = await prisma.quizAttempt.findMany({
+    where: { studentId: studentUser.id, status: "SUBMITTED" },
+    select: { score: true },
+  })
 
-  const upcomingQuizzesCount = upcomingQuizWhere
-    ? await prisma.quiz.count({ where: upcomingQuizWhere })
+  const averageScore = quizAttempts.length
+    ? Math.round(quizAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / quizAttempts.length)
     : 0
 
-  const upcomingQuizzes = upcomingQuizWhere
-    ? await prisma.quiz.findMany({
-        where: upcomingQuizWhere,
-        select: {
-          id: true,
-          title: true,
-          dueAt: true,
+  const upcomingQuizzes = await prisma.quiz.findMany({
+    where: {
+      status: "PUBLISHED",
+      module: {
+        enrollments: {
+          some: { userId: studentUser.id, status: "ACTIVE" },
         },
-        orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
-        take: 4,
-      })
-    : []
+      },
+    },
+    select: {
+      id: true,
+      title: true,
+      dueAt: true,
+      module: { select: { code: true } },
+    },
+    orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
+    take: 4,
+  })
 
   return (
     <main className={ui.page}>
-      {/* Top bar */}
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
-            <h1 className="text-lg font-semibold">
-              Student Dashboard
-            </h1>
+            <h1 className="text-lg font-semibold">Student Dashboard</h1>
+            <p className="text-xs text-slate-400 mt-1">Navigate to analogies, quizzes, and your performance statistics.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
+            <Link href="/student/statistics" className={ui.buttonPrimary}>Statistics</Link>
+            <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
             <span className="hidden sm:inline text-slate-300">
-              <span className="font-medium">
-                {studentUser?.email || "student@example.com"}
-              </span>{" "}
-              signed in as a Student
+              <span className="font-medium">{studentUser.email}</span> · Student
             </span>
-            <Link
-              href="/"
-              className={ui.buttonSecondary}
-            >
-              Log out
-            </Link>
+            <Link href="/student/login" className={ui.buttonSecondary}>Log out</Link>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
       <section className={ui.pageSection}>
-        <div className={`${ui.container} py-6 space-y-6`}>
-          {/* Greeting  */}
-          <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
-            <div className={ui.cardFull}>
-              <h2 className="text-xl font-semibold mb-2">
-                Welcome back, Student 👋
-              </h2>
-              <p className="text-sm text-slate-300 mb-3">
-                Continue exploring analogies for your modules, review recent
-                explanations, and take short quizzes to check your understanding.
-              </p>
-            </div>
+        <div className={`${ui.container} py-6 space-y-5`}>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <Link href="/student/analogies" className={ui.buttonSmall}>Go to analogies</Link>
+            <Link href="/student/quizzes" className={ui.buttonSmall}>Go to quizzes</Link>
+            <Link href="/student/statistics" className={ui.buttonSmall}>Go to statistics</Link>
+          </div>
 
-            {/* Stats  */}
-            <div className={`${ui.cardFull} text-sm`}>
-              <h3 className="text-base font-semibold">Quick Stats</h3>
-              <ul className="space-y-1 text-slate-300">
-                <li>• {activeEnrollments.length} active modules</li>
-                <li>• {upcomingQuizzesCount} upcoming quizzes</li>
-                <li>• {recentAnalogies.length} recent analogies</li>
-              </ul>
+          <div className={ui.cardFull}>
+            <h2 className="text-xl font-semibold mb-2">Welcome back 👋</h2>
+            <p className="text-sm text-slate-300 mb-3">
+              View approved analogies from your enrolled modules, complete published quizzes, and track your performance trends.
+            </p>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className={ui.cardInner}>
+                <h3 className="text-base font-semibold mb-1">Analogies</h3>
+                <p className="text-sm text-slate-300 mb-3">Browse module-specific analogies approved by your lecturer.</p>
+                <Link href="/student/analogies" className={ui.buttonPrimary}>View analogies</Link>
+              </div>
+              <div className={ui.cardInner}>
+                <h3 className="text-base font-semibold mb-1">Quizzes</h3>
+                <p className="text-sm text-slate-300 mb-3">Take quizzes for your active modules and review feedback.</p>
+                <Link href="/student/quizzes" className={ui.buttonPrimary}>Open quizzes</Link>
+              </div>
+              <div className={ui.cardInner}>
+                <h3 className="text-base font-semibold mb-1">Statistics</h3>
+                <p className="text-sm text-slate-300 mb-3">Monitor scores, attempts, and engagement across modules.</p>
+                <Link href="/student/statistics" className={ui.buttonPrimary}>View statistics</Link>
+              </div>
             </div>
           </div>
 
-          {/* Modules & analogies */}
           <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
-            {/* Modules list */}
             <div className={ui.cardFull}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className={ui.cardHeader}>Your modules</h3>
-              </div>
+              <h3 className={ui.cardHeader}>Your active modules</h3>
               <div className="space-y-3 text-sm">
-                {enrollments.map((enrollment) => (
-                  <div
-                    key={enrollment.id}
-                    className={ui.cardList}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div>
-                        <p className="font-medium">
-                          {enrollment.module.code} · {enrollment.module.name}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          Status: {enrollment.status}
-                        </p>
-                      </div>
-                      <Link href="/student/analogies">
-                        <button
-                          type="button"
-                          className="text-xs rounded-lg bg-indigo-500 px-3 py-1 font-medium hover:bg-indigo-400 transition"
-                        >
-                          View analogies
-                        </button>
-                      </Link>
-                    </div>
-                    <div className="mt-2 h-1.5 rounded-full bg-slate-800">
-                      <div
-                        className="h-1.5 rounded-full bg-indigo-500"
-                        style={{
-                          width: enrollment.status === "ACTIVE" ? "80%" : "30%",
-                        }}
-                      />
-                    </div>
+                {activeEnrollments.map((enrollment) => (
+                  <div key={enrollment.id} className={ui.cardList}>
+                    <p className="font-medium">{enrollment.module.code} · {enrollment.module.name}</p>
+                    <p className="text-xs text-slate-400">Enrollment active</p>
                   </div>
                 ))}
-                {enrollments.length === 0 && (
-                  <p className={ui.textSmall}>
-                    No module enrollments available yet.
-                  </p>
-                )}
+                {activeEnrollments.length === 0 ? <p className={ui.textSmall}>No active module enrollments yet.</p> : null}
               </div>
             </div>
 
-            {/* Recent analogies */}
             <div className="space-y-6">
               <div className={ui.cardFull}>
-                <h3 className={ui.cardHeader}>
-                  Recent analogies
-                </h3>
-                <div className="space-y-3 text-sm">
-                  {recentAnalogies.map((item) => (
-                    <div
-                      key={item.id}
-                      className={ui.cardInner}
-                    >
-                      <p className={`${ui.textHighlight} mb-1`}>
-                        {item.title || "Untitled"}
-                      </p>
-                      <p className="text-slate-200">
-                        {item.moduleId ? "Module linked" : "Unassigned"}
-                      </p>
-                    </div>
-                  ))}
-                  {recentAnalogies.length === 0 && (
-                    <p className={ui.textSmall}>
-                      No recent analogies for your modules.
-                    </p>
-                  )}
-                </div>
+                <h3 className={ui.cardHeader}>Quick stats</h3>
+                <ul className="space-y-1 text-sm text-slate-300">
+                  <li>• {activeEnrollments.length} active modules</li>
+                  <li>• {upcomingQuizzes.length} published quizzes</li>
+                  <li>• {recentAnalogies.length} approved analogies</li>
+                  <li>• {averageScore}% average quiz score</li>
+                </ul>
               </div>
 
-              {/* Upcoming quizzes */}
               <div className={ui.cardFull}>
-                <h3 className={ui.cardHeader}>
-                  Upcoming quizzes
-                </h3>
-                {upcomingQuizzes.length === 0 ? (
-                  <p className={ui.textSmall}>
-                    No quizzes scheduled. Your lecturer hasn&apos;t created any yet.
-                  </p>
-                ) : (
-                  <ul className="space-y-2 text-sm">
-                    {upcomingQuizzes.map((quiz) => (
-                      <li
-                        key={quiz.id}
-                        className={`${ui.cardInner} flex items-center justify-between`}
-                      >
-                        <div>
-                          <p className="font-medium">{quiz.title}</p>
-                          <p className="text-xs text-slate-400">
-                            Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}
-                          </p>
-                        </div>
-                        <Link href={`/student/quizzes/${quiz.id}/start`} className={ui.buttonSmall}>
-                          Start
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
+                <div className="space-y-2 text-sm">
+                  {upcomingQuizzes.map((quiz) => (
+                    <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
+                      <p className="font-medium">{quiz.title}</p>
+                      <p className="text-xs text-slate-400">{quiz.module.code} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}</p>
+                    </Link>
+                  ))}
+                  {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No published quizzes available right now.</p> : null}
+                </div>
               </div>
             </div>
           </div>
