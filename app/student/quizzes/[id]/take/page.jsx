@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import * as ui from "../../../../styles/ui"
 
-export default function StudentQuizTakePage({ params }) {
-  const { id } = params
+export default function StudentQuizTakePage() {
+  const { id } = useParams()
   const router = useRouter()
   const [quiz, setQuiz] = useState(null)
   const [answers, setAnswers] = useState({})
