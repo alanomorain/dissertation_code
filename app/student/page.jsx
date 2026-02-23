@@ -81,7 +81,7 @@ export default async function StudentDashboard() {
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">{studentUser.email}</span> · Student
             </span>
-            <Link href="/student/login" className={ui.buttonSecondary}>Log out</Link>
+            <Link href="/" className={ui.buttonSecondary}>Log out</Link>
           </div>
         </div>
       </header>
