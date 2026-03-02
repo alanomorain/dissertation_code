@@ -88,6 +88,19 @@ async function createSubmittedAttempt({ quiz, studentId, score, mcqAnswers = [],
   return attempt
 }
 
+function mcqQuestion(prompt, difficulty, correct, wrongA, wrongB) {
+  return {
+    prompt,
+    type: 'MCQ',
+    difficulty,
+    options: [
+      { text: correct, isCorrect: true },
+      { text: wrongA, isCorrect: false },
+      { text: wrongB, isCorrect: false },
+    ],
+  }
+}
+
 async function main() {
   console.log('Starting database seed...')
 
@@ -264,124 +277,115 @@ async function main() {
     ],
   })
 
-  const quizA = await createQuizWithQuestions({
-    title: 'Cloud-Native Microservices Readiness Quiz',
-    status: 'PUBLISHED',
-    moduleId: moduleCsc7058.id,
-    ownerId: lecturerUser.id,
-    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3),
-    maxAttempts: 2,
-    questions: [
-      {
-        prompt: 'Which statement best describes a cloud-native microservice?',
-        type: 'MCQ',
-        difficulty: 'MEDIUM',
-        options: [
-          { text: 'An independently deployable service that communicates through APIs.', isCorrect: true },
-          { text: 'A single monolithic deployment unit.', isCorrect: false },
-          { text: 'Only front-end components.', isCorrect: false },
-        ],
-      },
-      {
-        prompt: 'Which is a common trade-off when moving to microservices in the cloud?',
-        type: 'MCQ',
-        difficulty: 'HARD',
-        options: [
-          { text: 'Operational complexity increases.', isCorrect: true },
-          { text: 'No need for monitoring.', isCorrect: false },
-          { text: 'Databases are no longer required.', isCorrect: false },
-        ],
-      },
-      {
-        prompt: 'What cloud platform feature helps microservices recover quickly from instance failure?',
-        type: 'MCQ',
-        difficulty: 'MEDIUM',
-        options: [
-          { text: 'Health checks with automatic replacement.', isCorrect: true },
-          { text: 'Hard-coding service IP addresses.', isCorrect: false },
-          { text: 'Manual nightly deployments only.', isCorrect: false },
-        ],
-      },
-    ],
+  const quizBlueprints = [
+    {
+      title: 'Cloud-Native Microservices Readiness Quiz',
+      status: 'PUBLISHED',
+      moduleId: moduleCsc7058.id,
+      dueInDays: 3,
+      maxAttempts: 2,
+      questions: [
+        mcqQuestion('Which statement best describes a cloud-native microservice?', 'MEDIUM', 'An independently deployable service that communicates through APIs.', 'A single monolithic deployment unit.', 'Only front-end components.'),
+        mcqQuestion('Which is a common trade-off when moving to microservices in the cloud?', 'HARD', 'Operational complexity increases.', 'No need for monitoring.', 'Databases are no longer required.'),
+        mcqQuestion('What cloud platform feature helps microservices recover quickly from instance failure?', 'MEDIUM', 'Health checks with automatic replacement.', 'Hard-coding service IP addresses.', 'Manual nightly deployments only.'),
+        mcqQuestion('Why are service meshes often introduced in cloud-native systems?', 'HARD', 'To handle service-to-service traffic, security, and observability consistently.', 'To replace all business logic.', 'To avoid using containers.'),
+        mcqQuestion('What deployment approach limits user impact during release?', 'MEDIUM', 'Canary deployment with monitoring.', 'Stopping all pods before redeploying.', 'Deploying directly to production without tests.'),
+      ],
+    },
+    {
+      title: 'Cloud Data Reliability Fundamentals',
+      status: 'PUBLISHED',
+      moduleId: moduleCsc7082.id,
+      dueInDays: 7,
+      maxAttempts: 1,
+      questions: [
+        mcqQuestion('Why is multi-region replication used in cloud databases?', 'EASY', 'To improve resilience and reduce regional outage impact.', 'To eliminate the need for backups.', 'To avoid all consistency trade-offs.'),
+        { prompt: 'In your own words, explain one trade-off of synchronous replication across regions.', type: 'SHORT', difficulty: 'MEDIUM' },
+        mcqQuestion('What is the main purpose of automated cloud backups?', 'EASY', 'To restore data after accidental deletion or corruption.', 'To make indexes unnecessary.', 'To remove latency between regions.'),
+        mcqQuestion('Which pattern improves read performance for globally distributed users?', 'MEDIUM', 'Read replicas close to user regions.', 'A single write node with no replicas.', 'Disabling caching everywhere.'),
+        mcqQuestion('What does eventual consistency usually imply?', 'MEDIUM', 'Recent writes may take time to appear everywhere.', 'All regions always show data instantly.', 'No conflict resolution is ever required.'),
+      ],
+    },
+    {
+      title: 'DevOps Automation & Observability Quiz',
+      status: 'PUBLISHED',
+      moduleId: moduleCsc7084.id,
+      dueInDays: 5,
+      maxAttempts: 2,
+      questions: [
+        mcqQuestion('What is the primary benefit of CI/CD in cloud projects?', 'EASY', 'Faster and safer delivery of changes.', 'No need for testing.', 'Guaranteed zero downtime with no planning.'),
+        mcqQuestion('Which signal helps detect application performance issues earliest?', 'MEDIUM', 'Latency metrics and distributed traces.', 'Code comments only.', 'Version control commit count alone.'),
+        mcqQuestion('Why are infrastructure pipelines commonly version-controlled?', 'MEDIUM', 'To audit and review infrastructure changes safely.', 'To prevent rollback options.', 'To avoid any team collaboration.'),
+        mcqQuestion('What is the role of alerting thresholds in cloud operations?', 'MEDIUM', 'Notify engineers when service health deviates from targets.', 'Guarantee all incidents are false positives.', 'Replace logging systems completely.'),
+        mcqQuestion('Which practice strengthens deployment confidence?', 'HARD', 'Progressive rollout plus automated smoke tests.', 'Skipping staging environments.', 'Disabling observability during releases.'),
+      ],
+    },
+    {
+      title: 'Cloud API Security Foundations (Draft)',
+      status: 'DRAFT',
+      moduleId: moduleCsc7084.id,
+      dueInDays: null,
+      maxAttempts: 1,
+      questions: [
+        mcqQuestion('Which HTTP verb is usually used for resource creation?', 'EASY', 'POST', 'GET', 'DELETE'),
+        mcqQuestion('What is the purpose of API rate limiting?', 'MEDIUM', 'Protect APIs from abuse and traffic spikes.', 'Increase payload size limits.', 'Replace identity checks.'),
+        mcqQuestion('Why should API tokens be rotated?', 'MEDIUM', 'To reduce risk if a credential is exposed.', 'To increase request latency.', 'To disable monitoring tools.'),
+        mcqQuestion('Which mechanism is common for API authentication in cloud systems?', 'EASY', 'OAuth 2.0 or JWT-based bearer tokens.', 'Publicly shared root passwords.', 'IP addresses embedded in source code.'),
+        mcqQuestion('What should an API gateway typically enforce?', 'MEDIUM', 'Authentication, authorization, and request policies.', 'Random schema changes.', 'Direct database writes from the client.'),
+      ],
+    },
+  ]
+
+  const additionalPublishedQuizzes = [
+    'Kubernetes Scheduling and Resource Limits',
+    'Serverless Event Processing Essentials',
+    'Cloud Cost Optimization Basics',
+    'Infrastructure as Code Workflow Quiz',
+    'Distributed Caching and CDN Fundamentals',
+    'Cloud Networking and VPC Security',
+    'Incident Response in Cloud Operations',
+    'Container Security and Image Hardening',
+    'SRE Reliability Targets and Error Budgets',
+    'Cloud Storage Classes and Lifecycle Policies',
+    'Identity and Access Management in the Cloud',
+  ]
+
+  additionalPublishedQuizzes.forEach((title, idx) => {
+    const moduleId = [moduleCsc7058.id, moduleCsc7084.id, moduleCsc7082.id][idx % 3]
+    quizBlueprints.push({
+      title,
+      status: 'PUBLISHED',
+      moduleId,
+      dueInDays: 6 + idx,
+      maxAttempts: idx % 2 === 0 ? 2 : 1,
+      questions: [
+        mcqQuestion(`(${title}) Which cloud practice best supports resilience?`, 'MEDIUM', 'Redundancy across zones with health checks.', 'A single instance with manual restarts.', 'No monitoring and no backups.'),
+        mcqQuestion(`(${title}) What is a common reason to automate deployments?`, 'EASY', 'Reduce human error and improve repeatability.', 'Increase manual change approvals per release.', 'Prevent all test execution.'),
+        mcqQuestion(`(${title}) Which metric is useful for user experience tracking?`, 'MEDIUM', 'P95 request latency.', 'Number of README files.', 'Total lines of YAML.'),
+        mcqQuestion(`(${title}) Why is least-privilege access recommended?`, 'MEDIUM', 'It minimizes blast radius if credentials are compromised.', 'It guarantees zero security incidents.', 'It removes the need for audits.'),
+        { prompt: `(${title}) Briefly describe one cloud trade-off this topic introduces.`, type: 'SHORT', difficulty: 'HARD' },
+      ],
+    })
   })
 
-  const quizB = await createQuizWithQuestions({
-    title: 'Cloud Data Reliability Fundamentals',
-    status: 'PUBLISHED',
-    moduleId: moduleCsc7082.id,
-    ownerId: lecturerUser.id,
-    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-    maxAttempts: 1,
-    questions: [
-      {
-        prompt: 'Why is multi-region replication used in cloud databases?',
-        type: 'MCQ',
-        difficulty: 'EASY',
-        options: [
-          { text: 'To improve resilience and reduce regional outage impact.', isCorrect: true },
-          { text: 'To eliminate the need for backups.', isCorrect: false },
-          { text: 'To avoid all consistency trade-offs.', isCorrect: false },
-        ],
-      },
-      {
-        prompt: 'In your own words, explain one trade-off of synchronous replication across regions.',
-        type: 'SHORT',
-        difficulty: 'MEDIUM',
-      },
-    ],
-  })
+  const createdQuizzes = []
+  for (const blueprint of quizBlueprints) {
+    createdQuizzes.push(
+      await createQuizWithQuestions({
+        title: blueprint.title,
+        status: blueprint.status,
+        moduleId: blueprint.moduleId,
+        ownerId: lecturerUser.id,
+        dueAt: blueprint.dueInDays === null ? null : new Date(Date.now() + 1000 * 60 * 60 * 24 * blueprint.dueInDays),
+        maxAttempts: blueprint.maxAttempts,
+        questions: blueprint.questions,
+      }),
+    )
+  }
 
-  const quizC = await createQuizWithQuestions({
-    title: 'DevOps Automation & Observability Quiz',
-    status: 'PUBLISHED',
-    moduleId: moduleCsc7084.id,
-    ownerId: lecturerUser.id,
-    dueAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5),
-    maxAttempts: 2,
-    questions: [
-      {
-        prompt: 'What is the primary benefit of CI/CD in cloud projects?',
-        type: 'MCQ',
-        difficulty: 'EASY',
-        options: [
-          { text: 'Faster and safer delivery of changes.', isCorrect: true },
-          { text: 'No need for testing.', isCorrect: false },
-          { text: 'Guaranteed zero downtime with no planning.', isCorrect: false },
-        ],
-      },
-      {
-        prompt: 'Which signal helps detect application performance issues earliest?',
-        type: 'MCQ',
-        difficulty: 'MEDIUM',
-        options: [
-          { text: 'Latency metrics and distributed traces.', isCorrect: true },
-          { text: 'Code comments only.', isCorrect: false },
-          { text: 'Version control commit count alone.', isCorrect: false },
-        ],
-      },
-    ],
-  })
-
-  await createQuizWithQuestions({
-    title: 'Web APIs Quiz Draft',
-    status: 'DRAFT',
-    moduleId: moduleCsc7084.id,
-    ownerId: lecturerUser.id,
-    dueAt: null,
-    maxAttempts: 1,
-    questions: [
-      {
-        prompt: 'Which HTTP verb is usually used for resource creation?',
-        type: 'MCQ',
-        difficulty: 'EASY',
-        options: [
-          { text: 'POST', isCorrect: true },
-          { text: 'GET', isCorrect: false },
-          { text: 'DELETE', isCorrect: false },
-        ],
-      },
-    ],
-  })
+  const quizA = createdQuizzes[0]
+  const quizB = createdQuizzes[1]
+  const quizC = createdQuizzes[2]
 
   await createSubmittedAttempt({
     quiz: quizA,
