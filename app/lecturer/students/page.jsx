@@ -1,11 +1,11 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import LecturerInviteStudentForm from "../../../components/LecturerInviteStudentForm"
-import { prisma } from "../../../lib/db"
-import { getCurrentUser } from "../../../lib/currentUser"
-import * as ui from "../../../styles/ui"
+import LecturerStudentAccessManager from "../../components/LecturerStudentAccessManager"
+import { prisma } from "../../lib/db"
+import { getCurrentUser } from "../../lib/currentUser"
+import * as ui from "../../styles/ui"
 
-export default async function LecturerInviteStudentPage({ searchParams }) {
+export default async function LecturerStudentsPage({ searchParams }) {
   const lecturer = await getCurrentUser("LECTURER", { id: true })
   if (!lecturer) {
     redirect("/lecturer/login")
@@ -26,18 +26,18 @@ export default async function LecturerInviteStudentPage({ searchParams }) {
         <div className={ui.headerContent}>
           <div>
             <p className={ui.textLabel}>Lecturer · Students</p>
-            <h1 className="text-lg font-semibold">Invite students</h1>
+            <h1 className="text-lg font-semibold">Manage student access</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer/students" className={ui.buttonSecondary}>Manage access</Link>
             <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
+            <Link href="/lecturer/students/invite" className={ui.buttonSecondary}>Invite student</Link>
           </div>
         </div>
       </header>
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <LecturerInviteStudentForm modules={modules} initialModuleCode={initialModuleCode} />
+          <LecturerStudentAccessManager modules={modules} initialModuleCode={initialModuleCode} />
         </div>
       </section>
     </main>

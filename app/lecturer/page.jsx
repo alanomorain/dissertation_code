@@ -96,6 +96,9 @@ export default async function LecturerDashboard() {
                   <Link href="/lecturer/quizzes/new" className={ui.buttonSmall}>
                     New quiz
                   </Link>
+                  <Link href="/lecturer/students" className={ui.buttonSmall}>
+                    Manage students
+                  </Link>
                   <Link href="/lecturer/students/invite" className={ui.buttonSmall}>
                     Invite student
                   </Link>
@@ -162,6 +165,12 @@ export default async function LecturerDashboard() {
                           className={ui.buttonSmall}
                         >
                           New quiz
+                        </Link>
+                        <Link
+                          href={`/lecturer/students?module=${encodeURIComponent(mod.code)}`}
+                          className={ui.buttonSmall}
+                        >
+                          Manage students
                         </Link>
                         <Link
                           href={`/lecturer/students/invite?module=${encodeURIComponent(mod.code)}`}
