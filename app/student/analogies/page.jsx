@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import StudentSwitcher from "../../components/StudentSwitcher"
+import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
@@ -13,12 +13,6 @@ export default async function StudentAnalogiesPage() {
   })
 
   if (!studentUser) redirect("/student/login")
-
-  const availableStudents = await prisma.user.findMany({
-    where: { role: "STUDENT" },
-    select: { id: true, email: true, studentNumber: true },
-    orderBy: [{ studentNumber: "asc" }, { email: "asc" }],
-  })
 
   const activeEnrollments = await prisma.moduleEnrollment.findMany({
     where: { userId: studentUser.id, status: "ACTIVE" },
@@ -49,7 +43,7 @@ export default async function StudentAnalogiesPage() {
             <h1 className="text-lg font-semibold">Analogy library</h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
+            <SignOutButton />
             <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
           </div>
         </div>

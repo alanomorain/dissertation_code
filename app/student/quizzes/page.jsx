@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import QuizStatusBadge from "../../components/QuizStatusBadge"
-import StudentSwitcher from "../../components/StudentSwitcher"
+import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
@@ -18,12 +18,6 @@ function statusLabel(quiz) {
 export default async function StudentQuizzesPage() {
   const studentUser = await getCurrentUser("STUDENT", { id: true, email: true })
   if (!studentUser) redirect("/student/login")
-
-  const availableStudents = await prisma.user.findMany({
-    where: { role: "STUDENT" },
-    select: { id: true, email: true, studentNumber: true },
-    orderBy: [{ studentNumber: "asc" }, { email: "asc" }],
-  })
 
   const quizzes = await prisma.quiz.findMany({
     where: {
@@ -57,7 +51,7 @@ export default async function StudentQuizzesPage() {
             <h1 className="text-lg font-semibold">Quiz library</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
+            <SignOutButton />
             <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
           </div>
         </div>

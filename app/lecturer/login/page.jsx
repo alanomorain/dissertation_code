@@ -2,13 +2,13 @@ import Link from "next/link"
 import LoginForm from "../../components/LoginForm"
 import * as ui from "../../styles/ui"
 
-export default function StudentLoginPage() {
+export default function LecturerLoginPage() {
   return (
     <main className={ui.page}>
       <header className={ui.header}>
         <div className={ui.headerContentNarrow}>
           <div>
-            <p className={ui.textLabel}>Student access</p>
+            <p className={ui.textLabel}>Lecturer access</p>
             <h1 className="text-lg font-semibold">Sign in</h1>
           </div>
           <Link href="/" className={ui.buttonSecondary}>Back to home</Link>
@@ -18,10 +18,10 @@ export default function StudentLoginPage() {
       <section className={ui.pageSection}>
         <div className={`${ui.containerNarrow} py-10 space-y-5`}>
           <LoginForm
-            role="STUDENT"
-            title="Student sign in"
-            redirectTo="/student"
-            subtitle="Sign in to access your enrolled modules, analogies, quizzes, and results."
+            role="LECTURER"
+            title="Lecturer sign in"
+            redirectTo="/lecturer"
+            subtitle="Sign in to manage your modules, analogies, quizzes, and analytics."
           />
         </div>
       </section>

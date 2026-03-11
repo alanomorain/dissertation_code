@@ -4,7 +4,13 @@ import { getCurrentUser } from "../../lib/currentUser"
 export const runtime = "nodejs"
 
 export async function GET() {
+  const lecturer = await getCurrentUser("LECTURER", { id: true })
+  if (!lecturer) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   const quizzes = await prisma.quiz.findMany({
+    where: { ownerId: lecturer.id },
     include: {
       module: { select: { code: true, name: true } },
       _count: { select: { questions: true, attempts: true } },
@@ -34,9 +40,11 @@ export async function POST(req) {
       return Response.json({ error: "At least one question is required" }, { status: 400 })
     }
 
-    const moduleRecord = await prisma.module.findUnique({ where: { code: moduleCode } })
+    const moduleRecord = await prisma.module.findFirst({
+      where: { code: moduleCode, lecturerId: lecturer.id },
+    })
     if (!moduleRecord) {
-      return Response.json({ error: "Unknown module" }, { status: 400 })
+      return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
     }
 
     const created = await prisma.quiz.create({

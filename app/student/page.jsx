@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import StudentSwitcher from "../components/StudentSwitcher"
+import SignOutButton from "../components/SignOutButton"
 import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
 import * as ui from "../styles/ui"
@@ -40,7 +40,6 @@ function isDatabaseUnavailableError(error) {
 
 export default async function StudentDashboard() {
   let studentUser = null
-  let availableStudents = []
   let activeEnrollments = []
   let recentAnalogies = []
   let quizAttempts = []
@@ -59,12 +58,6 @@ export default async function StudentDashboard() {
     })
 
     if (!studentUser) redirect("/student/login")
-
-    availableStudents = await prisma.user.findMany({
-      where: { role: "STUDENT" },
-      select: { id: true, email: true, studentNumber: true },
-      orderBy: [{ studentNumber: "asc" }, { email: "asc" }],
-    })
 
     activeEnrollments = await prisma.moduleEnrollment.findMany({
       where: { userId: studentUser.id, status: "ACTIVE" },
@@ -152,13 +145,6 @@ export default async function StudentDashboard() {
       studentNumber: "Demo",
     }
 
-    availableStudents = [
-      {
-        id: "offline-preview",
-        email: "student@example.com",
-        studentNumber: "Demo",
-      },
-    ]
   }
 
   return (
@@ -169,11 +155,10 @@ export default async function StudentDashboard() {
             <h1 className="text-lg font-semibold">Student Dashboard</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">{studentUser.email}</span> · Student
             </span>
-            <Link href="/" className={ui.buttonSecondary}>Log out</Link>
+            <SignOutButton />
           </div>
         </div>
       </header>

@@ -1,24 +1,22 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
 export default async function LecturerStatisticsPage() {
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
+  if (!lecturerUser) redirect("/lecturer/login")
 
-  const quizzes = lecturerUser
-    ? await prisma.quiz.findMany({
-        where: { ownerId: lecturerUser.id },
-        include: { attempts: { where: { status: "SUBMITTED" } } },
-      })
-    : []
+  const quizzes = await prisma.quiz.findMany({
+    where: { ownerId: lecturerUser.id },
+    include: { attempts: { where: { status: "SUBMITTED" } } },
+  })
 
-  const analogySets = lecturerUser
-    ? await prisma.analogySet.findMany({
-        where: { ownerId: lecturerUser.id },
-        include: { interactions: true },
-      })
-    : []
+  const analogySets = await prisma.analogySet.findMany({
+    where: { ownerId: lecturerUser.id },
+    include: { interactions: true },
+  })
 
   const allAttempts = quizzes.flatMap((quiz) => quiz.attempts)
   const avgQuizScore = allAttempts.length

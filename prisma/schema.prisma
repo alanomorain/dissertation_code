@@ -65,6 +65,7 @@ enum AnalogyInteractionType {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
+  passwordHash  String?
   studentNumber String?  @unique
   role          Role     @default(STUDENT)
   createdAt     DateTime @default(now())

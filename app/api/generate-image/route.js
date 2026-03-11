@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { getCurrentUser } from "../../lib/currentUser"
 
 export const runtime = "nodejs"
 
@@ -7,6 +8,11 @@ const modelName = process.env.GEMINI_IMAGE_MODEL
 
 export async function POST(req) {
   try {
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: "GEMINI_API_KEY is not configured." }),

@@ -2,10 +2,17 @@ require('dotenv').config()
 const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
+const { randomBytes, scryptSync } = require('node:crypto')
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
+
+function hashPassword(password) {
+  const salt = randomBytes(16).toString('hex')
+  const derivedKey = scryptSync(password, salt, 64)
+  return `${salt}:${derivedKey.toString('hex')}`
+}
 
 async function createQuizWithQuestions({ title, status, moduleId, ownerId, dueAt, maxAttempts, questions }) {
   return prisma.quiz.create({
@@ -103,6 +110,9 @@ function mcqQuestion(prompt, difficulty, correct, wrongA, wrongB) {
 
 async function main() {
   console.log('Starting database seed...')
+  const lecturerPassword = process.env.SEED_LECTURER_PASSWORD || 'LecturerPass123!'
+  const studentPassword = process.env.SEED_STUDENT_PASSWORD || 'StudentPass123!'
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'AdminPass123!'
 
   await prisma.quizResponse.deleteMany()
   await prisma.quizAttempt.deleteMany()
@@ -117,27 +127,27 @@ async function main() {
   console.log('Cleared existing records')
 
   const adminUser = await prisma.user.create({
-    data: { email: 'admin@example.com', role: 'ADMIN' },
+    data: { email: 'admin@example.com', role: 'ADMIN', passwordHash: hashPassword(adminPassword) },
   })
 
   const lecturerUser = await prisma.user.create({
-    data: { email: 'lecturer@example.com', role: 'LECTURER' },
+    data: { email: 'lecturer@example.com', role: 'LECTURER', passwordHash: hashPassword(lecturerPassword) },
   })
 
   const studentA = await prisma.user.create({
-    data: { email: 'student@example.com', studentNumber: 'S1234567', role: 'STUDENT' },
+    data: { email: 'student@example.com', studentNumber: 'S1234567', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentB = await prisma.user.create({
-    data: { email: 'student2@example.com', studentNumber: 'S1234568', role: 'STUDENT' },
+    data: { email: 'student2@example.com', studentNumber: 'S1234568', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentC = await prisma.user.create({
-    data: { email: 'student3@example.com', studentNumber: 'S1234569', role: 'STUDENT' },
+    data: { email: 'student3@example.com', studentNumber: 'S1234569', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentD = await prisma.user.create({
-    data: { email: 'student4@example.com', studentNumber: 'S1234570', role: 'STUDENT' },
+    data: { email: 'student4@example.com', studentNumber: 'S1234570', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const moduleCsc7058 = await prisma.module.create({

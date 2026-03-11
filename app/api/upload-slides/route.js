@@ -1,5 +1,6 @@
 // app/api/upload-slides/route.js
 import OpenAI from "openai"
+import { getCurrentUser } from "../../lib/currentUser"
 
 export const runtime = "nodejs" // needed for Buffer & Node libs
 
@@ -92,6 +93,11 @@ Return STRICTLY in this JSON format (no extra keys, no prose):
 
 export async function POST(req) {
   try {
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const formData = await req.formData()
     const file = formData.get("file")
     const moduleCode = formData.get("moduleCode") || "UNKNOWN_MODULE"

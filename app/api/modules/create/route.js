@@ -1,9 +1,15 @@
 import { prisma } from "../../../lib/db"
+import { getCurrentUser } from "../../../lib/currentUser"
 
 export const runtime = "nodejs"
 
 export async function POST(req) {
   try {
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await req.json()
     const { code, name, description } = body
 
@@ -61,6 +67,7 @@ export async function POST(req) {
         code: code.trim(),
         name: name.trim(),
         description: description?.trim() || null,
+        lecturerId: lecturer.id,
       },
     })
 

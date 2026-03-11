@@ -1,14 +1,20 @@
 import Link from "next/link"
 import { prisma } from "../../../../../lib/db"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
+import { getCurrentUser } from "../../../../../lib/currentUser"
 import * as ui from "../../../../../styles/ui"
 import MediaImagePanel from "../../../components/MediaImagePanel"
 
 export default async function LecturerTopicDetailPage({ params }) {
   const { id, topicIndex } = await params
+  const lecturerUser = await getCurrentUser("LECTURER", { id: true })
 
-  const analogy = await prisma.analogySet.findUnique({
-    where: { id },
+  if (!lecturerUser) {
+    redirect("/lecturer/login")
+  }
+
+  const analogy = await prisma.analogySet.findFirst({
+    where: { id, ownerId: lecturerUser.id },
   })
 
   if (!analogy) {

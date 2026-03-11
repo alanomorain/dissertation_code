@@ -1,4 +1,3 @@
-import DemoRoleSwitcher from "./components/DemoRoleSwitcher";
 import "./globals.css";
 
 export const metadata = {
@@ -21,9 +20,6 @@ export default function RootLayout({ children }) {
         <div className="flex-1 relative z-0">
           {children}
         </div>
-
-        <DemoRoleSwitcher />
-
 
         {/* Global footer */}
         <footer className="relative z-10 border-t border-slate-800/50 backdrop-blur-sm">

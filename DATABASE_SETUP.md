@@ -33,6 +33,7 @@ cp .env.example .env
 The `.env` file should contain:
 ```
 DATABASE_URL="postgresql://postgres:password@localhost:5432/dissertation_db?schema=public"
+AUTH_SECRET="replace-with-a-long-random-secret"
 OPENAI_API_KEY="your-openai-api-key-here"
 ```
 
@@ -67,6 +68,11 @@ npm run db:seed
 ```
 
 This will create sample `AnalogySet` records with various statuses (ready, processing, failed) and sample educational analogies.
+It also creates password-backed demo users:
+
+- Lecturer: `lecturer@example.com` / `LecturerPass123!`
+- Student: `student@example.com` / `StudentPass123!`
+- Admin: `admin@example.com` / `AdminPass123!`
 
 ## Verify Database Connection
 

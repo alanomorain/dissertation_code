@@ -1,6 +1,7 @@
 // app/api/generate-analogies/route.js
 import OpenAI from "openai"
 import { prisma } from "../../lib/db"
+import { getCurrentUser } from "../../lib/currentUser"
 
 export const runtime = "nodejs"
 
@@ -139,6 +140,11 @@ export async function POST(req) {
   let analogySetId = null
 
   try {
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await req.json()
     const { title, concept, topics, notes, persist, sourceText, selectedAnalogies } = body
 
@@ -166,6 +172,20 @@ export async function POST(req) {
       )
     }
 
+    let moduleRecord = null
+    if (body.moduleCode) {
+      moduleRecord = await prisma.module.findFirst({
+        where: {
+          code: body.moduleCode,
+          lecturerId: lecturer.id,
+        },
+      })
+
+      if (!moduleRecord) {
+        return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
+      }
+    }
+
     // If persist is true, create DB row first
     if (persist) {
       const analogySet = await prisma.analogySet.create({
@@ -176,6 +196,8 @@ export async function POST(req) {
           title: title || (isSingleMode ? concept : `Batch: ${topics.join(", ")}`),
           source: isBatchMode ? "slides" : "manual",
           sourceText: sourceText || notes || "",
+          ownerId: lecturer.id,
+          moduleId: moduleRecord?.id || null,
         },
       })
       analogySetId = analogySet.id
@@ -330,6 +352,11 @@ export async function POST(req) {
 
 export async function PATCH(req) {
   try {
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const body = await req.json()
     const { id, title, concept, analogyText, moduleCode, action, topics, notes } = body
 
@@ -345,19 +372,23 @@ export async function PATCH(req) {
 
     if (action) {
       if (action === "approve") {
-        const updated = await prisma.analogySet.update({
-          where: { id },
+        const updated = await prisma.analogySet.updateMany({
+          where: { id, ownerId: lecturer.id },
           data: {
             reviewStatus: "APPROVED",
             approvedAt: new Date(),
           },
         })
 
+        if (updated.count === 0) {
+          return Response.json({ error: "Analogy not found" }, { status: 404 })
+        }
+
         return new Response(
           JSON.stringify({
-            id: updated.id,
-            reviewStatus: updated.reviewStatus,
-            approvedAt: updated.approvedAt,
+            id,
+            reviewStatus: "APPROVED",
+            approvedAt: new Date(),
           }),
           {
             status: 200,
@@ -369,8 +400,8 @@ export async function PATCH(req) {
       if (action === "requestChanges") {
         const nextTopics = normalizeTopics(topics)
 
-        const updated = await prisma.analogySet.update({
-          where: { id },
+        const updated = await prisma.analogySet.updateMany({
+          where: { id, ownerId: lecturer.id },
           data: {
             reviewStatus: "CHANGES",
             approvedAt: null,
@@ -378,10 +409,14 @@ export async function PATCH(req) {
           },
         })
 
+        if (updated.count === 0) {
+          return Response.json({ error: "Analogy not found" }, { status: 404 })
+        }
+
         return new Response(
           JSON.stringify({
-            id: updated.id,
-            reviewStatus: updated.reviewStatus,
+            id,
+            reviewStatus: "CHANGES",
           }),
           {
             status: 200,
@@ -403,17 +438,20 @@ export async function PATCH(req) {
           )
         }
 
-        const updated = await prisma.analogySet.update({
-          where: { id },
+        const updated = await prisma.analogySet.updateMany({
+          where: { id, ownerId: lecturer.id },
           data: {
             topicsJson: { topics: nextTopics },
           },
         })
 
+        if (updated.count === 0) {
+          return Response.json({ error: "Analogy not found" }, { status: 404 })
+        }
+
         return new Response(
           JSON.stringify({
-            id: updated.id,
-            reviewStatus: updated.reviewStatus,
+            id,
           }),
           {
             status: 200,
@@ -423,8 +461,8 @@ export async function PATCH(req) {
       }
 
       if (action === "regenerate") {
-        const existing = await prisma.analogySet.findUnique({
-          where: { id },
+        const existing = await prisma.analogySet.findFirst({
+          where: { id, ownerId: lecturer.id },
         })
 
         if (!existing) {
@@ -465,8 +503,8 @@ export async function PATCH(req) {
           }
         })
 
-        const updated = await prisma.analogySet.update({
-          where: { id },
+        const updated = await prisma.analogySet.updateMany({
+          where: { id, ownerId: lecturer.id },
           data: {
             status: "ready",
             reviewStatus: "DRAFT",
@@ -475,10 +513,14 @@ export async function PATCH(req) {
           },
         })
 
+        if (updated.count === 0) {
+          return Response.json({ error: "Analogy not found" }, { status: 404 })
+        }
+
         return new Response(
           JSON.stringify({
-            id: updated.id,
-            reviewStatus: updated.reviewStatus,
+            id,
+            reviewStatus: "DRAFT",
           }),
           {
             status: 200,
@@ -511,17 +553,22 @@ export async function PATCH(req) {
     // Find the module by code if provided
     let moduleId = null
     if (moduleCode) {
-      const moduleRecord = await prisma.module.findUnique({
-        where: { code: moduleCode },
+      const moduleRecord = await prisma.module.findFirst({
+        where: {
+          code: moduleCode,
+          lecturerId: lecturer.id,
+        },
       })
       if (moduleRecord) {
         moduleId = moduleRecord.id
+      } else {
+        return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
       }
     }
 
     // Update the analogy
-    const updated = await prisma.analogySet.update({
-      where: { id },
+    const updated = await prisma.analogySet.updateMany({
+      where: { id, ownerId: lecturer.id },
       data: {
         title,
         sourceText: analogyText,
@@ -540,11 +587,15 @@ export async function PATCH(req) {
       },
     })
 
+    if (updated.count === 0) {
+      return Response.json({ error: "Analogy not found" }, { status: 404 })
+    }
+
     return new Response(
       JSON.stringify({
-        id: updated.id,
-        title: updated.title,
-        status: updated.status,
+        id,
+        title,
+        status: "ready",
       }),
       {
         status: 200,

@@ -1,4 +1,6 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
+import SignOutButton from "../components/SignOutButton"
 import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
 import * as ui from "../styles/ui"
@@ -9,25 +11,25 @@ export default async function LecturerDashboard() {
     email: true,
   })
 
-  const taughtModules = lecturerUser
-    ? await prisma.module.findMany({
-        where: { lecturerId: lecturerUser.id },
-        include: {
-          enrollments: true,
-          analogySets: true,
-        },
-        orderBy: { createdAt: "desc" },
-      })
-    : []
+  if (!lecturerUser) {
+    redirect("/lecturer/login")
+  }
 
-  const recentUploads = lecturerUser
-    ? await prisma.analogySet.findMany({
-        where: { ownerId: lecturerUser.id },
-        orderBy: { createdAt: "desc" },
-        take: 2,
-        include: { module: true },
-      })
-    : []
+  const taughtModules = await prisma.module.findMany({
+    where: { lecturerId: lecturerUser.id },
+    include: {
+      enrollments: true,
+      analogySets: true,
+    },
+    orderBy: { createdAt: "desc" },
+  })
+
+  const recentUploads = await prisma.analogySet.findMany({
+    where: { ownerId: lecturerUser.id },
+    orderBy: { createdAt: "desc" },
+    take: 2,
+    include: { module: true },
+  })
 
   return (
     <main className={ui.page}>
@@ -42,16 +44,11 @@ export default async function LecturerDashboard() {
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">
-                {lecturerUser?.email || "lecturer@example.com"}
+                {lecturerUser.email}
               </span>{" "}
               signed in as a Lecturer
             </span>
-            <Link
-              href="/"
-              className={ui.buttonSecondary}
-            >
-              Log out
-            </Link>
+            <SignOutButton />
           </div>
         </div>
       </header>

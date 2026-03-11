@@ -35,6 +35,10 @@ This is the main app for my project - an educational analogy generation system f
    npm run db:seed
    ```
 
+6. Use the seeded credentials to sign in:
+   - Lecturer: `lecturer@example.com` / `LecturerPass123!`
+   - Student: `student@example.com` / `StudentPass123!`
+
 ### Running the Application
 
 Start the development server:

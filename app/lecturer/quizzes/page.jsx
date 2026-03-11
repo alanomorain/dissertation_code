@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import QuizStatusBadge from "../../components/QuizStatusBadge"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
@@ -13,17 +14,16 @@ function toBadgeStatus(status, dueAt) {
 
 export default async function LecturerQuizzesPage() {
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
+  if (!lecturerUser) redirect("/lecturer/login")
 
-  const quizzes = lecturerUser
-    ? await prisma.quiz.findMany({
-        where: { ownerId: lecturerUser.id },
-        include: {
-          module: { select: { code: true } },
-          _count: { select: { questions: true, attempts: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      })
-    : []
+  const quizzes = await prisma.quiz.findMany({
+    where: { ownerId: lecturerUser.id },
+    include: {
+      module: { select: { code: true } },
+      _count: { select: { questions: true, attempts: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  })
 
   return (
     <main className={ui.page}>

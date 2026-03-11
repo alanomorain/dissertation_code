@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import StudentSwitcher from "../../components/StudentSwitcher"
+import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
@@ -8,12 +8,6 @@ import * as ui from "../../styles/ui"
 export default async function StudentStatisticsPage() {
   const studentUser = await getCurrentUser("STUDENT", { id: true, email: true })
   if (!studentUser) redirect("/student/login")
-
-  const availableStudents = await prisma.user.findMany({
-    where: { role: "STUDENT" },
-    select: { id: true, email: true, studentNumber: true },
-    orderBy: [{ studentNumber: "asc" }, { email: "asc" }],
-  })
 
   const attempts = await prisma.quizAttempt.findMany({
     where: { studentId: studentUser.id, status: "SUBMITTED" },
@@ -54,7 +48,7 @@ export default async function StudentStatisticsPage() {
             <h1 className="text-lg font-semibold">Performance overview</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <StudentSwitcher currentEmail={studentUser.email} students={availableStudents} />
+            <SignOutButton />
             <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
           </div>
         </div>

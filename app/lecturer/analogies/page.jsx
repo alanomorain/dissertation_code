@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
@@ -9,14 +10,16 @@ export default async function AnalogiesDashboardPage() {
     email: true,
   })
 
-  const analogies = lecturerUser
-    ? await prisma.analogySet.findMany({
-        where: { ownerId: lecturerUser.id },
-        orderBy: {
-          createdAt: "desc",
-        },
-      })
-    : []
+  if (!lecturerUser) {
+    redirect("/lecturer/login")
+  }
+
+  const analogies = await prisma.analogySet.findMany({
+    where: { ownerId: lecturerUser.id },
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
 
   return (
     <main className={ui.page}>
@@ -32,7 +35,7 @@ export default async function AnalogiesDashboardPage() {
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-slate-300">
               <span className="font-medium">
-                {lecturerUser?.email || "lecturer@example.com"}
+                {lecturerUser.email}
               </span>{" "}
               signed in as a Lecturer
             </span>
