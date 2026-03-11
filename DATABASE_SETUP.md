@@ -34,6 +34,7 @@ The `.env` file should contain:
 ```
 DATABASE_URL="postgresql://postgres:password@localhost:5432/dissertation_db?schema=public"
 AUTH_SECRET="replace-with-a-long-random-secret"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 OPENAI_API_KEY="your-openai-api-key-here"
 ```
 

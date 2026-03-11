@@ -23,6 +23,15 @@ export default function StudentLoginPage() {
             redirectTo="/student"
             subtitle="Sign in to access your enrolled modules, analogies, quizzes, and results."
           />
+          <div className={ui.cardFull}>
+            <p className="text-sm text-slate-300">
+              New here? Create a student account or activate an invitation from your lecturer.
+            </p>
+            <div className="mt-3 flex items-center gap-2">
+              <Link href="/student/register" className={ui.buttonPrimary}>Create account</Link>
+              <Link href="/student/activate" className={ui.buttonSecondary}>Activate invite</Link>
+            </div>
+          </div>
         </div>
       </section>
     </main>

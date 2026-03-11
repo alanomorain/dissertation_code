@@ -67,6 +67,8 @@ model User {
   email         String   @unique
   passwordHash  String?
   studentNumber String?  @unique
+  inviteToken   String?  @unique
+  inviteExpires DateTime?
   role          Role     @default(STUDENT)
   createdAt     DateTime @default(now())
 
@@ -78,6 +80,7 @@ model User {
   interactions  AnalogyInteraction[]
 
   @@index([studentNumber])
+  @@index([inviteToken])
 }
 
 model Module {
