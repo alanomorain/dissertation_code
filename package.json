@@ -9,7 +9,7 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js",
+    "db:seed": "npm run db:push && node prisma/seed.js",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "prebuild": "DATABASE_URL=${DATABASE_URL:-postgresql://postgres:password@localhost:5432/dissertation_db?schema=public} prisma generate",

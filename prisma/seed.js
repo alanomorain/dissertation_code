@@ -61,13 +61,20 @@ async function createQuizWithQuestions({
   })
 }
 
-async function createSubmittedAttempt({ quiz, studentId, score, mcqAnswers = [], shortAnswers = [] }) {
+async function createSubmittedAttempt({ quiz, studentId, mcqAnswers = [], shortAnswers = [] }) {
+  const allAnswerMarks = [...mcqAnswers, ...shortAnswers]
+  const gradedAnswerCount = allAnswerMarks.length
+  const correctCount = allAnswerMarks.filter((answer) => !!answer.isCorrect).length
+  const computedScore = gradedAnswerCount > 0
+    ? Math.round((correctCount / gradedAnswerCount) * 100)
+    : 0
+
   const attempt = await prisma.quizAttempt.create({
     data: {
       quizId: quiz.id,
       studentId,
       status: 'SUBMITTED',
-      score,
+      score: computedScore,
       submittedAt: new Date(),
     },
   })
@@ -420,7 +427,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizA,
     studentId: studentA.id,
-    score: 100,
     mcqAnswers: [
       { questionIndex: 0, selection: 'correct', isCorrect: true },
       { questionIndex: 1, selection: 'correct', isCorrect: true },
@@ -431,7 +437,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizA,
     studentId: studentB.id,
-    score: 67,
     mcqAnswers: [
       { questionIndex: 0, selection: 'correct', isCorrect: true },
       { questionIndex: 1, selection: 'wrong', isCorrect: false },
@@ -442,7 +447,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizA,
     studentId: studentC.id,
-    score: 33,
     mcqAnswers: [
       { questionIndex: 0, selection: 'wrong', isCorrect: false },
       { questionIndex: 1, selection: 'correct', isCorrect: true },
@@ -453,7 +457,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizB,
     studentId: studentA.id,
-    score: 90,
     mcqAnswers: [{ questionIndex: 0, selection: 'correct', isCorrect: true }],
     shortAnswers: [
       {
@@ -467,7 +470,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizB,
     studentId: studentD.id,
-    score: 40,
     mcqAnswers: [{ questionIndex: 0, selection: 'wrong', isCorrect: false }],
     shortAnswers: [
       {
@@ -481,7 +483,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizC,
     studentId: studentC.id,
-    score: 100,
     mcqAnswers: [
       { questionIndex: 0, selection: 'correct', isCorrect: true },
       { questionIndex: 1, selection: 'correct', isCorrect: true },
@@ -491,7 +492,6 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizC,
     studentId: studentD.id,
-    score: 50,
     mcqAnswers: [
       { questionIndex: 0, selection: 'correct', isCorrect: true },
       { questionIndex: 1, selection: 'wrong', isCorrect: false },
@@ -504,6 +504,10 @@ async function main() {
 
 main()
   .catch((e) => {
+    if (e?.code === 'P2022') {
+      console.error('Schema mismatch detected (missing DB column).')
+      console.error('Run `npm run db:push` to sync your database schema, then retry `npm run db:seed`.')
+    }
     console.error('Error during seed:', e)
     process.exit(1)
   })

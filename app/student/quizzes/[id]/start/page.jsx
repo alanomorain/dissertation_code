@@ -24,6 +24,20 @@ export default async function StudentQuizStartPage({ params }) {
   const submittedAttempts = await prisma.quizAttempt.count({
     where: { quizId: quiz.id, studentId: studentUser.id, status: "SUBMITTED" },
   })
+  const previousAttempts = await prisma.quizAttempt.findMany({
+    where: { quizId: quiz.id, studentId: studentUser.id, status: "SUBMITTED" },
+    select: {
+      id: true,
+      score: true,
+      submittedAt: true,
+    },
+    orderBy: { submittedAt: "desc" },
+    take: 10,
+  })
+
+  const bestScore = previousAttempts.length
+    ? Math.max(...previousAttempts.map((attempt) => attempt.score || 0))
+    : null
 
   return (
     <main className={ui.page}>
@@ -47,7 +61,36 @@ export default async function StudentQuizStartPage({ params }) {
               <p><span className={ui.textMuted}>Title:</span> {quiz.title}</p>
               <p><span className={ui.textMuted}>Questions:</span> {quiz._count.questions}</p>
               <p><span className={ui.textMuted}>Attempts used:</span> {submittedAttempts} / {quiz.maxAttempts}</p>
+              <p><span className={ui.textMuted}>Best score:</span> {bestScore === null ? "No attempts yet" : `${bestScore}%`}</p>
             </div>
+          </div>
+
+          <div className={ui.cardFull}>
+            <h2 className={ui.cardHeader}>Previous attempts</h2>
+            {previousAttempts.length === 0 ? (
+              <p className={ui.textSmall}>No previous submitted attempts yet.</p>
+            ) : (
+              <div className="space-y-2 text-sm">
+                {previousAttempts.map((attempt, index) => (
+                  <div key={attempt.id} className={ui.cardInner}>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-slate-100">Attempt #{submittedAttempts - index}</p>
+                        <p className="text-xs text-slate-400">
+                          Submitted: {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleString() : "Not submitted"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-slate-200">{attempt.score ?? 0}%</span>
+                        <Link href={`/student/quizzes/${id}/results?attemptId=${encodeURIComponent(attempt.id)}`} className={ui.buttonSmall}>
+                          View
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3">

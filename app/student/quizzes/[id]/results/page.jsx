@@ -26,7 +26,11 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
 
   if (!attempt) notFound()
 
-  const correct = attempt.responses.filter((r) => r.isCorrect).length
+  const gradedResponses = attempt.responses.filter((r) => typeof r.isCorrect === "boolean")
+  const correct = gradedResponses.filter((r) => r.isCorrect).length
+  const scoreFromResponses = gradedResponses.length
+    ? Math.round((correct / gradedResponses.length) * 100)
+    : (attempt.score || 0)
 
   return (
     <main className={ui.page}>
@@ -48,8 +52,8 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
               <p><span className={ui.textMuted}>Quiz:</span> {attempt.quiz.title}</p>
-              <p><span className={ui.textMuted}>Score:</span> {attempt.score || 0}%</p>
-              <p><span className={ui.textMuted}>Correct:</span> {correct} / {attempt.responses.length}</p>
+              <p><span className={ui.textMuted}>Score:</span> {scoreFromResponses}%</p>
+              <p><span className={ui.textMuted}>Auto-graded:</span> {correct} / {gradedResponses.length}</p>
             </div>
           </div>
 

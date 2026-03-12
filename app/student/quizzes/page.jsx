@@ -3,19 +3,12 @@ import { redirect } from "next/navigation"
 import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import {
+  createStudentAttemptStats,
+  getStudentQuizProgressState,
+} from "../../lib/quizState"
 import * as ui from "../../styles/ui"
 import StudentModuleQuizCard from "./components/StudentModuleQuizCard"
-
-function quizState(quiz, submittedCount, inProgressCount, nowTs) {
-  const releaseTs = quiz.publishedAt ? new Date(quiz.publishedAt).getTime() : null
-  const dueTs = quiz.dueAt ? new Date(quiz.dueAt).getTime() : null
-
-  if (releaseTs && releaseTs > nowTs) return "UPCOMING"
-  if (submittedCount >= quiz.maxAttempts) return "COMPLETED"
-  if (dueTs && dueTs < nowTs) return "COMPLETED"
-  if (inProgressCount > 0 || submittedCount > 0) return "IN_PROGRESS"
-  return "TO_DO"
-}
 
 function badgeForState(state, quiz, nowTs) {
   const dueTs = quiz.dueAt ? new Date(quiz.dueAt).getTime() : null
@@ -49,26 +42,7 @@ export default async function StudentQuizzesPage() {
     select: { quizId: true, status: true, score: true },
   })
 
-  const attemptStatsByQuiz = attempts.reduce((acc, attempt) => {
-    if (!acc[attempt.quizId]) {
-      acc[attempt.quizId] = {
-        submittedCount: 0,
-        inProgressCount: 0,
-        bestScore: null,
-      }
-    }
-
-    if (attempt.status === "SUBMITTED") {
-      acc[attempt.quizId].submittedCount += 1
-      if (typeof attempt.score === "number") {
-        acc[attempt.quizId].bestScore = Math.max(acc[attempt.quizId].bestScore ?? 0, attempt.score)
-      }
-    } else if (attempt.status === "IN_PROGRESS") {
-      acc[attempt.quizId].inProgressCount += 1
-    }
-
-    return acc
-  }, {})
+  const attemptStatsByQuiz = createStudentAttemptStats(attempts)
 
   const moduleMap = quizzes.reduce((acc, quiz) => {
     if (!acc[quiz.module.code]) {
@@ -86,7 +60,7 @@ export default async function StudentQuizzesPage() {
     }
 
     const stats = attemptStatsByQuiz[quiz.id] || { submittedCount: 0, inProgressCount: 0, bestScore: null }
-    const state = quizState(quiz, stats.submittedCount, stats.inProgressCount, nowTs)
+    const state = getStudentQuizProgressState(quiz, stats, nowTs)
     const badgeStatus = badgeForState(state, quiz, nowTs)
 
     acc[quiz.module.code].counts[state] += 1
