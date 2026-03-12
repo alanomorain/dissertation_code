@@ -30,7 +30,7 @@ export async function POST(req) {
     }
 
     const body = await req.json()
-    const { title, moduleCode, status, dueAt, maxAttempts, questions } = body
+    const { title, moduleCode, status, dueAt, publishedAt, maxAttempts, questions } = body
 
     if (!title || !moduleCode) {
       return Response.json({ error: "title and moduleCode are required" }, { status: 400 })
@@ -47,35 +47,85 @@ export async function POST(req) {
       return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
     }
 
+    const normalizedQuestions = questions
+      .slice(0, 50)
+      .map((question, questionIndex) => {
+        const type = question?.type === "SHORT" ? "SHORT" : "MCQ"
+        const normalizedOptions = type === "SHORT"
+          ? []
+          : (Array.isArray(question?.options) ? question.options : [])
+              .slice(0, 6)
+              .map((option, optionIndex) => ({
+                text: String(option?.text || "").trim().slice(0, 300),
+                isCorrect: !!option?.isCorrect,
+                orderIndex: optionIndex,
+              }))
+              .filter((option) => option.text.length > 0)
+
+        return {
+          prompt: String(question?.prompt || "").trim().slice(0, 1000),
+          type,
+          difficulty: ["EASY", "MEDIUM", "HARD"].includes(question?.difficulty)
+            ? question.difficulty
+            : "MEDIUM",
+          orderIndex: questionIndex,
+          options: normalizedOptions,
+        }
+      })
+      .filter((question) => question.prompt.length > 0)
+
+    if (normalizedQuestions.length === 0) {
+      return Response.json({ error: "Questions must include non-empty prompts" }, { status: 400 })
+    }
+
+    const hasInvalidMcq = normalizedQuestions.some(
+      (question) =>
+        question.type === "MCQ"
+        && (question.options.length < 2 || !question.options.some((option) => option.isCorrect)),
+    )
+
+    if (hasInvalidMcq) {
+      return Response.json(
+        { error: "Each MCQ requires at least two options and one correct option" },
+        { status: 400 },
+      )
+    }
+
+    const isPublished = status === "PUBLISHED"
+    const parsedDueAt = dueAt ? new Date(dueAt) : null
+    const parsedPublishedAt = isPublished
+      ? (publishedAt ? new Date(publishedAt) : new Date())
+      : null
+
+    if (parsedDueAt && Number.isNaN(parsedDueAt.getTime())) {
+      return Response.json({ error: "Invalid dueAt value" }, { status: 400 })
+    }
+
+    if (parsedPublishedAt && Number.isNaN(parsedPublishedAt.getTime())) {
+      return Response.json({ error: "Invalid publishedAt value" }, { status: 400 })
+    }
+
     const created = await prisma.quiz.create({
       data: {
         title: title.trim().slice(0, 200),
         moduleId: moduleRecord.id,
         ownerId: lecturer.id,
-        status: status === "PUBLISHED" ? "PUBLISHED" : "DRAFT",
+        status: isPublished ? "PUBLISHED" : "DRAFT",
         visibility: "ENROLLED",
         maxAttempts: Math.max(1, Math.min(Number(maxAttempts) || 1, 5)),
-        dueAt: dueAt ? new Date(dueAt) : null,
-        publishedAt: status === "PUBLISHED" ? new Date() : null,
+        dueAt: parsedDueAt,
+        publishedAt: parsedPublishedAt,
         questions: {
-          create: questions.slice(0, 50).map((question, questionIndex) => ({
-            prompt: String(question.prompt || "").trim().slice(0, 1000),
-            type: question.type === "SHORT" ? "SHORT" : "MCQ",
-            difficulty: ["EASY", "MEDIUM", "HARD"].includes(question.difficulty)
-              ? question.difficulty
-              : "MEDIUM",
-            orderIndex: questionIndex,
+          create: normalizedQuestions.map((question) => ({
+            prompt: question.prompt,
+            type: question.type,
+            difficulty: question.difficulty,
+            orderIndex: question.orderIndex,
             options:
               question.type === "SHORT"
                 ? undefined
                 : {
-                    create: (Array.isArray(question.options) ? question.options : [])
-                      .slice(0, 6)
-                      .map((option, optionIndex) => ({
-                        text: String(option.text || "").trim().slice(0, 300),
-                        isCorrect: !!option.isCorrect,
-                        orderIndex: optionIndex,
-                      })),
+                    create: question.options,
                   },
           })),
         },

@@ -14,7 +14,16 @@ function hashPassword(password) {
   return `${salt}:${derivedKey.toString('hex')}`
 }
 
-async function createQuizWithQuestions({ title, status, moduleId, ownerId, dueAt, maxAttempts, questions }) {
+async function createQuizWithQuestions({
+  title,
+  status,
+  moduleId,
+  ownerId,
+  dueAt,
+  publishedAt,
+  maxAttempts,
+  questions,
+}) {
   return prisma.quiz.create({
     data: {
       title,
@@ -24,7 +33,7 @@ async function createQuizWithQuestions({ title, status, moduleId, ownerId, dueAt
       visibility: 'ENROLLED',
       maxAttempts,
       dueAt,
-      publishedAt: status === 'PUBLISHED' ? new Date() : null,
+      publishedAt: status === 'PUBLISHED' ? (publishedAt || new Date()) : null,
       questions: {
         create: questions.map((q, index) => ({
           prompt: q.prompt,
@@ -292,7 +301,8 @@ async function main() {
       title: 'Cloud-Native Microservices Readiness Quiz',
       status: 'PUBLISHED',
       moduleId: moduleCsc7058.id,
-      dueInDays: 3,
+      dueInDays: -2,
+      publishedOffsetDays: -10,
       maxAttempts: 2,
       questions: [
         mcqQuestion('Which statement best describes a cloud-native microservice?', 'MEDIUM', 'An independently deployable service that communicates through APIs.', 'A single monolithic deployment unit.', 'Only front-end components.'),
@@ -307,6 +317,7 @@ async function main() {
       status: 'PUBLISHED',
       moduleId: moduleCsc7082.id,
       dueInDays: 7,
+      publishedOffsetDays: -3,
       maxAttempts: 1,
       questions: [
         mcqQuestion('Why is multi-region replication used in cloud databases?', 'EASY', 'To improve resilience and reduce regional outage impact.', 'To eliminate the need for backups.', 'To avoid all consistency trade-offs.'),
@@ -321,6 +332,7 @@ async function main() {
       status: 'PUBLISHED',
       moduleId: moduleCsc7084.id,
       dueInDays: 5,
+      publishedOffsetDays: -4,
       maxAttempts: 2,
       questions: [
         mcqQuestion('What is the primary benefit of CI/CD in cloud projects?', 'EASY', 'Faster and safer delivery of changes.', 'No need for testing.', 'Guaranteed zero downtime with no planning.'),
@@ -335,6 +347,7 @@ async function main() {
       status: 'DRAFT',
       moduleId: moduleCsc7084.id,
       dueInDays: null,
+      publishedOffsetDays: null,
       maxAttempts: 1,
       questions: [
         mcqQuestion('Which HTTP verb is usually used for resource creation?', 'EASY', 'POST', 'GET', 'DELETE'),
@@ -367,6 +380,7 @@ async function main() {
       status: 'PUBLISHED',
       moduleId,
       dueInDays: 6 + idx,
+      publishedOffsetDays: idx % 4 === 0 ? 2 : -(idx + 1),
       maxAttempts: idx % 2 === 0 ? 2 : 1,
       questions: [
         mcqQuestion(`(${title}) Which cloud practice best supports resilience?`, 'MEDIUM', 'Redundancy across zones with health checks.', 'A single instance with manual restarts.', 'No monitoring and no backups.'),
@@ -387,6 +401,12 @@ async function main() {
         moduleId: blueprint.moduleId,
         ownerId: lecturerUser.id,
         dueAt: blueprint.dueInDays === null ? null : new Date(Date.now() + 1000 * 60 * 60 * 24 * blueprint.dueInDays),
+        publishedAt:
+          blueprint.status !== 'PUBLISHED'
+            ? null
+            : blueprint.publishedOffsetDays === null || blueprint.publishedOffsetDays === undefined
+              ? new Date()
+              : new Date(Date.now() + 1000 * 60 * 60 * 24 * blueprint.publishedOffsetDays),
         maxAttempts: blueprint.maxAttempts,
         questions: blueprint.questions,
       }),

@@ -5,6 +5,16 @@ import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
 
+function statusLabel(quiz) {
+  const nowTs = Date.now()
+  const publishedTs = quiz.publishedAt ? new Date(quiz.publishedAt).getTime() : null
+  const dueTs = quiz.dueAt ? new Date(quiz.dueAt).getTime() : null
+
+  if (quiz.status === "PUBLISHED" && publishedTs && publishedTs > nowTs) return "Upcoming"
+  if (quiz.status === "PUBLISHED" && dueTs && dueTs < nowTs) return "Closed"
+  return quiz.status
+}
+
 export default async function LecturerQuizDetailPage({ params }) {
   const { id } = await params
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
@@ -42,9 +52,10 @@ export default async function LecturerQuizDetailPage({ params }) {
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
               <p><span className={ui.textMuted}>Module:</span> {quiz.module.code}</p>
-              <p className="flex items-center gap-2"><span className={ui.textMuted}>Status:</span><QuizStatusBadge status={quiz.status} /></p>
+              <p className="flex items-center gap-2"><span className={ui.textMuted}>Status:</span><QuizStatusBadge status={statusLabel(quiz)} /></p>
               <p><span className={ui.textMuted}>Questions:</span> {quiz.questions.length}</p>
               <p><span className={ui.textMuted}>Attempts:</span> {quiz._count.attempts}</p>
+              <p><span className={ui.textMuted}>Release:</span> {quiz.publishedAt ? new Date(quiz.publishedAt).toLocaleString() : "Not scheduled"}</p>
               <p><span className={ui.textMuted}>Due:</span> {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "Not set"}</p>
             </div>
           </div>

@@ -22,6 +22,7 @@ export default async function StudentQuizzesPage() {
   const quizzes = await prisma.quiz.findMany({
     where: {
       status: "PUBLISHED",
+      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
       module: {
         enrollments: {
           some: { userId: studentUser.id, status: "ACTIVE" },

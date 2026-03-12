@@ -11,6 +11,7 @@ export async function GET(_req, { params }) {
     where: {
       id,
       status: "PUBLISHED",
+      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
       module: {
         enrollments: {
           some: {

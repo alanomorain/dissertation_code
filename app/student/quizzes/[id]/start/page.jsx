@@ -13,6 +13,7 @@ export default async function StudentQuizStartPage({ params }) {
     where: {
       id,
       status: "PUBLISHED",
+      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
       module: { enrollments: { some: { userId: studentUser.id, status: "ACTIVE" } } },
     },
     include: { _count: { select: { questions: true } } },
