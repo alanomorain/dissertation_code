@@ -4,8 +4,18 @@ const normalizeStatus = (value) => (value || "Draft").toString().trim().toLowerC
 
 const getClassName = (status) => {
   const normalized = normalizeStatus(status)
-  if (normalized === "published" || normalized === "available") {
+  if (
+    normalized === "published"
+    || normalized === "available"
+    || normalized === "completed"
+  ) {
     return ui.badgeApproved
+  }
+  if (normalized === "in progress") {
+    return ui.badgeProcessing
+  }
+  if (normalized === "to do") {
+    return ui.badgeDraft
   }
   if (normalized === "upcoming") {
     return ui.badgeProcessing
