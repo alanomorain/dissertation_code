@@ -243,7 +243,7 @@ export default async function StudentStatisticsPage() {
 
             <div className={ui.cardFull}>
               <div className="mb-4">
-                <h2 className={ui.cardHeader}>Quiz progress pipeline</h2>
+                <h2 className={ui.cardHeader}>Quiz Progress</h2>[p]
               </div>
               <StackedPipelineBar
                 toDo={stateTotals.TO_DO}

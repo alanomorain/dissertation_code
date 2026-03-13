@@ -1,81 +1,134 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import StatProgressBar from "../../components/StatProgressBar"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
-import { getQuizTimingState } from "../../lib/quizState"
 import * as ui from "../../styles/ui"
 
-export default async function LecturerStatisticsPage() {
+function parseRange(searchParams) {
+  const range = String(searchParams?.range || "30d")
+  const now = new Date()
+  if (range === "7d") return { range, from: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }
+  if (range === "90d") return { range, from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) }
+  if (range === "all") return { range, from: null }
+  return { range: "30d", from: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) }
+}
+
+function dateRangeLabel(range) {
+  if (range === "7d") return "Last 7 days"
+  if (range === "90d") return "Last 90 days"
+  if (range === "all") return "All time"
+  return "Last 30 days"
+}
+
+function analogyBuckets(analogySets, fromDate) {
+  return analogySets.reduce(
+    (acc, set) => {
+      const inRangeInteractions = fromDate
+        ? set.interactions.filter((interaction) => new Date(interaction.createdAt) >= fromDate)
+        : set.interactions
+      const isApprovedReady = set.status === "ready" && set.reviewStatus === "APPROVED"
+
+      if (!isApprovedReady) {
+        acc.draft += 1
+      } else if (inRangeInteractions.length > 0) {
+        acc.active += 1
+      } else {
+        acc.upcoming += 1
+      }
+      return acc
+    },
+    { active: 0, draft: 0, upcoming: 0 },
+  )
+}
+
+function quizRevisitCount(submittedAttempts) {
+  const perStudent = submittedAttempts.reduce((acc, attempt) => {
+    const key = `${attempt.quizId}:${attempt.studentId}`
+    acc[key] = (acc[key] || 0) + 1
+    return acc
+  }, {})
+  return Object.values(perStudent).reduce((total, count) => total + Math.max(0, count - 1), 0)
+}
+
+export default async function LecturerStatisticsPage({ searchParams }) {
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
   if (!lecturerUser) redirect("/lecturer/login")
 
-  const nowTs = new Date().getTime()
-  const quizzes = await prisma.quiz.findMany({
-    where: { ownerId: lecturerUser.id },
+  const resolvedSearchParams = await searchParams
+  const { range, from } = parseRange(resolvedSearchParams)
+
+  const modules = await prisma.module.findMany({
+    where: { lecturerId: lecturerUser.id },
     include: {
-      module: { select: { code: true, name: true } },
-      attempts: { where: { status: "SUBMITTED" }, select: { score: true } },
-      _count: { select: { questions: true } },
+      enrollments: {
+        where: { status: "ACTIVE" },
+        select: { userId: true },
+      },
+      analogySets: {
+        select: {
+          id: true,
+          status: true,
+          reviewStatus: true,
+          interactions: {
+            select: { createdAt: true },
+          },
+        },
+      },
+      quizzes: {
+        include: {
+          attempts: {
+            where: {
+              status: "SUBMITTED",
+              ...(from ? { submittedAt: { gte: from } } : {}),
+            },
+            select: { score: true, studentId: true, quizId: true },
+          },
+        },
+      },
     },
-    orderBy: [{ module: { code: "asc" } }, { createdAt: "desc" }],
+    orderBy: { code: "asc" },
   })
 
-  const analogySets = await prisma.analogySet.findMany({
-    where: { ownerId: lecturerUser.id },
-    include: { interactions: true },
+  const moduleCards = modules.map((module) => {
+    const submittedAttempts = module.quizzes.flatMap((quiz) => quiz.attempts)
+    const participants = new Set(submittedAttempts.map((attempt) => attempt.studentId)).size
+    const activeStudents = module.enrollments.length
+    const participationRate = activeStudents
+      ? Math.round((participants / activeStudents) * 100)
+      : 0
+    const avgQuizScore = submittedAttempts.length
+      ? Math.round(
+          submittedAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / submittedAttempts.length,
+        )
+      : 0
+    const analogyStats = analogyBuckets(module.analogySets, from)
+    const completions = submittedAttempts.length
+    const revisits = quizRevisitCount(submittedAttempts)
+
+    return {
+      code: module.code,
+      name: module.name,
+      lectureInstances: module.analogySets.length,
+      analogyStats,
+      avgQuizScore,
+      participationRate,
+      participants,
+      activeStudents,
+      completions,
+      revisits,
+    }
   })
 
-  const allAttempts = quizzes.flatMap((quiz) => quiz.attempts)
-  const avgQuizScore = allAttempts.length
-    ? Math.round(allAttempts.reduce((acc, a) => acc + (a.score || 0), 0) / allAttempts.length)
-    : 0
-
-  const quizStateTotals = quizzes.reduce(
-    (acc, quiz) => {
-      const state = getQuizTimingState(quiz, nowTs)
-      acc[state] += 1
-      return acc
-    },
-    { ACTIVE: 0, SCHEDULED: 0, PAST: 0, DRAFT: 0, ARCHIVED: 0 },
-  )
-
-  const moduleQuizSummary = Object.values(
-    quizzes.reduce((acc, quiz) => {
-      const code = quiz.module.code
-      if (!acc[code]) {
-        acc[code] = {
-          code,
-          name: quiz.module.name,
-          total: 0,
-          active: 0,
-          scheduled: 0,
-          past: 0,
-          draft: 0,
-        }
-      }
-      const timingState = getQuizTimingState(quiz, nowTs)
-      acc[code].total += 1
-      if (timingState === "ACTIVE") acc[code].active += 1
-      if (timingState === "SCHEDULED") acc[code].scheduled += 1
-      if (timingState === "PAST") acc[code].past += 1
-      if (timingState === "DRAFT") acc[code].draft += 1
-      return acc
-    }, {}),
-  )
-    .sort((a, b) => a.code.localeCompare(b.code))
-
-  const totalViews = analogySets.reduce((acc, item) => acc + item.interactions.filter((i) => i.type === "VIEW").length, 0)
-  const totalRevisits = analogySets.reduce((acc, item) => acc + item.interactions.filter((i) => i.type === "REVISIT").length, 0)
-  const totalQuizzes = quizzes.length
+  const totalCompletions = moduleCards.reduce((total, module) => total + module.completions, 0)
+  const totalRevisits = moduleCards.reduce((total, module) => total + module.revisits, 0)
 
   return (
     <main className={ui.page}>
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
-            <h1 className="text-lg font-semibold">Statistics Dashboard</h1>
-            <p className={ui.textSmall}>Track analogy performance and student engagement trends.</p>
+            <h1 className="text-lg font-semibold">Lecturer statistics</h1>
+            <p className={ui.textSmall}>Module-first analytics with participation, outcomes, and engagement.</p>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
@@ -85,98 +138,60 @@ export default async function LecturerStatisticsPage() {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className="mx-auto w-full max-w-[1240px] space-y-6">
-            <div className={ui.cardFull}>
-              <p className={ui.textLabel}>Overview</p>
-              <div className="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-5 text-sm">
-                <div className={`${ui.card} p-4`}><p className={`${ui.textLabel} mb-1`}>Total analogies</p><p className="text-2xl font-semibold">{analogySets.length}</p></div>
-                <div className={`${ui.card} p-4`}><p className={`${ui.textLabel} mb-1`}>Avg quiz score</p><p className="text-2xl font-semibold">{avgQuizScore}%</p></div>
-                <div className={`${ui.card} p-4`}><p className={`${ui.textLabel} mb-1`}>Active quizzes</p><p className="text-2xl font-semibold">{quizStateTotals.ACTIVE}</p></div>
-                <div className={`${ui.card} p-4`}><p className={`${ui.textLabel} mb-1`}>Scheduled quizzes</p><p className="text-2xl font-semibold">{quizStateTotals.SCHEDULED}</p></div>
-                <div className={`${ui.card} p-4`}><p className={`${ui.textLabel} mb-1`}>Past quizzes</p><p className="text-2xl font-semibold">{quizStateTotals.PAST}</p></div>
+          <div className={ui.cardFull}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className={ui.textLabel}>Date range: {dateRangeLabel(range)}</p>
+              <div className="flex items-center gap-2 text-xs">
+                <Link href={`/lecturer/statistics?range=7d`} className={range === "7d" ? ui.buttonPrimary : ui.buttonSecondary}>7d</Link>
+                <Link href={`/lecturer/statistics?range=30d`} className={range === "30d" ? ui.buttonPrimary : ui.buttonSecondary}>30d</Link>
+                <Link href={`/lecturer/statistics?range=90d`} className={range === "90d" ? ui.buttonPrimary : ui.buttonSecondary}>90d</Link>
+                <Link href={`/lecturer/statistics?range=all`} className={range === "all" ? ui.buttonPrimary : ui.buttonSecondary}>All</Link>
               </div>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-              <div className={ui.cardFull}>
-                <div className="mb-4">
-                  <h2 className={ui.cardHeader}>Quiz insights</h2>
-                  <p className="text-xs text-slate-400">Distribution and performance of your quizzes across lifecycle states.</p>
-                </div>
-                <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  <StatProgressBar label="Active" value={quizStateTotals.ACTIVE} total={totalQuizzes} colorClass="bg-emerald-500" />
-                  <StatProgressBar label="Scheduled" value={quizStateTotals.SCHEDULED} total={totalQuizzes} colorClass="bg-sky-500" />
-                  <StatProgressBar label="Past" value={quizStateTotals.PAST} total={totalQuizzes} colorClass="bg-amber-500" />
-                  <StatProgressBar label="Draft" value={quizStateTotals.DRAFT} total={totalQuizzes} colorClass="bg-slate-500" />
-                  <StatProgressBar label="Archived" value={quizStateTotals.ARCHIVED} total={totalQuizzes} colorClass="bg-rose-500" />
-                </div>
-                <div className="space-y-2.5 text-sm">
-                  {quizzes.map((quiz) => {
-                    const attempts = quiz.attempts
-                    const avg = attempts.length ? Math.round(attempts.reduce((a, b) => a + (b.score || 0), 0) / attempts.length) : 0
-                    const timingState = getQuizTimingState(quiz, nowTs)
-                    const timingLabel = timingState.charAt(0) + timingState.slice(1).toLowerCase()
-                    return (
-                      <div key={quiz.id} className={ui.cardInner}>
-                        <p className="font-medium">{quiz.title}</p>
-                        <p className="text-xs text-slate-400">
-                          {quiz.module.code} · {timingLabel} · {quiz._count.questions} questions
-                        </p>
-                        <p className="text-xs text-slate-400">Attempts: {attempts.length} · Avg score: {avg}%</p>
-                      </div>
-                    )
-                  })}
-                  {quizzes.length === 0 ? <p className={ui.textSmall}>No quiz data yet.</p> : null}
-                </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-3 text-sm">
+              <div className={`${ui.card} p-4`}>
+                <p className={ui.textLabel}>Modules</p>
+                <p className="mt-1 text-2xl font-semibold">{moduleCards.length}</p>
               </div>
+              <div className={`${ui.card} p-4`}>
+                <p className={ui.textLabel}>Quiz completions</p>
+                <p className="mt-1 text-2xl font-semibold">{totalCompletions}</p>
+              </div>
+              <div className={`${ui.card} p-4`}>
+                <p className={ui.textLabel}>Quiz revisits</p>
+                <p className="mt-1 text-2xl font-semibold">{totalRevisits}</p>
+              </div>
+            </div>
+          </div>
 
-              <div className="space-y-6">
-                <div className={ui.cardFull}>
-                  <h2 className={ui.cardHeader}>Quiz state by module</h2>
-                  <div className="space-y-2 text-sm mt-3">
-                    {moduleQuizSummary.map((item) => (
-                      <div key={item.code} className={ui.cardInner}>
-                        <p className="font-medium">{item.code}</p>
-                        <p className="text-xs text-slate-400">
-                          Active: {item.active} · Scheduled: {item.scheduled} · Past: {item.past} · Draft: {item.draft}
-                        </p>
-                      </div>
-                    ))}
-                    {moduleQuizSummary.length === 0 ? <p className={ui.textSmall}>No module quiz data yet.</p> : null}
-                  </div>
-                </div>
-
-                <div className={ui.cardFull}>
-                  <h2 className={ui.cardHeader}>Analogy engagement</h2>
-                  <div className="space-y-3 text-sm mt-3">
-                    <div className="grid gap-3">
-                      <StatProgressBar
-                        label="Views"
-                        value={totalViews}
-                        total={Math.max(totalViews + totalRevisits, 1)}
-                        hint={`${totalViews + totalRevisits} total interactions`}
-                        colorClass="bg-indigo-500"
-                      />
-                      <StatProgressBar
-                        label="Revisits"
-                        value={totalRevisits}
-                        total={Math.max(totalViews + totalRevisits, 1)}
-                        hint={`${totalViews + totalRevisits} total interactions`}
-                        colorClass="bg-violet-500"
-                      />
+          <div className={ui.cardFull}>
+            <h2 className={ui.cardHeader}>Module breakdown</h2>
+            <div className="space-y-3 text-sm">
+              {moduleCards.map((module) => (
+                <Link
+                  key={module.code}
+                  href={`/lecturer/statistics/${encodeURIComponent(module.code)}?range=${range}`}
+                  className={`${ui.cardList} block hover:border-indigo-400 transition`}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-slate-100">{module.code} · {module.name}</p>
+                      <p className="text-xs text-slate-400">
+                        Lecture instances: {module.lectureInstances} · Analogies (active/draft/upcoming): {module.analogyStats.active}/{module.analogyStats.draft}/{module.analogyStats.upcoming}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Avg quiz score: {module.avgQuizScore}% · Participation: {module.participationRate}% ({module.participants}/{module.activeStudents})
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Quiz completions: {module.completions} · Revisits: {module.revisits}
+                      </p>
                     </div>
-                    {analogySets.slice(0, 4).map((item) => (
-                      <div key={item.id} className={ui.cardInner}>
-                        <p className="font-medium">{item.title || "Untitled"}</p>
-                        <p className="text-xs text-slate-400">
-                          Views: {item.interactions.filter((i) => i.type === "VIEW").length} · Revisits: {item.interactions.filter((i) => i.type === "REVISIT").length}
-                        </p>
-                      </div>
-                    ))}
-                    {analogySets.length === 0 ? <p className={ui.textSmall}>No analogy interaction data yet.</p> : null}
+                    <span className={ui.buttonSmall}>Open module stats</span>
                   </div>
-                </div>
-              </div>
+                </Link>
+              ))}
+              {moduleCards.length === 0 ? <p className={ui.textSmall}>No modules available yet.</p> : null}
             </div>
           </div>
         </div>
