@@ -10,14 +10,13 @@ export async function POST(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { code, name, description } = body
-
-    console.log("📝 Module creation request:", { code, name, description })
+    const body = await req.json().catch(() => ({}))
+    const code = typeof body.code === "string" ? body.code.trim().toUpperCase() : ""
+    const name = typeof body.name === "string" ? body.name.trim() : ""
+    const description = typeof body.description === "string" ? body.description.trim() : ""
 
     // Validate required fields
     if (!code || !name) {
-      console.log("❌ Missing required fields")
       return new Response(
         JSON.stringify({ error: "Module code and name are required" }),
         {
@@ -29,7 +28,6 @@ export async function POST(req) {
 
     // Validate code format (alphanumeric, uppercase)
     if (!/^[A-Z0-9]{3,10}$/.test(code)) {
-      console.log("❌ Invalid code format:", code)
       return new Response(
         JSON.stringify({
           error: "Module code must be 3-10 uppercase alphanumeric characters (e.g., CSC7099)",
@@ -42,13 +40,11 @@ export async function POST(req) {
     }
 
     // Check if code already exists
-    console.log("🔍 Checking for existing module with code:", code)
     const existing = await prisma.module.findUnique({
       where: { code },
     })
 
     if (existing) {
-      console.log("⚠️ Module code already exists:", code)
       return new Response(
         JSON.stringify({
           error: `Module code "${code}" already exists`,
@@ -60,18 +56,14 @@ export async function POST(req) {
       )
     }
 
-    // Create the module
-    console.log("✅ Creating module...")
     const createdModule = await prisma.module.create({
       data: {
-        code: code.trim(),
-        name: name.trim(),
-        description: description?.trim() || null,
+        code,
+        name: name.slice(0, 120),
+        description: description ? description.slice(0, 1000) : null,
         lecturerId: lecturer.id,
       },
     })
-
-    console.log("✅ Module created:", createdModule.id)
 
     return new Response(
       JSON.stringify({
@@ -86,12 +78,11 @@ export async function POST(req) {
       },
     )
   } catch (err) {
-    console.error("❌ Error in /api/modules/create:", err)
+    console.error("Error in /api/modules/create:", err)
 
     return new Response(
       JSON.stringify({
         error: "Server error while creating module",
-        details: err.message || String(err),
       }),
       {
         status: 500,

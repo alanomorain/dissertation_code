@@ -30,7 +30,9 @@ export async function POST(req) {
     }
 
     const body = await req.json()
-    const { analogyText, topic, style } = body
+    const analogyText = String(body?.analogyText || "").trim().slice(0, 4000)
+    const topic = String(body?.topic || "").trim().slice(0, 200)
+    const style = String(body?.style || "").trim().slice(0, 200)
 
     if (!analogyText) {
       return new Response(
@@ -62,7 +64,6 @@ Analogy:
       return new Response(
         JSON.stringify({
           error: "No image data returned from Gemini.",
-          details: response?.candidates?.[0]?.content || null,
         }),
         { status: 500, headers: { "Content-Type": "application/json" } },
       )
@@ -80,7 +81,6 @@ Analogy:
     return new Response(
       JSON.stringify({
         error: "Server error while generating image",
-        details: err.message || String(err),
       }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     )

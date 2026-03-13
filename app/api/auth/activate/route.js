@@ -13,9 +13,15 @@ export async function POST(req) {
     if (!token || !password) {
       return Response.json({ error: "Activation token and password are required" }, { status: 400 })
     }
+    if (token.length > 200) {
+      return Response.json({ error: "Invalid activation token" }, { status: 400 })
+    }
 
     if (password.length < 8) {
       return Response.json({ error: "Password must be at least 8 characters" }, { status: 400 })
+    }
+    if (studentNumber.length > 40) {
+      return Response.json({ error: "Student number is too long" }, { status: 400 })
     }
 
     const user = await prisma.user.findFirst({

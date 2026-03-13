@@ -81,7 +81,7 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}))
-    const moduleCode = String(body?.moduleCode || "").trim()
+    const moduleCode = String(body?.moduleCode || "").trim().toUpperCase()
     const feedback = String(body?.feedback || "").trim().slice(0, 1500)
     const questionCount = Math.max(1, Math.min(Number(body?.questionCount) || 5, 12))
 
@@ -187,7 +187,7 @@ Return JSON with this exact shape:
   } catch (err) {
     console.error("Error generating quiz questions", err)
     return Response.json(
-      { error: err.message || "Failed to generate quiz questions" },
+      { error: "Failed to generate quiz questions" },
       { status: 500 },
     )
   }

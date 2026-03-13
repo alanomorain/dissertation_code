@@ -2,7 +2,13 @@
 import OpenAI from "openai"
 import { getCurrentUser } from "../../lib/currentUser"
 
-export const runtime = "nodejs" // needed for Buffer & Node libs
+export const runtime = "nodejs"
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+const ALLOWED_FILE_TYPES = new Set([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-powerpoint",
+])
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -100,8 +106,8 @@ export async function POST(req) {
 
     const formData = await req.formData()
     const file = formData.get("file")
-    const moduleCode = formData.get("moduleCode") || "UNKNOWN_MODULE"
-    const notes = formData.get("notes") || ""
+    const moduleCode = String(formData.get("moduleCode") || "UNKNOWN_MODULE").trim().slice(0, 50)
+    const notes = String(formData.get("notes") || "").slice(0, 15000)
 
     if (!file || typeof file === "string") {
       return new Response(
@@ -113,20 +119,23 @@ export async function POST(req) {
       )
     }
 
-    // Read the file into a buffer (so we're ready to do real slide parsing later)
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return Response.json(
+        { error: "File is too large. Maximum allowed size is 10MB." },
+        { status: 413 },
+      )
+    }
 
-    console.log("Received slide deck:", {
-      name: file.name,
-      size: buffer.length,
-      type: file.type,
-      moduleCode,
-    })
+    if (file.type && !ALLOWED_FILE_TYPES.has(file.type)) {
+      return Response.json(
+        { error: "Unsupported file type. Please upload PDF or PowerPoint files." },
+        { status: 415 },
+      )
+    }
 
-    // TODO (later): actually parse the PDF/PPTX using `buffer`.
+    // TODO (later): parse the uploaded PDF/PPTX file contents instead of notes-only mode.
     // For now, we treat `notes` as our "extractedText".
-    const extractedText = notes.toString()
+    const extractedText = notes
 
     let topics
     try {
@@ -154,7 +163,6 @@ export async function POST(req) {
     return new Response(
       JSON.stringify({
         error: "Server error while processing slides",
-        details: err.message || String(err),
       }),
       {
         status: 500,

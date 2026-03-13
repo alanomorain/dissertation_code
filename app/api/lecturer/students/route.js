@@ -4,6 +4,7 @@ import { getCurrentUser } from "../../../lib/currentUser"
 export const runtime = "nodejs"
 
 const VALID_STATUS = new Set(["ACTIVE", "INVITED", "DROPPED"])
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function GET(req) {
   try {
@@ -58,12 +59,15 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => ({}))
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
-    const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim() : ""
+    const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim().toUpperCase() : ""
     const requestedStatus = typeof body.status === "string" ? body.status.toUpperCase() : "ACTIVE"
     const status = VALID_STATUS.has(requestedStatus) ? requestedStatus : "ACTIVE"
 
     if (!email || !moduleCode) {
       return Response.json({ error: "Email and module are required" }, { status: 400 })
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return Response.json({ error: "Invalid email format" }, { status: 400 })
     }
 
     const moduleRecord = await prisma.module.findFirst({

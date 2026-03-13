@@ -6,6 +6,9 @@ export const runtime = "nodejs"
 export async function GET(_req, { params }) {
   const { id } = await params
   const student = await getCurrentUser("STUDENT", { id: true })
+  if (!student) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 })
+  }
 
   const quiz = await prisma.quiz.findFirst({
     where: {
@@ -15,7 +18,7 @@ export async function GET(_req, { params }) {
       module: {
         enrollments: {
           some: {
-            userId: student?.id || "",
+            userId: student.id,
             status: "ACTIVE",
           },
         },

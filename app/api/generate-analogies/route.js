@@ -4,6 +4,9 @@ import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 
 export const runtime = "nodejs"
+const MAX_TOPICS = 12
+const MAX_TOPIC_LENGTH = 200
+const MAX_TEXT_LENGTH = 15000
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
@@ -136,6 +139,14 @@ function normalizeTopics(topics) {
     }))
 }
 
+function sanitizeTopics(input) {
+  if (!Array.isArray(input)) return []
+  return input
+    .map((topic) => String(topic || "").trim().slice(0, MAX_TOPIC_LENGTH))
+    .filter(Boolean)
+    .slice(0, MAX_TOPICS)
+}
+
 export async function POST(req) {
   let analogySetId = null
 
@@ -145,8 +156,15 @@ export async function POST(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { title, concept, topics, notes, persist, sourceText, selectedAnalogies } = body
+    const body = await req.json().catch(() => ({}))
+    const title = typeof body.title === "string" ? body.title.trim().slice(0, 200) : ""
+    const concept = typeof body.concept === "string" ? body.concept.trim().slice(0, MAX_TOPIC_LENGTH) : ""
+    const topics = sanitizeTopics(body.topics)
+    const notes = typeof body.notes === "string" ? body.notes.slice(0, MAX_TEXT_LENGTH) : ""
+    const sourceText = typeof body.sourceText === "string" ? body.sourceText.slice(0, MAX_TEXT_LENGTH) : ""
+    const selectedAnalogies = Array.isArray(body.selectedAnalogies) ? body.selectedAnalogies.slice(0, MAX_TOPICS) : []
+    const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim().toUpperCase() : ""
+    const persist = Boolean(body.persist)
 
     // Two modes: single concept or batch topics
     const isSingleMode = !!concept
@@ -173,10 +191,10 @@ export async function POST(req) {
     }
 
     let moduleRecord = null
-    if (body.moduleCode) {
+    if (moduleCode) {
       moduleRecord = await prisma.module.findFirst({
         where: {
-          code: body.moduleCode,
+          code: moduleCode,
           lecturerId: lecturer.id,
         },
       })
@@ -193,7 +211,7 @@ export async function POST(req) {
           status: "processing",
           reviewStatus: "DRAFT",
           approvedAt: null,
-          title: title || (isSingleMode ? concept : `Batch: ${topics.join(", ")}`),
+          title: title || (isSingleMode ? concept : `Batch: ${topics.join(", ")}`.slice(0, 200)),
           source: isBatchMode ? "slides" : "manual",
           sourceText: sourceText || notes || "",
           ownerId: lecturer.id,
@@ -310,7 +328,6 @@ export async function POST(req) {
         return new Response(
           JSON.stringify({
             error: "Failed to generate analogy",
-            details: err.message,
             id: analogySetId,
             status: "failed",
           }),
@@ -340,7 +357,6 @@ export async function POST(req) {
     return new Response(
       JSON.stringify({
         error: "Server error while generating analogy",
-        details: err.message || String(err),
       }),
       {
         status: 500,
@@ -357,8 +373,15 @@ export async function PATCH(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await req.json()
-    const { id, title, concept, analogyText, moduleCode, action, topics, notes } = body
+    const body = await req.json().catch(() => ({}))
+    const id = typeof body.id === "string" ? body.id.trim() : ""
+    const title = typeof body.title === "string" ? body.title.trim().slice(0, 200) : ""
+    const concept = typeof body.concept === "string" ? body.concept.trim().slice(0, MAX_TOPIC_LENGTH) : ""
+    const analogyText = typeof body.analogyText === "string" ? body.analogyText.trim().slice(0, MAX_TEXT_LENGTH) : ""
+    const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim() : ""
+    const action = typeof body.action === "string" ? body.action.trim() : ""
+    const topics = body.topics
+    const notes = typeof body.notes === "string" ? body.notes.slice(0, MAX_TEXT_LENGTH) : ""
 
     if (!id) {
       return new Response(
@@ -608,7 +631,6 @@ export async function PATCH(req) {
     return new Response(
       JSON.stringify({
         error: "Server error while updating analogy",
-        details: err.message || String(err),
       }),
       {
         status: 500,

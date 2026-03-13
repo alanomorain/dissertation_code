@@ -4,6 +4,7 @@ import { prisma } from "./db"
 
 const SESSION_COOKIE = "lta_session"
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7
+const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000
 
 function getSessionSecret() {
   const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
@@ -37,7 +38,21 @@ function decodeSession(value) {
   }
 
   try {
-    return JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"))
+    const parsed = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8"))
+    const issuedAt = Number(parsed?.issuedAt)
+    if (!Number.isFinite(issuedAt)) {
+      return null
+    }
+
+    if (Date.now() - issuedAt > SESSION_TTL_MS) {
+      return null
+    }
+
+    if (!parsed?.userId || typeof parsed.userId !== "string") {
+      return null
+    }
+
+    return parsed
   } catch {
     return null
   }

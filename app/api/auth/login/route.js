@@ -3,6 +3,7 @@ import { buildSessionCookie } from "../../../lib/auth"
 import { verifyPassword } from "../../../lib/passwords"
 
 export const runtime = "nodejs"
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
@@ -13,6 +14,9 @@ export async function POST(req) {
 
     if (!email || !password || !role) {
       return Response.json({ error: "email, password, and role are required" }, { status: 400 })
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return Response.json({ error: "Invalid email format" }, { status: 400 })
     }
 
     if (!["LECTURER", "STUDENT", "ADMIN"].includes(role)) {

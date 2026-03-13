@@ -5,6 +5,7 @@ import { getCurrentUser } from "../../../../lib/currentUser"
 export const runtime = "nodejs"
 
 const INVITE_TTL_HOURS = 72
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
@@ -20,6 +21,12 @@ export async function POST(req) {
 
     if (!email || !moduleCode) {
       return Response.json({ error: "Email and module are required" }, { status: 400 })
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return Response.json({ error: "Invalid email format" }, { status: 400 })
+    }
+    if (studentNumber.length > 40) {
+      return Response.json({ error: "Student number is too long" }, { status: 400 })
     }
 
     const moduleRecord = await prisma.module.findFirst({
@@ -91,7 +98,7 @@ export async function POST(req) {
       },
     })
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
     const activationLink = `${baseUrl}/student/activate?token=${encodeURIComponent(inviteToken)}`
 
     return Response.json(

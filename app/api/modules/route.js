@@ -15,12 +15,9 @@ export async function GET() {
       },
     })
 
-    return new Response(JSON.stringify(modules), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    })
+    return Response.json(modules, { status: 200 })
   } catch (error) {
     console.error("Error fetching modules:", error)
-    return new Response("Error fetching modules", { status: 500 })
+    return Response.json({ error: "Unable to fetch modules" }, { status: 500 })
   }
 }

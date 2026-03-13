@@ -53,16 +53,9 @@ export async function POST(req, { params }) {
         .map((item) => [item.questionId, item]),
     )
 
-    const createdAttempt = await prisma.quizAttempt.create({
-      data: {
-        quizId: quiz.id,
-        studentId: student.id,
-        status: "IN_PROGRESS",
-      },
-    })
-
     let gradedCount = 0
     let correctCount = 0
+    const responseRows = []
 
     for (const question of quiz.questions) {
       const incoming = responseMap.get(question.id)
@@ -76,36 +69,49 @@ export async function POST(req, { params }) {
           if (selected.isCorrect) correctCount += 1
         }
 
-        await prisma.quizResponse.create({
-          data: {
-            attemptId: createdAttempt.id,
-            questionId: question.id,
-            selectedOptionId: selected ? selected.id : null,
-            isCorrect: selected ? !!selected.isCorrect : false,
-          },
+        responseRows.push({
+          questionId: question.id,
+          selectedOptionId: selected ? selected.id : null,
+          isCorrect: selected ? !!selected.isCorrect : false,
         })
       } else {
         const textAnswer = typeof incoming.textAnswer === "string" ? incoming.textAnswer.trim().slice(0, 5000) : ""
-        await prisma.quizResponse.create({
-          data: {
-            attemptId: createdAttempt.id,
-            questionId: question.id,
-            textAnswer,
-            isCorrect: null,
-          },
+        responseRows.push({
+          questionId: question.id,
+          textAnswer,
+          isCorrect: null,
         })
       }
     }
 
     const score = gradedCount > 0 ? Math.round((correctCount / gradedCount) * 100) : 0
 
-    await prisma.quizAttempt.update({
-      where: { id: createdAttempt.id },
-      data: {
-        status: "SUBMITTED",
-        score,
-        submittedAt: new Date(),
-      },
+    const createdAttempt = await prisma.$transaction(async (tx) => {
+      const attempt = await tx.quizAttempt.create({
+        data: {
+          quizId: quiz.id,
+          studentId: student.id,
+          status: "IN_PROGRESS",
+        },
+      })
+
+      if (responseRows.length > 0) {
+        await tx.quizResponse.createMany({
+          data: responseRows.map((row) => ({
+            ...row,
+            attemptId: attempt.id,
+          })),
+        })
+      }
+
+      return tx.quizAttempt.update({
+        where: { id: attempt.id },
+        data: {
+          status: "SUBMITTED",
+          score,
+          submittedAt: new Date(),
+        },
+      })
     })
 
     return Response.json({ attemptId: createdAttempt.id, score })

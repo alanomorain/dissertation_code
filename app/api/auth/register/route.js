@@ -2,6 +2,7 @@ import { prisma } from "../../../lib/db"
 import { hashPassword } from "../../../lib/passwords"
 
 export const runtime = "nodejs"
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
@@ -13,9 +14,15 @@ export async function POST(req) {
     if (!email || !password) {
       return Response.json({ error: "Email and password are required" }, { status: 400 })
     }
+    if (!EMAIL_REGEX.test(email)) {
+      return Response.json({ error: "Invalid email format" }, { status: 400 })
+    }
 
     if (password.length < 8) {
       return Response.json({ error: "Password must be at least 8 characters" }, { status: 400 })
+    }
+    if (studentNumber.length > 40) {
+      return Response.json({ error: "Student number is too long" }, { status: 400 })
     }
 
     const existingByEmail = await prisma.user.findUnique({
