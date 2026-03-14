@@ -1,5 +1,6 @@
 import { prisma } from "../../../lib/db"
 import { hashPassword } from "../../../lib/passwords"
+import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
 
 export const runtime = "nodejs"
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -10,6 +11,16 @@ export async function POST(req) {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""
     const password = typeof body.password === "string" ? body.password : ""
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "auth-register",
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+      key: `${getClientIp(req)}:${email || "anonymous"}`,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
 
     if (!email || !password) {
       return Response.json({ error: "Email and password are required" }, { status: 400 })

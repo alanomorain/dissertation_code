@@ -1,6 +1,7 @@
 import { prisma } from "../../../lib/db"
 import { buildSessionCookie } from "../../../lib/auth"
 import { verifyPassword } from "../../../lib/passwords"
+import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
 
 export const runtime = "nodejs"
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -11,6 +12,16 @@ export async function POST(req) {
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const password = typeof body.password === "string" ? body.password : ""
     const role = typeof body.role === "string" ? body.role.trim().toUpperCase() : ""
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "auth-login",
+      limit: 10,
+      windowMs: 60 * 1000,
+      key: `${getClientIp(req)}:${email || "anonymous"}`,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
 
     if (!email || !password || !role) {
       return Response.json({ error: "email, password, and role are required" }, { status: 400 })

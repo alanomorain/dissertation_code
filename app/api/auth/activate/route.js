@@ -1,5 +1,6 @@
 import { prisma } from "../../../lib/db"
 import { hashPassword } from "../../../lib/passwords"
+import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
 
 export const runtime = "nodejs"
 
@@ -9,6 +10,16 @@ export async function POST(req) {
     const token = typeof body.token === "string" ? body.token.trim() : ""
     const password = typeof body.password === "string" ? body.password : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "auth-activate",
+      limit: 6,
+      windowMs: 10 * 60 * 1000,
+      key: `${getClientIp(req)}:${token.slice(0, 12) || "anonymous"}`,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
 
     if (!token || !password) {
       return Response.json({ error: "Activation token and password are required" }, { status: 400 })

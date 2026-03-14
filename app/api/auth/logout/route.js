@@ -1,8 +1,24 @@
 import { buildExpiredSessionCookie } from "../../../lib/auth"
+import { enforceRateLimit } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 
-export async function POST() {
+export async function POST(req) {
+  const csrfResponse = enforceCsrf(req)
+  if (csrfResponse) {
+    return csrfResponse
+  }
+
+  const rateLimitResponse = enforceRateLimit(req, {
+    scope: "auth-logout",
+    limit: 30,
+    windowMs: 60 * 1000,
+  })
+  if (rateLimitResponse) {
+    return rateLimitResponse
+  }
+
   const expiredCookie = buildExpiredSessionCookie()
   const cookieParts = [
     `${expiredCookie.name}=`,

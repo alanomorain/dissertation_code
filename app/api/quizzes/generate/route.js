@@ -1,6 +1,8 @@
 import OpenAI from "openai"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { enforceRateLimit } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 
@@ -75,6 +77,20 @@ function normalizeGeneratedQuestions(input, count) {
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "quizzes-generate",
+      limit: 20,
+      windowMs: 60 * 1000,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const lecturer = await getCurrentUser("LECTURER", { id: true })
     if (!lecturer) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })

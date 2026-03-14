@@ -1,5 +1,7 @@
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { enforceRateLimit } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 
@@ -52,6 +54,20 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "lecturer-students-post",
+      limit: 30,
+      windowMs: 60 * 1000,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const lecturer = await getCurrentUser("LECTURER", { id: true })
     if (!lecturer) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
@@ -117,6 +133,20 @@ export async function POST(req) {
 
 export async function PATCH(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "lecturer-students-patch",
+      limit: 50,
+      windowMs: 60 * 1000,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const lecturer = await getCurrentUser("LECTURER", { id: true })
     if (!lecturer) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })

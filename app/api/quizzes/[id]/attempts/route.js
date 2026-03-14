@@ -1,10 +1,26 @@
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
+import { enforceRateLimit } from "../../../../lib/rateLimit"
+import { enforceCsrf } from "../../../../lib/security"
 
 export const runtime = "nodejs"
 
 export async function POST(req, { params }) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "quiz-attempt-submit",
+      limit: 30,
+      windowMs: 60 * 1000,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const { id } = await params
     const student = await getCurrentUser("STUDENT", { id: true })
     if (!student) {

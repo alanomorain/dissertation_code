@@ -1,6 +1,8 @@
 import { randomBytes } from "node:crypto"
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
+import { enforceRateLimit } from "../../../../lib/rateLimit"
+import { enforceCsrf } from "../../../../lib/security"
 
 export const runtime = "nodejs"
 
@@ -9,6 +11,20 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
+    const rateLimitResponse = enforceRateLimit(req, {
+      scope: "lecturer-students-invite",
+      limit: 20,
+      windowMs: 60 * 1000,
+    })
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const lecturer = await getCurrentUser("LECTURER", { id: true })
     if (!lecturer) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
