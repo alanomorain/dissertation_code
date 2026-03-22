@@ -193,6 +193,15 @@ async function main() {
     },
   })
 
+  const moduleCsc3065 = await prisma.module.create({
+    data: {
+      code: 'CSC3065',
+      name: 'Cloud Computing',
+      description: 'Core cloud computing concepts including service models, virtualization, and scalable distributed systems.',
+      lecturerId: lecturerUser.id,
+    },
+  })
+
   await prisma.moduleEnrollment.createMany({
     data: [
       { userId: studentA.id, moduleId: moduleCsc7058.id, status: 'ACTIVE' },
@@ -200,10 +209,14 @@ async function main() {
       { userId: studentA.id, moduleId: moduleCsc7082.id, status: 'ACTIVE' },
       { userId: studentB.id, moduleId: moduleCsc7058.id, status: 'ACTIVE' },
       { userId: studentB.id, moduleId: moduleCsc7082.id, status: 'ACTIVE' },
+      { userId: studentB.id, moduleId: moduleCsc3065.id, status: 'ACTIVE' },
       { userId: studentC.id, moduleId: moduleCsc7058.id, status: 'ACTIVE' },
       { userId: studentC.id, moduleId: moduleCsc7084.id, status: 'ACTIVE' },
+      { userId: studentC.id, moduleId: moduleCsc3065.id, status: 'ACTIVE' },
       { userId: studentD.id, moduleId: moduleCsc7084.id, status: 'ACTIVE' },
       { userId: studentD.id, moduleId: moduleCsc7082.id, status: 'ACTIVE' },
+      { userId: studentD.id, moduleId: moduleCsc3065.id, status: 'ACTIVE' },
+      { userId: studentA.id, moduleId: moduleCsc3065.id, status: 'ACTIVE' },
     ],
   })
 
