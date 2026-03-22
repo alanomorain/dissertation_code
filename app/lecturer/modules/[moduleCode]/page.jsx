@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
+import DeleteAnalogyButton from "../components/DeleteAnalogyButton"
 
 export default async function LecturerModuleDetailPage({ params }) {
   const lecturer = await getCurrentUser("LECTURER", { id: true })
@@ -93,12 +94,15 @@ export default async function LecturerModuleDetailPage({ params }) {
               ) : (
                 <div className="space-y-2 text-sm">
                   {moduleRecord.analogySets.map((analogy) => (
-                    <Link key={analogy.id} href={`/lecturer/analogies/${analogy.id}`} className={ui.linkCard}>
-                      <p className="font-medium">{analogy.title || "Untitled"}</p>
-                      <p className="text-xs text-slate-400">
-                        {analogy.lecture?.title || "No lecture"} · {new Date(analogy.createdAt).toLocaleDateString()}
-                      </p>
-                    </Link>
+                    <div key={analogy.id} className={`${ui.linkCard} flex items-center justify-between gap-3`}>
+                      <Link href={`/lecturer/analogies/${analogy.id}`} className="min-w-0">
+                        <p className="font-medium truncate">{analogy.title || "Untitled"}</p>
+                        <p className="text-xs text-slate-400">
+                          {analogy.lecture?.title || "No lecture"} · {new Date(analogy.createdAt).toLocaleDateString()}
+                        </p>
+                      </Link>
+                      <DeleteAnalogyButton analogyId={analogy.id} />
+                    </div>
                   ))}
                 </div>
               )}

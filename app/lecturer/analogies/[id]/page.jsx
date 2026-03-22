@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
 import MediaImagePanel from "../components/MediaImagePanel"
+import AnalogyDetailActions from "../components/AnalogyDetailActions"
 
 export default async function LecturerAnalogyDetailPage({ params }) {
   const { id } = await params
@@ -36,20 +37,10 @@ export default async function LecturerAnalogyDetailPage({ params }) {
           <div>
             <h1 className="text-lg font-semibold">Analogy Details</h1>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Link
-              href="/lecturer/analogies"
-              className={ui.buttonSecondary}
-            >
-              ← Back to list
-            </Link>
-            <Link
-              href={`/lecturer/analogies/${analogy.id}/edit`}
-              className={ui.buttonPrimary}
-            >
-              Edit
-            </Link>
-          </div>
+          <AnalogyDetailActions
+            analogyId={analogy.id}
+            reviewStatus={analogy.reviewStatus || "DRAFT"}
+          />
         </div>
       </header>
 

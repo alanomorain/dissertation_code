@@ -11,6 +11,9 @@ const makeTopicState = (topic, candidates = []) => ({
   candidates,
   analogy: candidates[0] || "",
   feedback: "",
+  isEditing: false,
+  editingCandidateIndex: null,
+  preEditAnalogy: "",
   imageUrl: "",
   imageStyle: "",
   videoUrl: "",
@@ -102,6 +105,71 @@ function UploadSlidesPageInner() {
   const updateTopicState = (index, patch) => {
     setTopicStates((prev) =>
       prev.map((item, idx) => (idx === index ? { ...item, ...patch } : item)),
+    )
+  }
+
+  const startEditingSelectedAnalogy = (topicIndex) => {
+    setTopicStates((prev) =>
+      prev.map((item, idx) => {
+        if (idx !== topicIndex) return item
+        const selectedIndex = item.candidates.findIndex((candidate) => candidate === item.analogy)
+        return {
+          ...item,
+          isEditing: true,
+          editingCandidateIndex: selectedIndex >= 0 ? selectedIndex : 0,
+          preEditAnalogy: item.analogy,
+        }
+      }),
+    )
+  }
+
+  const handleSelectedAnalogyEdit = (topicIndex, value) => {
+    setTopicStates((prev) =>
+      prev.map((item, idx) => {
+        if (idx !== topicIndex) return item
+        const candidateIndex = item.editingCandidateIndex
+        if (candidateIndex === null || candidateIndex < 0 || candidateIndex >= item.candidates.length) {
+          return { ...item, analogy: value }
+        }
+
+        const nextCandidates = item.candidates.map((candidate, index) =>
+          index === candidateIndex ? value : candidate,
+        )
+
+        return {
+          ...item,
+          analogy: value,
+          candidates: nextCandidates,
+        }
+      }),
+    )
+  }
+
+  const finishEditingSelectedAnalogy = (topicIndex) => {
+    setTopicStates((prev) =>
+      prev.map((item, idx) => {
+        if (idx !== topicIndex) return item
+
+        const finalized = item.analogy.trim() || item.preEditAnalogy || item.candidates[0] || ""
+        const candidateIndex = item.editingCandidateIndex
+        const nextCandidates =
+          candidateIndex !== null &&
+          candidateIndex >= 0 &&
+          candidateIndex < item.candidates.length
+            ? item.candidates.map((candidate, index) =>
+                index === candidateIndex ? finalized : candidate,
+              )
+            : item.candidates
+
+        return {
+          ...item,
+          analogy: finalized,
+          candidates: nextCandidates,
+          isEditing: false,
+          editingCandidateIndex: null,
+          preEditAnalogy: "",
+        }
+      }),
     )
   }
 
@@ -205,6 +273,9 @@ function UploadSlidesPageInner() {
 
   const buildRegenerationNotes = (topicItem) => {
     const parts = []
+    if (topicItem.analogy.trim()) {
+      parts.push(`Current selected analogy to improve:\n${topicItem.analogy.trim()}`)
+    }
     if (notes.trim()) {
       parts.push(`Global lecturer notes:\n${notes.trim()}`)
     }
@@ -217,6 +288,13 @@ function UploadSlidesPageInner() {
   const handleRegenerateTopic = async (idx) => {
     const item = topicStates[idx]
     if (!item?.topic) return
+    if (!item.analogy?.trim()) {
+      setMessage({
+        type: "error",
+        text: "Please select a favourite analogy before regenerating.",
+      })
+      return
+    }
 
     setRegeneratingIndex(idx)
     setMessage(null)
@@ -227,7 +305,7 @@ function UploadSlidesPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           moduleCode,
-          topics: [item.topic],
+          concept: item.topic,
           notes: buildRegenerationNotes(item),
         }),
       })
@@ -238,30 +316,27 @@ function UploadSlidesPageInner() {
       }
 
       const data = await res.json()
-      const regenerated = (data.analogies || data.points || [])[0]
-      const newCandidates = regenerated?.analogies || []
-
-      if (newCandidates.length === 0) {
-        throw new Error("No analogies returned for this topic.")
-      }
+      const regeneratedText = String(data?.analogy?.analogy || "").trim()
+      if (!regeneratedText) throw new Error("No regenerated analogy returned for this topic.")
 
       setTopicStates((prev) =>
         prev.map((entry, entryIndex) => {
           if (entryIndex !== idx) return entry
-          const nextAnalogy = newCandidates.includes(entry.analogy)
-            ? entry.analogy
-            : newCandidates[0]
           return {
             ...entry,
-            candidates: newCandidates,
-            analogy: nextAnalogy,
+            candidates: [regeneratedText],
+            analogy: regeneratedText,
+            feedback: "",
+            isEditing: false,
+            editingCandidateIndex: null,
+            preEditAnalogy: "",
           }
         }),
       )
 
       setMessage({
         type: "success",
-        text: `Regenerated analogies for "${item.topic}" using your feedback.`,
+        text: `Regenerated your selected analogy for "${item.topic}". Other options were removed.`,
       })
     } catch (err) {
       console.error(err)
@@ -674,7 +749,7 @@ function UploadSlidesPageInner() {
                   <section className="mt-8 border-t border-slate-800 pt-4">
                     <h2 className={`${ui.cardHeader} mb-3`}>Select your favourite analogy for each topic</h2>
                     <p className="text-xs text-slate-400 mb-4">
-                      Selected options are highlighted. Add feedback and regenerate only that topic when needed.
+                      Selected options are highlighted. Double-click the selected analogy to edit wording, then add feedback and regenerate that topic if needed.
                     </p>
 
                     <div className="space-y-4">
@@ -711,10 +786,43 @@ function UploadSlidesPageInner() {
                                     type="radio"
                                     name={`analogy-${idx}`}
                                     checked={selected}
-                                    onChange={() => updateTopicState(idx, { analogy: candidate })}
+                                    onChange={() =>
+                                      updateTopicState(idx, {
+                                        analogy: candidate,
+                                        isEditing: false,
+                                        editingCandidateIndex: null,
+                                        preEditAnalogy: "",
+                                      })
+                                    }
                                     className="mr-2"
                                   />
-                                  {candidate}
+                                  {selected && item.isEditing ? (
+                                    <textarea
+                                      value={item.analogy}
+                                      onChange={(event) =>
+                                        handleSelectedAnalogyEdit(idx, event.target.value)
+                                      }
+                                      onBlur={() => finishEditingSelectedAnalogy(idx)}
+                                      onKeyDown={(event) => {
+                                        if (event.key === "Enter" && !event.shiftKey) {
+                                          event.preventDefault()
+                                          finishEditingSelectedAnalogy(idx)
+                                        }
+                                      }}
+                                      rows={3}
+                                      autoFocus
+                                      className="mt-2 w-full rounded-lg border border-emerald-500/60 bg-slate-950/60 px-3 py-2 text-sm text-emerald-100 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                    />
+                                  ) : (
+                                    <span
+                                      onDoubleClick={() => {
+                                        if (selected) startEditingSelectedAnalogy(idx)
+                                      }}
+                                      title={selected ? "Double-click to edit selected wording" : ""}
+                                    >
+                                      {candidate}
+                                    </span>
+                                  )}
                                 </label>
                               )
                             })}

@@ -33,3 +33,29 @@ export async function GET(request, { params }) {
     )
   }
 }
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = await params
+    const lecturer = await getCurrentUser("LECTURER", { id: true })
+    if (!lecturer) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const deleted = await prisma.analogySet.deleteMany({
+      where: { id, ownerId: lecturer.id },
+    })
+
+    if (deleted.count === 0) {
+      return NextResponse.json({ error: "Analogy not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error("Error deleting analogy:", err)
+    return NextResponse.json(
+      { error: "Server error deleting analogy" },
+      { status: 500 },
+    )
+  }
+}
