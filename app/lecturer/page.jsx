@@ -22,6 +22,7 @@ export default async function LecturerDashboard() {
     include: {
       enrollments: true,
       analogySets: true,
+      lectures: true,
       quizzes: true,
     },
     orderBy: { createdAt: "desc" },
@@ -36,17 +37,27 @@ export default async function LecturerDashboard() {
 
   const totalStudents = taughtModules.reduce((count, moduleItem) => count + moduleItem.enrollments.length, 0)
   const totalAnalogies = taughtModules.reduce((count, moduleItem) => count + moduleItem.analogySets.length, 0)
+  const totalLectures = taughtModules.reduce((count, moduleItem) => count + moduleItem.lectures.length, 0)
   const totalQuizzes = taughtModules.reduce((count, moduleItem) => count + moduleItem.quizzes.length, 0)
 
   const coreAreas = [
     {
       title: "Modules",
       description: "See and organise all module spaces you teach.",
-      href: "/lecturer/modules/create",
-      cta: "Create module",
-      secondaryHref: "/lecturer#modules",
-      secondaryCta: "Open module list",
+      href: "/lecturer/modules",
+      cta: "Open modules",
+      secondaryHref: "/lecturer/modules/create",
+      secondaryCta: "Create module",
       stat: `${taughtModules.length} active`,
+    },
+    {
+      title: "Lectures",
+      description: "Manage lecture uploads and lecture-specific content.",
+      href: "/lecturer/lectures",
+      cta: "Open lectures",
+      secondaryHref: "/lecturer/analogies/upload-slides",
+      secondaryCta: "Upload slides",
+      stat: `${totalLectures} total`,
     },
     {
       title: "Analogies",
@@ -142,7 +153,7 @@ export default async function LecturerDashboard() {
                 New module
               </Link>
             </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
               {coreAreas.map((area) => (
                 <div key={area.title} className={`${ui.cardInner} flex flex-col justify-between gap-4`}>
                   <div>
@@ -190,6 +201,7 @@ export default async function LecturerDashboard() {
                           </div>
                           <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-300">
                             <Link href={`/lecturer/analogies?module=${moduleCode}`} className="hover:text-indigo-200 transition">Analogies</Link>
+                            <Link href={`/lecturer/lectures?module=${moduleCode}`} className="hover:text-indigo-200 transition">Lectures</Link>
                             <Link href={`/lecturer/quizzes?module=${moduleCode}`} className="hover:text-indigo-200 transition">Quizzes</Link>
                             <Link href={`/lecturer/statistics/${encodeURIComponent(moduleItem.code)}`} className="hover:text-indigo-200 transition">Statistics</Link>
                             <Link href={`/lecturer/students?module=${moduleCode}`} className="hover:text-indigo-200 transition">Students</Link>

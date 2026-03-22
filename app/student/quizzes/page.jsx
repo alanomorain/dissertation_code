@@ -19,9 +19,11 @@ function badgeForState(state, quiz, nowTs) {
   return "To do"
 }
 
-export default async function StudentQuizzesPage() {
+export default async function StudentQuizzesPage({ searchParams }) {
   const studentUser = await getCurrentUser("STUDENT", { id: true, email: true })
   if (!studentUser) redirect("/student/login")
+  const resolvedSearchParams = await searchParams
+  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
   const nowTs = new Date().getTime()
   const quizzes = await prisma.quiz.findMany({
@@ -29,10 +31,11 @@ export default async function StudentQuizzesPage() {
       status: "PUBLISHED",
       module: {
         enrollments: {
-          some: { userId: studentUser.id, status: "ACTIVE" },
+            some: { userId: studentUser.id, status: "ACTIVE" },
+          },
+          ...(moduleCodeFilter ? { code: moduleCodeFilter } : {}),
         },
       },
-    },
     include: { module: { select: { code: true, name: true } } },
     orderBy: [{ module: { code: "asc" } }, { dueAt: "asc" }, { createdAt: "desc" }],
   })

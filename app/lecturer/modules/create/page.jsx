@@ -49,7 +49,7 @@ export default function CreateModulePage() {
       })
 
       setTimeout(() => {
-        router.push("/lecturer")
+        router.push("/lecturer/modules")
       }, 500)
     } catch (err) {
       console.error(err)

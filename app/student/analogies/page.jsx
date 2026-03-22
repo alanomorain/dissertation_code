@@ -5,7 +5,7 @@ import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
-export default async function StudentAnalogiesPage() {
+export default async function StudentAnalogiesPage({ searchParams }) {
   const studentUser = await getCurrentUser("STUDENT", {
     id: true,
     email: true,
@@ -16,9 +16,14 @@ export default async function StudentAnalogiesPage() {
 
   const activeEnrollments = await prisma.moduleEnrollment.findMany({
     where: { userId: studentUser.id, status: "ACTIVE" },
-    select: { moduleId: true },
+    include: { module: { select: { code: true } } },
   })
-  const moduleIds = activeEnrollments.map((enrollment) => enrollment.moduleId)
+  const resolvedSearchParams = await searchParams
+  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
+
+  const moduleIds = activeEnrollments
+    .filter((enrollment) => !moduleCodeFilter || enrollment.module.code === moduleCodeFilter)
+    .map((enrollment) => enrollment.moduleId)
 
   const analogies = moduleIds.length
     ? await prisma.analogySet.findMany({

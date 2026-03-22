@@ -48,6 +48,7 @@ export default async function StudentDashboard() {
   let completionRate = 0
   let averageScore = 0
   let upcomingQuizzes = []
+  let lectureCount = 0
   let databaseUnavailable = false
 
   try {
@@ -79,6 +80,20 @@ export default async function StudentDashboard() {
           take: 4,
         })
       : []
+
+    lectureCount = moduleIds.length
+      ? await prisma.lecture.count({
+          where: {
+            moduleId: { in: moduleIds },
+            analogySets: {
+              some: {
+                status: "ready",
+                reviewStatus: "APPROVED",
+              },
+            },
+          },
+        })
+      : 0
 
     quizAttempts = await prisma.quizAttempt.findMany({
       where: {
@@ -176,7 +191,17 @@ export default async function StudentDashboard() {
             <p className="text-sm text-slate-300 mb-3">
               View approved analogies from your enrolled modules, complete published quizzes, and track your performance trends.
             </p>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+              <div className={ui.cardInner}>
+                <h3 className="text-base font-semibold mb-1">Modules</h3>
+                <p className="text-sm text-slate-300 mb-3">Open your enrolled module spaces.</p>
+                <Link href="/student/modules" className={ui.buttonPrimary}>View modules</Link>
+              </div>
+              <div className={ui.cardInner}>
+                <h3 className="text-base font-semibold mb-1">Lectures</h3>
+                <p className="text-sm text-slate-300 mb-3">Browse lecture-specific content and analogies.</p>
+                <Link href="/student/lectures" className={ui.buttonPrimary}>View lectures</Link>
+              </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Analogies</h3>
                 <p className="text-sm text-slate-300 mb-3">Browse module-specific analogies approved by your lecturer.</p>
@@ -214,6 +239,7 @@ export default async function StudentDashboard() {
                 <h3 className={ui.cardHeader}>Quick stats</h3>
                 <ul className="mb-4 space-y-1 text-sm text-slate-300">
                   <li>• {activeEnrollments.length} active modules</li>
+                  <li>• {lectureCount} lectures with approved analogies</li>
                   <li>• {publishedQuizCount} published quizzes</li>
                   <li>• {recentAnalogies.length} approved analogies</li>
                   <li>• {completedQuizCount} quizzes completed</li>

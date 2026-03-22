@@ -86,13 +86,18 @@ function SidebarSection({ title, helperText, quizzes, nowTs }) {
   )
 }
 
-export default async function LecturerQuizzesPage() {
+export default async function LecturerQuizzesPage({ searchParams }) {
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
   if (!lecturerUser) redirect("/lecturer/login")
+  const resolvedSearchParams = await searchParams
+  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
   const nowTs = new Date().getTime()
   const quizzes = await prisma.quiz.findMany({
-    where: { ownerId: lecturerUser.id },
+    where: {
+      ownerId: lecturerUser.id,
+      ...(moduleCodeFilter ? { module: { code: moduleCodeFilter } } : {}),
+    },
     include: {
       module: { select: { code: true, name: true } },
       _count: { select: { questions: true, attempts: true } },

@@ -73,6 +73,7 @@ model User {
   createdAt     DateTime @default(now())
 
   modulesTaught Module[]           @relation("LecturerModules")
+  lectures      Lecture[]
   enrollments   ModuleEnrollment[]
   analogySets   AnalogySet[]       @relation("AnalogyOwner")
   ownedQuizzes  Quiz[]             @relation("QuizOwner")
@@ -93,8 +94,30 @@ model Module {
   lecturerId  String?
   lecturer    User?              @relation("LecturerModules", fields: [lecturerId], references: [id])
   enrollments ModuleEnrollment[]
+  lectures    Lecture[]
   analogySets AnalogySet[]
   quizzes     Quiz[]
+}
+
+model Lecture {
+  id             String   @id @default(cuid())
+  title          String
+  sourceType     String? // manual | slides | import
+  sourceFilename String?
+  sourceText     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  moduleId String
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  ownerId String
+  owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  analogySets AnalogySet[]
+
+  @@index([moduleId, createdAt])
+  @@index([ownerId, createdAt])
 }
 
 model AnalogySet {
@@ -114,6 +137,8 @@ model AnalogySet {
   // module association
   moduleId String?
   module   Module? @relation(fields: [moduleId], references: [id])
+  lectureId String?
+  lecture   Lecture? @relation(fields: [lectureId], references: [id])
 
   // content
   sourceText String? // optional: extracted/pasted text
@@ -121,6 +146,8 @@ model AnalogySet {
 
   errorMessage String?
   interactions AnalogyInteraction[]
+
+  @@index([lectureId])
 }
 
 model ModuleEnrollment {

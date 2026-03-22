@@ -180,6 +180,10 @@ export async function POST(req) {
     const sourceText = typeof body.sourceText === "string" ? body.sourceText.slice(0, MAX_TEXT_LENGTH) : ""
     const selectedAnalogies = Array.isArray(body.selectedAnalogies) ? body.selectedAnalogies.slice(0, MAX_TOPICS) : []
     const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim().toUpperCase() : ""
+    const lectureId = typeof body.lectureId === "string" ? body.lectureId.trim() : ""
+    const lectureTitle = typeof body.lectureTitle === "string" ? body.lectureTitle.trim().slice(0, 200) : ""
+    const lectureSourceType = typeof body.lectureSourceType === "string" ? body.lectureSourceType.trim().slice(0, 50) : ""
+    const sourceFilename = typeof body.sourceFilename === "string" ? body.sourceFilename.trim().slice(0, 255) : ""
     const persist = Boolean(body.persist)
 
     // Two modes: single concept or batch topics
@@ -220,6 +224,34 @@ export async function POST(req) {
       }
     }
 
+    let lectureRecord = null
+    if (lectureId) {
+      lectureRecord = await prisma.lecture.findFirst({
+        where: {
+          id: lectureId,
+          ownerId: lecturer.id,
+        },
+      })
+
+      if (!lectureRecord) {
+        return Response.json({ error: "Unknown lecture for this lecturer" }, { status: 400 })
+      }
+      if (moduleRecord && lectureRecord.moduleId !== moduleRecord.id) {
+        return Response.json({ error: "Lecture does not belong to selected module" }, { status: 400 })
+      }
+    } else if (persist && moduleRecord && lectureTitle) {
+      lectureRecord = await prisma.lecture.create({
+        data: {
+          title: lectureTitle,
+          ownerId: lecturer.id,
+          moduleId: moduleRecord.id,
+          sourceType: lectureSourceType || (isBatchMode ? "slides" : "manual"),
+          sourceFilename: sourceFilename || null,
+          sourceText: sourceText || notes || null,
+        },
+      })
+    }
+
     // If persist is true, create DB row first
     if (persist) {
       const analogySet = await prisma.analogySet.create({
@@ -232,6 +264,7 @@ export async function POST(req) {
           sourceText: sourceText || notes || "",
           ownerId: lecturer.id,
           moduleId: moduleRecord?.id || null,
+          lectureId: lectureRecord?.id || null,
         },
       })
       analogySetId = analogySet.id

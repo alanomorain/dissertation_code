@@ -12,6 +12,7 @@ function UploadSlidesPageInner() {
   const [modules, setModules] = useState([])
   const [moduleCode, setModuleCode] = useState("")
   const [slidesFile, setSlidesFile] = useState(null)
+  const [lectureTitle, setLectureTitle] = useState("")
   const [notes, setNotes] = useState("")
   const [saving, setSaving] = useState(false)          // for upload+topics
   const [message, setMessage] = useState(null)
@@ -75,6 +76,10 @@ function UploadSlidesPageInner() {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
     setSlidesFile(file || null)
+    if (file && !lectureTitle.trim()) {
+      const baseName = file.name.replace(/\.[^/.]+$/, "")
+      setLectureTitle(baseName.slice(0, 200))
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -273,6 +278,10 @@ function UploadSlidesPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           persist: true,
+          moduleCode,
+          lectureTitle: lectureTitle.trim() || `Lecture from ${slidesFile?.name || "slides"}`,
+          lectureSourceType: "slides",
+          sourceFilename: slidesFile?.name || "",
           topics,
           selectedAnalogies: selectedTopics,
           sourceText: extractedText,
@@ -433,6 +442,26 @@ function UploadSlidesPageInner() {
                 </select>
                 <p className="text-xs text-slate-400">
                   Choose which module these slides belong to, or create a new one.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="lectureTitle"
+                  className="block text-sm font-medium text-slate-200"
+                >
+                  Lecture title
+                </label>
+                <input
+                  id="lectureTitle"
+                  type="text"
+                  value={lectureTitle}
+                  onChange={(e) => setLectureTitle(e.target.value)}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  placeholder="e.g., Week 3 - Distributed Systems Fundamentals"
+                />
+                <p className="text-xs text-slate-400">
+                  A lecture record will be created when you save analogies.
                 </p>
               </div>
 

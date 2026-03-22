@@ -4,7 +4,7 @@ import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
-export default async function AnalogiesDashboardPage() {
+export default async function AnalogiesDashboardPage({ searchParams }) {
   const lecturerUser = await getCurrentUser("LECTURER", {
     id: true,
     email: true,
@@ -14,8 +14,27 @@ export default async function AnalogiesDashboardPage() {
     redirect("/lecturer/login")
   }
 
+  const resolvedSearchParams = await searchParams
+  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
+
+  let moduleFilterId = null
+  if (moduleCodeFilter) {
+    const moduleRecord = await prisma.module.findFirst({
+      where: { code: moduleCodeFilter, lecturerId: lecturerUser.id },
+      select: { id: true },
+    })
+    moduleFilterId = moduleRecord?.id || "missing-module"
+  }
+
   const analogies = await prisma.analogySet.findMany({
-    where: { ownerId: lecturerUser.id },
+    where: {
+      ownerId: lecturerUser.id,
+      ...(moduleCodeFilter ? { moduleId: moduleFilterId } : {}),
+    },
+    include: {
+      module: { select: { code: true } },
+      lecture: { select: { title: true } },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -124,7 +143,7 @@ export default async function AnalogiesDashboardPage() {
                         {analogy.title || "Untitled"}
                       </p>
                       <p className="font-medium">
-                        {analogy.source || "N/A"}
+                        {analogy.module?.code || "No module"} · {analogy.lecture?.title || "No lecture"}
                       </p>
                       <p className="text-xs text-slate-400">
                         Status: {analogy.status}

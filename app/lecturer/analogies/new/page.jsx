@@ -9,9 +9,11 @@ function NewAnalogyPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [modules, setModules] = useState([])
+  const [lectures, setLectures] = useState([])
   const [title, setTitle] = useState("")
   const [concept, setConcept] = useState("")
   const [moduleCode, setModuleCode] = useState("")
+  const [lectureId, setLectureId] = useState("")
   const [analogyText, setAnalogyText] = useState("")
   const [imageFile, setImageFile] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -59,6 +61,35 @@ function NewAnalogyPageInner() {
     }
   }, [modules, moduleFromUrl, moduleCode])
 
+  useEffect(() => {
+    if (!moduleCode) {
+      setLectures([])
+      setLectureId("")
+      return
+    }
+
+    const fetchLectures = async () => {
+      try {
+        const res = await fetch(`/api/lectures?moduleCode=${encodeURIComponent(moduleCode)}`)
+        if (!res.ok) return
+        const data = await res.json()
+        const nextLectures = Array.isArray(data) ? data : []
+        setLectures(nextLectures)
+        if (nextLectures.length === 0) {
+          setLectureId("")
+        } else {
+          setLectureId((currentLectureId) =>
+            nextLectures.some((lecture) => lecture.id === currentLectureId) ? currentLectureId : nextLectures[0].id,
+          )
+        }
+      } catch (err) {
+        console.error("Failed to fetch lectures:", err)
+      }
+    }
+
+    fetchLectures()
+  }, [moduleCode])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -83,6 +114,7 @@ function NewAnalogyPageInner() {
           title,
           concept,
           moduleCode,
+          lectureId: lectureId || undefined,
           notes: analogyText,
           persist: true,
         }),
@@ -241,6 +273,31 @@ function NewAnalogyPageInner() {
                 </select>
                 <p className="text-xs text-slate-400">
                   Choose the module this analogy belongs to.
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="lecture"
+                  className="block text-sm font-medium text-slate-200"
+                >
+                  Lecture (optional)
+                </label>
+                <select
+                  id="lecture"
+                  value={lectureId}
+                  onChange={(e) => setLectureId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                >
+                  <option value="">{lectures.length === 0 ? "No lectures yet for this module" : "No lecture selected"}</option>
+                  {lectures.map((lecture) => (
+                    <option key={lecture.id} value={lecture.id}>
+                      {lecture.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-400">
+                  If selected, the analogy is attached to this lecture.
                 </p>
               </div>
 
