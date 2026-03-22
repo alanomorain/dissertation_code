@@ -73,6 +73,36 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
           },
         },
       },
+      lectures: {
+        include: {
+          analogySets: {
+            select: {
+              id: true,
+              interactions: {
+                where: from ? { createdAt: { gte: from } } : {},
+                select: { userId: true, createdAt: true },
+              },
+            },
+          },
+          quizzes: {
+            include: {
+              attempts: {
+                where: {
+                  status: "SUBMITTED",
+                  ...(from ? { submittedAt: { gte: from } } : {}),
+                },
+                select: {
+                  id: true,
+                  score: true,
+                  studentId: true,
+                  submittedAt: true,
+                  quizId: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 
@@ -101,9 +131,37 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
     return {
       id: quiz.id,
       title: quiz.title,
+      lectureId: quiz.lectureId || "",
       completions,
       revisits,
       avgScore,
+    }
+  })
+
+  const lectureRows = moduleRecord.lectures.map((lecture) => {
+    const lectureAttempts = lecture.quizzes.flatMap((quiz) => quiz.attempts)
+    const participants = new Set(lectureAttempts.map((attempt) => attempt.studentId)).size
+    const avgScore = lectureAttempts.length
+      ? Math.round(lectureAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / lectureAttempts.length)
+      : 0
+    const revisits = lectureAttempts.reduce((acc, attempt) => {
+      const key = `${attempt.quizId}:${attempt.studentId}`
+      acc[key] = (acc[key] || 0) + 1
+      return acc
+    }, {})
+    const revisitCount = Object.values(revisits).reduce((total, count) => total + Math.max(0, count - 1), 0)
+    const analogyViews = lecture.analogySets.reduce((total, set) => total + set.interactions.length, 0)
+
+    return {
+      id: lecture.id,
+      title: lecture.title,
+      quizCount: lecture.quizzes.length,
+      analogySetCount: lecture.analogySets.length,
+      analogyViews,
+      completions: lectureAttempts.length,
+      participants,
+      avgScore,
+      revisits: revisitCount,
     }
   })
 
@@ -195,7 +253,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Students</p><p className="mt-1 text-2xl font-semibold">{activeStudentIds.size}</p></div>
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Participation</p><p className="mt-1 text-2xl font-semibold">{participationRate}%</p></div>
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Average quiz score</p><p className="mt-1 text-2xl font-semibold">{avgQuizScore}%</p></div>
-              <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Lecture instances</p><p className="mt-1 text-2xl font-semibold">{moduleRecord.analogySets.length}</p></div>
+              <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Lectures</p><p className="mt-1 text-2xl font-semibold">{moduleRecord.lectures.length}</p></div>
             </div>
           </div>
 
@@ -227,11 +285,33 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                     <p className="text-xs text-slate-400">
                       Completions (views): {quiz.completions} · Revisits: {quiz.revisits}
                     </p>
+                    <p className="text-xs text-slate-400">Lecture linked: {quiz.lectureId ? "Yes" : "No"}</p>
                     <p className="text-xs text-slate-400">Average score: {quiz.avgScore}%</p>
                   </div>
                 ))}
                 {quizRows.length === 0 ? <p className={ui.textSmall}>No quizzes in this module yet.</p> : null}
               </div>
+            </div>
+          </div>
+
+          <div className={ui.cardFull}>
+            <h2 className={ui.cardHeader}>Lecture performance</h2>
+            <div className="space-y-2 text-sm">
+              {lectureRows.map((lecture) => (
+                <div key={lecture.id} className={ui.cardInner}>
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium">{lecture.title}</p>
+                    <Link href={`/lecturer/lectures/${lecture.id}`} className={ui.buttonSmall}>Open lecture</Link>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Quizzes: {lecture.quizCount} · Completions: {lecture.completions} · Participants: {lecture.participants} · Revisits: {lecture.revisits}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Avg quiz score: {lecture.avgScore}% · Analogy sets: {lecture.analogySetCount} · Analogy views: {lecture.analogyViews}
+                  </p>
+                </div>
+              ))}
+              {lectureRows.length === 0 ? <p className={ui.textSmall}>No lectures in this module yet.</p> : null}
             </div>
           </div>
         </div>

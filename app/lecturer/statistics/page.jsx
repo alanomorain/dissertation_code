@@ -50,6 +50,55 @@ function quizRevisitCount(submittedAttempts) {
   return Object.values(perStudent).reduce((total, count) => total + Math.max(0, count - 1), 0)
 }
 
+function createLectureRows(module, fromDate) {
+  const rows = module.lectures.map((lecture) => {
+    const lectureAttempts = lecture.quizzes.flatMap((quiz) => quiz.attempts)
+    const participants = new Set(lectureAttempts.map((attempt) => attempt.studentId)).size
+    const avgScore = lectureAttempts.length
+      ? Math.round(lectureAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / lectureAttempts.length)
+      : 0
+    const revisits = quizRevisitCount(lectureAttempts)
+    const interactions = lecture.analogySets.flatMap((set) => {
+      const scopedInteractions = fromDate
+        ? set.interactions.filter((interaction) => new Date(interaction.createdAt) >= fromDate)
+        : set.interactions
+      return scopedInteractions
+    })
+
+    return {
+      id: lecture.id,
+      title: lecture.title,
+      analogySetCount: lecture.analogySets.length,
+      interactionCount: interactions.length,
+      quizCount: lecture.quizzes.length,
+      completions: lectureAttempts.length,
+      participants,
+      avgScore,
+      revisits,
+    }
+  })
+
+  const unassignedQuizzes = module.quizzes.filter((quiz) => !quiz.lectureId)
+  if (unassignedQuizzes.length > 0) {
+    const attempts = unassignedQuizzes.flatMap((quiz) => quiz.attempts)
+    rows.push({
+      id: "unassigned",
+      title: "Unassigned quizzes",
+      analogySetCount: 0,
+      interactionCount: 0,
+      quizCount: unassignedQuizzes.length,
+      completions: attempts.length,
+      participants: new Set(attempts.map((attempt) => attempt.studentId)).size,
+      avgScore: attempts.length
+        ? Math.round(attempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / attempts.length)
+        : 0,
+      revisits: quizRevisitCount(attempts),
+    })
+  }
+
+  return rows
+}
+
 export default async function LecturerStatisticsPage({ searchParams }) {
   const lecturerUser = await getCurrentUser("LECTURER", { id: true })
   if (!lecturerUser) redirect("/lecturer/login")
@@ -85,6 +134,29 @@ export default async function LecturerStatisticsPage({ searchParams }) {
           },
         },
       },
+      lectures: {
+        include: {
+          analogySets: {
+            select: {
+              id: true,
+              interactions: {
+                select: { createdAt: true },
+              },
+            },
+          },
+          quizzes: {
+            include: {
+              attempts: {
+                where: {
+                  status: "SUBMITTED",
+                  ...(from ? { submittedAt: { gte: from } } : {}),
+                },
+                select: { score: true, studentId: true, quizId: true },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: { code: "asc" },
   })
@@ -104,11 +176,18 @@ export default async function LecturerStatisticsPage({ searchParams }) {
     const analogyStats = analogyBuckets(module.analogySets, from)
     const completions = submittedAttempts.length
     const revisits = quizRevisitCount(submittedAttempts)
+    const lectureRows = createLectureRows(module, from)
+    const lectureCompletions = lectureRows.reduce((total, lecture) => total + lecture.completions, 0)
+    const lectureAvgScore = lectureCompletions
+      ? Math.round(
+          lectureRows.reduce((total, lecture) => total + (lecture.avgScore * lecture.completions), 0) / lectureCompletions,
+        )
+      : 0
 
     return {
       code: module.code,
       name: module.name,
-      lectureInstances: module.analogySets.length,
+      lectureInstances: module.lectures.length,
       analogyStats,
       avgQuizScore,
       participationRate,
@@ -116,6 +195,9 @@ export default async function LecturerStatisticsPage({ searchParams }) {
       activeStudents,
       completions,
       revisits,
+      lectureCompletions,
+      lectureAvgScore,
+      lecturesWithQuizActivity: lectureRows.filter((lecture) => lecture.completions > 0).length,
     }
   })
 
@@ -184,7 +266,10 @@ export default async function LecturerStatisticsPage({ searchParams }) {
                         Avg quiz score: {module.avgQuizScore}% · Participation: {module.participationRate}% ({module.participants}/{module.activeStudents})
                       </p>
                       <p className="text-xs text-slate-400">
-                        Quiz completions: {module.completions} · Revisits: {module.revisits}
+                        Quiz completions: {module.completions} · Revisits: {module.revisits} · Active lectures: {module.lecturesWithQuizActivity}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Lecture-scoped avg score: {module.lectureAvgScore}% · Lecture-scoped completions: {module.lectureCompletions}
                       </p>
                     </div>
                     <span className={ui.buttonSmall}>Open module stats</span>
