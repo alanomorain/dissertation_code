@@ -46,10 +46,10 @@ export async function POST(req) {
     }
 
     const body = await req.json()
-    const { title, moduleCode, status, dueAt, publishedAt, maxAttempts, questions } = body
+    const { title, moduleCode, lectureId, status, dueAt, publishedAt, maxAttempts, questions } = body
 
-    if (!title || !moduleCode) {
-      return Response.json({ error: "title and moduleCode are required" }, { status: 400 })
+    if (!title || !moduleCode || !lectureId) {
+      return Response.json({ error: "title, moduleCode, and lectureId are required" }, { status: 400 })
     }
 
     if (!Array.isArray(questions) || questions.length === 0) {
@@ -61,6 +61,18 @@ export async function POST(req) {
     })
     if (!moduleRecord) {
       return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
+    }
+
+    const lectureRecord = await prisma.lecture.findFirst({
+      where: {
+        id: lectureId,
+        ownerId: lecturer.id,
+        moduleId: moduleRecord.id,
+      },
+      select: { id: true },
+    })
+    if (!lectureRecord) {
+      return Response.json({ error: "Unknown lecture for this lecturer/module" }, { status: 400 })
     }
 
     const normalizedQuestions = questions
@@ -125,6 +137,7 @@ export async function POST(req) {
       data: {
         title: title.trim().slice(0, 200),
         moduleId: moduleRecord.id,
+        lectureId: lectureRecord.id,
         ownerId: lecturer.id,
         status: isPublished ? "PUBLISHED" : "DRAFT",
         visibility: "ENROLLED",

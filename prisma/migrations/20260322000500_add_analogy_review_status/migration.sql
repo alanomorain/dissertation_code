@@ -1,0 +1,10 @@
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ReviewStatus') THEN
+    CREATE TYPE "ReviewStatus" AS ENUM ('DRAFT', 'APPROVED', 'CHANGES');
+  END IF;
+END $$;
+
+ALTER TABLE "AnalogySet"
+ADD COLUMN IF NOT EXISTS "reviewStatus" "ReviewStatus" NOT NULL DEFAULT 'DRAFT',
+ADD COLUMN IF NOT EXISTS "approvedAt" TIMESTAMP(3);

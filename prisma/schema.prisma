@@ -115,6 +115,7 @@ model Lecture {
   owner   User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
   analogySets AnalogySet[]
+  quizzes     Quiz[]
 
   @@index([moduleId, createdAt])
   @@index([ownerId, createdAt])
@@ -178,6 +179,8 @@ model Quiz {
 
   moduleId String
   module   Module @relation(fields: [moduleId], references: [id])
+  lectureId String?
+  lecture   Lecture? @relation(fields: [lectureId], references: [id])
 
   ownerId String
   owner   User   @relation("QuizOwner", fields: [ownerId], references: [id])
@@ -186,6 +189,7 @@ model Quiz {
   attempts  QuizAttempt[]
 
   @@index([moduleId])
+  @@index([lectureId])
   @@index([ownerId])
   @@index([status])
 }

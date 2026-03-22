@@ -97,27 +97,29 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}))
-    const moduleCode = String(body?.moduleCode || "").trim().toUpperCase()
+    const lectureId = String(body?.lectureId || "").trim()
     const feedback = String(body?.feedback || "").trim().slice(0, 1500)
     const questionCount = Math.max(1, Math.min(Number(body?.questionCount) || 5, 12))
 
-    if (!moduleCode) {
-      return Response.json({ error: "moduleCode is required" }, { status: 400 })
+    if (!lectureId) {
+      return Response.json({ error: "lectureId is required" }, { status: 400 })
     }
 
-    const moduleRecord = await prisma.module.findFirst({
-      where: { code: moduleCode, lecturerId: lecturer.id },
-      select: { id: true, code: true, name: true },
+    const lectureRecord = await prisma.lecture.findFirst({
+      where: { id: lectureId, ownerId: lecturer.id },
+      include: {
+        module: { select: { id: true, code: true, name: true } },
+      },
     })
 
-    if (!moduleRecord) {
-      return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
+    if (!lectureRecord) {
+      return Response.json({ error: "Unknown lecture for this lecturer" }, { status: 400 })
     }
 
     const analogySets = await prisma.analogySet.findMany({
       where: {
         ownerId: lecturer.id,
-        moduleId: moduleRecord.id,
+        lectureId: lectureRecord.id,
         status: "ready",
       },
       select: {
@@ -154,7 +156,8 @@ Return valid JSON only, with no markdown and no prose.
         {
           role: "user",
           content: `
-Module: ${moduleRecord.code} - ${moduleRecord.name}
+Module: ${lectureRecord.module.code} - ${lectureRecord.module.name}
+Lecture: ${lectureRecord.title}
 
 Analogy context:
 ${topics.map((item, index) => `${index + 1}. Topic: ${item.topic}\nAnalogy: ${item.analogy}`).join("\n\n")}
@@ -194,7 +197,11 @@ Return JSON with this exact shape:
 
     return Response.json({
       questions,
-      module: moduleRecord,
+      module: lectureRecord.module,
+      lecture: {
+        id: lectureRecord.id,
+        title: lectureRecord.title,
+      },
       context: {
         analogySetCount: analogySets.length,
         topicCount: topics.length,

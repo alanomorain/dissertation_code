@@ -51,7 +51,9 @@ function LecturerQuizWizardPageInner() {
   const moduleFromUrl = useMemo(() => searchParams.get("module") || "", [searchParams])
 
   const [modules, setModules] = useState([])
+  const [lectures, setLectures] = useState([])
   const [selectedModule, setSelectedModule] = useState("")
+  const [selectedLectureId, setSelectedLectureId] = useState("")
   const [quizTitle, setQuizTitle] = useState("")
   const [dueAt, setDueAt] = useState("")
   const [publishedAt, setPublishedAt] = useState("")
@@ -79,9 +81,31 @@ function LecturerQuizWizardPageInner() {
       .catch(() => setModules([]))
   }, [moduleFromUrl])
 
-  const handleGenerate = async () => {
+  useEffect(() => {
     if (!selectedModule) {
-      setMessage("Select a module first.")
+      setLectures([])
+      setSelectedLectureId("")
+      return
+    }
+
+    fetch(`/api/lectures?moduleCode=${encodeURIComponent(selectedModule)}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        const next = Array.isArray(data) ? data : []
+        setLectures(next)
+        setSelectedLectureId((current) => (
+          next.some((lecture) => lecture.id === current) ? current : (next[0]?.id || "")
+        ))
+      })
+      .catch(() => {
+        setLectures([])
+        setSelectedLectureId("")
+      })
+  }, [selectedModule])
+
+  const handleGenerate = async () => {
+    if (!selectedModule || !selectedLectureId) {
+      setMessage("Select a module and lecture first.")
       return
     }
 
@@ -92,7 +116,7 @@ function LecturerQuizWizardPageInner() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          moduleCode: selectedModule,
+          lectureId: selectedLectureId,
           feedback: generationFeedback || undefined,
           questionCount: 5,
         }),
@@ -102,7 +126,10 @@ function LecturerQuizWizardPageInner() {
       if (!res.ok) throw new Error(data.error || "Failed to generate questions")
 
       setQuestions(Array.isArray(data.questions) ? data.questions : [])
-      setGenerationContext(data.context || null)
+      setGenerationContext({
+        ...(data.context || {}),
+        lectureTitle: data.lecture?.title || "",
+      })
       setMessage("Questions generated. You can now review and edit before saving.")
     } catch (err) {
       setQuestions([])
@@ -116,8 +143,8 @@ function LecturerQuizWizardPageInner() {
   const handleCreate = async () => {
     const normalizedQuestions = normalizeQuestionsForSave(questions)
 
-    if (!quizTitle.trim() || !selectedModule) {
-      setMessage("Title and module are required.")
+    if (!quizTitle.trim() || !selectedModule || !selectedLectureId) {
+      setMessage("Title, module, and lecture are required.")
       return
     }
 
@@ -135,6 +162,7 @@ function LecturerQuizWizardPageInner() {
         body: JSON.stringify({
           title: quizTitle,
           moduleCode: selectedModule,
+          lectureId: selectedLectureId,
           status,
           dueAt: dueAt || null,
           publishedAt: status === "PUBLISHED" ? (publishedAt || null) : null,
@@ -180,6 +208,17 @@ function LecturerQuizWizardPageInner() {
                 </select>
               </label>
               <label className="space-y-1">
+                <span className="font-medium">Lecture</span>
+                <select
+                  value={selectedLectureId}
+                  onChange={(e) => setSelectedLectureId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                >
+                  {lectures.length === 0 ? <option value="">No lectures available for this module</option> : null}
+                  {lectures.map((lecture) => <option key={lecture.id} value={lecture.id}>{lecture.title}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
                 <span className="font-medium">Status</span>
                 <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
                   <option value="DRAFT">Draft</option>
@@ -209,7 +248,7 @@ function LecturerQuizWizardPageInner() {
                 </button>
               </div>
               <p className="text-xs text-slate-400">
-                Generation is only available when the selected module has at least one ready analogy saved by this lecturer.
+                Generation is only available when the selected lecture has at least one ready analogy saved by this lecturer.
               </p>
               <label className="space-y-1 text-sm">
                 <span className="font-medium">Feedback for regeneration (optional)</span>
@@ -223,7 +262,7 @@ function LecturerQuizWizardPageInner() {
               </label>
               {generationContext ? (
                 <p className="text-xs text-slate-400">
-                  Using {generationContext.topicCount} topic(s) from {generationContext.analogySetCount} analogy set(s).
+                  Using {generationContext.topicCount} topic(s) from {generationContext.analogySetCount} analogy set(s) in lecture {generationContext.lectureTitle || "selected lecture"}.
                 </p>
               ) : null}
             </div>
