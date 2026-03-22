@@ -44,12 +44,6 @@ export default async function LecturerAnalogyDetailPage({ params }) {
               ← Back to list
             </Link>
             <Link
-              href={`/lecturer/analogies/${analogy.id}/review`}
-              className={ui.buttonSecondary}
-            >
-              Review
-            </Link>
-            <Link
               href={`/lecturer/analogies/${analogy.id}/edit`}
               className={ui.buttonPrimary}
             >

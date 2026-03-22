@@ -138,6 +138,10 @@ function normalizeTopics(topics) {
       topic: item.topic || "",
       analogy: item.analogy || "",
       feedback: item.feedback || "",
+      imageUrl: item.imageUrl || "",
+      imageStyle: item.imageStyle || "",
+      videoUrl: item.videoUrl || "",
+      videoNotes: item.videoNotes || "",
     }))
 }
 
@@ -326,6 +330,10 @@ export async function POST(req) {
                   topic: item.topic,
                   analogy: item.analogy,
                   feedback: item.feedback || "",
+                  imageUrl: item.imageUrl || "",
+                  imageStyle: item.imageStyle || "",
+                  videoUrl: item.videoUrl || "",
+                  videoNotes: item.videoNotes || "",
                 }))
             : generated
                 .filter((item) => item.analogies && item.analogies.length > 0)
@@ -333,6 +341,10 @@ export async function POST(req) {
                   topic: item.original || "",
                   analogy: item.analogies[0] || "",
                   feedback: "",
+                  imageUrl: "",
+                  imageStyle: "",
+                  videoUrl: "",
+                  videoNotes: "",
                 }))
 
           const updated = await prisma.analogySet.update({
