@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
+import DeleteLectureButton from "./components/DeleteLectureButton"
 
 export default async function LecturerLecturesPage({ searchParams }) {
   const lecturer = await getCurrentUser("LECTURER", { id: true })
@@ -77,12 +78,15 @@ export default async function LecturerLecturesPage({ searchParams }) {
             ) : (
               <div className="space-y-3 text-sm">
                 {lectures.map((lecture) => (
-                  <Link key={lecture.id} href={`/lecturer/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-indigo-400 transition`}>
-                    <p className="font-semibold text-slate-100">{lecture.title}</p>
-                    <p className="text-xs text-slate-400">
-                      {lecture.module.code} · {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
-                    </p>
-                  </Link>
+                  <div key={lecture.id} className={`${ui.cardList} flex items-start justify-between gap-3`}>
+                    <Link href={`/lecturer/lectures/${lecture.id}`} className="min-w-0 hover:text-indigo-200 transition">
+                      <p className="font-semibold text-slate-100 truncate">{lecture.title}</p>
+                      <p className="text-xs text-slate-400">
+                        {lecture.module.code} · {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
+                      </p>
+                    </Link>
+                    <DeleteLectureButton lectureId={lecture.id} lectureTitle={lecture.title} />
+                  </div>
                 ))}
               </div>
             )}

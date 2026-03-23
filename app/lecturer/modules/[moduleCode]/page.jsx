@@ -5,6 +5,21 @@ import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
 import DeleteAnalogyButton from "../components/DeleteAnalogyButton"
 
+function extractTopicPreview(topicsJson) {
+  const topics = Array.isArray(topicsJson?.topics) ? topicsJson.topics : []
+  const first = topics.find((topic) => topic && (topic.topic || topic.analogy))
+  if (!first) return null
+  return {
+    topic: String(first.topic || "").trim() || "Untitled topic",
+    analogy: String(first.analogy || "").trim() || "No analogy text available.",
+  }
+}
+
+function clampPercent(value) {
+  if (!Number.isFinite(value)) return 0
+  return Math.max(0, Math.min(100, Math.round(value)))
+}
+
 export default async function LecturerModuleDetailPage({ params }) {
   const lecturer = await getCurrentUser("LECTURER", { id: true })
   if (!lecturer) redirect("/lecturer/login")
@@ -22,23 +37,52 @@ export default async function LecturerModuleDetailPage({ params }) {
         orderBy: { createdAt: "desc" },
       },
       analogySets: {
-        select: { id: true, title: true, createdAt: true, lecture: { select: { title: true } } },
+        select: { id: true, title: true, topicsJson: true, createdAt: true, lecture: { select: { title: true } } },
         orderBy: { createdAt: "desc" },
-        take: 8,
+        take: 3,
       },
       quizzes: {
-        select: { id: true, title: true, status: true, createdAt: true },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          createdAt: true,
+          attempts: {
+            where: { status: "SUBMITTED" },
+            select: { score: true },
+          },
+        },
         orderBy: { createdAt: "desc" },
-        take: 8,
+        take: 6,
       },
       enrollments: {
         where: { status: "ACTIVE" },
         select: { id: true },
       },
+      _count: {
+        select: {
+          lectures: true,
+          analogySets: true,
+          quizzes: true,
+        },
+      },
     },
   })
 
   if (!moduleRecord) redirect("/lecturer/modules")
+
+  const quizPerformanceRows = moduleRecord.quizzes.map((quiz) => {
+    const attemptCount = quiz.attempts.length
+    const avgScore = attemptCount
+      ? Math.round(quiz.attempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / attemptCount)
+      : 0
+    return {
+      id: quiz.id,
+      title: quiz.title,
+      avgScore: clampPercent(avgScore),
+      attemptCount,
+    }
+  })
 
   return (
     <main className={ui.page}>
@@ -60,9 +104,9 @@ export default async function LecturerModuleDetailPage({ params }) {
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className="grid gap-4 md:grid-cols-4 text-sm">
             <div className={ui.cardFull}><p className={ui.textLabel}>Students</p><p className="mt-2 text-2xl font-semibold">{moduleRecord.enrollments.length}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{moduleRecord.lectures.length}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Analogy sets</p><p className="mt-2 text-2xl font-semibold">{moduleRecord.analogySets.length}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Quizzes</p><p className="mt-2 text-2xl font-semibold">{moduleRecord.quizzes.length}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.lectures}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Analogy sets</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.analogySets}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Quizzes</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.quizzes}</p></div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
@@ -93,15 +137,75 @@ export default async function LecturerModuleDetailPage({ params }) {
                 <p className={ui.textSmall}>No analogies in this module yet.</p>
               ) : (
                 <div className="space-y-2 text-sm">
-                  {moduleRecord.analogySets.map((analogy) => (
-                    <div key={analogy.id} className={`${ui.linkCard} flex items-center justify-between gap-3`}>
-                      <Link href={`/lecturer/analogies/${analogy.id}`} className="min-w-0">
-                        <p className="font-medium truncate">{analogy.title || "Untitled"}</p>
-                        <p className="text-xs text-slate-400">
-                          {analogy.lecture?.title || "No lecture"} · {new Date(analogy.createdAt).toLocaleDateString()}
-                        </p>
-                      </Link>
-                      <DeleteAnalogyButton analogyId={analogy.id} />
+                  {moduleRecord.analogySets.map((analogy) => {
+                    const preview = extractTopicPreview(analogy.topicsJson)
+                    const analogyText = preview?.analogy ? preview.analogy.slice(0, 180) : ""
+                    return (
+                      <div key={analogy.id} className={`${ui.linkCard} flex items-start justify-between gap-3`}>
+                        <Link href={`/lecturer/analogies/${analogy.id}`} className="min-w-0">
+                          {preview ? (
+                            <>
+                              <p className="text-sm text-slate-200">
+                                <span className="font-medium">{preview.topic}</span>
+                                {" - "}
+                                <span>{analogyText}{preview.analogy.length > 180 ? "..." : ""}</span>
+                              </p>
+                            </>
+                          ) : (
+                            <p className="font-medium truncate">{analogy.title || "Untitled analogy"}</p>
+                          )}
+                          <p className="text-xs text-slate-400 mt-1">
+                            {analogy.lecture?.title || "No lecture"} · {new Date(analogy.createdAt).toLocaleDateString()}
+                          </p>
+                        </Link>
+                        <DeleteAnalogyButton analogyId={analogy.id} />
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className={ui.cardFull}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className={ui.cardHeader}>Quizzes</h2>
+                <Link href={`/lecturer/quizzes?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>View all</Link>
+              </div>
+              {moduleRecord.quizzes.length === 0 ? (
+                <p className={ui.textSmall}>No quizzes in this module yet.</p>
+              ) : (
+                <div className="space-y-2 text-sm">
+                  {moduleRecord.quizzes.map((quiz) => (
+                    <Link key={quiz.id} href={`/lecturer/quizzes/${quiz.id}`} className={ui.linkCard}>
+                      <p className="font-medium">{quiz.title}</p>
+                      <p className="text-xs text-slate-400">
+                        {quiz.status} · {quiz.attempts.length} submitted {quiz.attempts.length === 1 ? "attempt" : "attempts"}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={ui.cardFull}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className={ui.cardHeader}>Statistics snapshot</h2>
+                <Link href={`/lecturer/statistics/${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>Open stats</Link>
+              </div>
+              {quizPerformanceRows.length === 0 ? (
+                <p className={ui.textSmall}>No quiz data yet to chart.</p>
+              ) : (
+                <div className="space-y-3">
+                  {quizPerformanceRows.slice(0, 5).map((quiz) => (
+                    <div key={quiz.id}>
+                      <div className="mb-1 flex items-center justify-between gap-3 text-xs text-slate-300">
+                        <span className="truncate">{quiz.title}</span>
+                        <span>{quiz.avgScore}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-800/70">
+                        <div className="h-full rounded-full bg-indigo-400" style={{ width: `${quiz.avgScore}%` }} />
+                      </div>
+                      <p className="mt-1 text-[11px] text-slate-500">{quiz.attemptCount} submitted attempts</p>
                     </div>
                   ))}
                 </div>
