@@ -3,16 +3,12 @@ import { redirect } from "next/navigation"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
-import DeleteAnalogyButton from "../components/DeleteAnalogyButton"
 
-function extractTopicPreview(topicsJson) {
+function extractTopicTitles(topicsJson) {
   const topics = Array.isArray(topicsJson?.topics) ? topicsJson.topics : []
-  const first = topics.find((topic) => topic && (topic.topic || topic.analogy))
-  if (!first) return null
-  return {
-    topic: String(first.topic || "").trim() || "Untitled topic",
-    analogy: String(first.analogy || "").trim() || "No analogy text available.",
-  }
+  return topics
+    .map((topic) => String(topic?.topic || "").trim())
+    .filter(Boolean)
 }
 
 function clampPercent(value) {
@@ -39,7 +35,7 @@ export default async function LecturerModuleDetailPage({ params }) {
       analogySets: {
         select: { id: true, title: true, topicsJson: true, createdAt: true, lecture: { select: { title: true } } },
         orderBy: { createdAt: "desc" },
-        take: 3,
+        take: 8,
       },
       quizzes: {
         select: {
@@ -71,6 +67,15 @@ export default async function LecturerModuleDetailPage({ params }) {
 
   if (!moduleRecord) redirect("/lecturer/modules")
 
+  const allModuleTopics = await prisma.analogySet.findMany({
+    where: { moduleId: moduleRecord.id, ownerId: lecturer.id },
+    select: { topicsJson: true },
+  })
+  const analogyTopicCount = allModuleTopics.reduce((total, set) => {
+    const topics = Array.isArray(set?.topicsJson?.topics) ? set.topicsJson.topics : []
+    return total + topics.length
+  }, 0)
+
   const quizPerformanceRows = moduleRecord.quizzes.map((quiz) => {
     const attemptCount = quiz.attempts.length
     const avgScore = attemptCount
@@ -83,6 +88,18 @@ export default async function LecturerModuleDetailPage({ params }) {
       attemptCount,
     }
   })
+
+  const recentTopics = moduleRecord.analogySets
+    .flatMap((analogy) =>
+      extractTopicTitles(analogy.topicsJson).map((topicTitle, topicIndex) => ({
+        analogyId: analogy.id,
+        topicIndex,
+        topicTitle,
+        lectureTitle: analogy.lecture?.title || "No lecture",
+        createdAt: analogy.createdAt,
+      })),
+    )
+    .slice(0, 3)
 
   return (
     <main className={ui.page}>
@@ -105,7 +122,7 @@ export default async function LecturerModuleDetailPage({ params }) {
           <div className="grid gap-4 md:grid-cols-4 text-sm">
             <div className={ui.cardFull}><p className={ui.textLabel}>Students</p><p className="mt-2 text-2xl font-semibold">{moduleRecord.enrollments.length}</p></div>
             <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.lectures}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Analogy sets</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.analogySets}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Analogies</p><p className="mt-2 text-2xl font-semibold">{analogyTopicCount}</p></div>
             <div className={ui.cardFull}><p className={ui.textLabel}>Quizzes</p><p className="mt-2 text-2xl font-semibold">{moduleRecord._count.quizzes}</p></div>
           </div>
 
@@ -132,33 +149,20 @@ export default async function LecturerModuleDetailPage({ params }) {
             </div>
 
             <div className={ui.cardFull}>
-              <h2 className={ui.cardHeader}>Recent analogies</h2>
-              {moduleRecord.analogySets.length === 0 ? (
-                <p className={ui.textSmall}>No analogies in this module yet.</p>
+              <h2 className={ui.cardHeader}>Recent topics</h2>
+              {recentTopics.length === 0 ? (
+                <p className={ui.textSmall}>No topics in this module yet.</p>
               ) : (
                 <div className="space-y-2 text-sm">
-                  {moduleRecord.analogySets.map((analogy) => {
-                    const preview = extractTopicPreview(analogy.topicsJson)
-                    const analogyText = preview?.analogy ? preview.analogy.slice(0, 180) : ""
+                  {recentTopics.map((topic) => {
                     return (
-                      <div key={analogy.id} className={`${ui.linkCard} flex items-start justify-between gap-3`}>
-                        <Link href={`/lecturer/analogies/${analogy.id}`} className="min-w-0">
-                          {preview ? (
-                            <>
-                              <p className="text-sm text-slate-200">
-                                <span className="font-medium">{preview.topic}</span>
-                                {" - "}
-                                <span>{analogyText}{preview.analogy.length > 180 ? "..." : ""}</span>
-                              </p>
-                            </>
-                          ) : (
-                            <p className="font-medium truncate">{analogy.title || "Untitled analogy"}</p>
-                          )}
+                      <div key={`${topic.analogyId}-${topic.topicIndex}`} className={ui.linkCard}>
+                        <Link href={`/lecturer/analogies/${topic.analogyId}/topics/${topic.topicIndex}`} className="block min-w-0">
+                          <p className="font-medium truncate">{topic.topicTitle || "Untitled topic"}</p>
                           <p className="text-xs text-slate-400 mt-1">
-                            {analogy.lecture?.title || "No lecture"} · {new Date(analogy.createdAt).toLocaleDateString()}
+                            {topic.lectureTitle} · {new Date(topic.createdAt).toLocaleDateString()}
                           </p>
                         </Link>
-                        <DeleteAnalogyButton analogyId={analogy.id} />
                       </div>
                     )
                   })}
