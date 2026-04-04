@@ -13,6 +13,14 @@ export default async function LecturerQuizResultsPage({ params }) {
     where: { id, ownerId: lecturerUser.id },
     include: {
       questions: { select: { id: true, prompt: true } },
+      module: {
+        select: {
+          enrollments: {
+            where: { status: "ACTIVE" },
+            select: { userId: true },
+          },
+        },
+      },
       attempts: {
         where: { status: "SUBMITTED" },
         include: {
@@ -30,7 +38,11 @@ export default async function LecturerQuizResultsPage({ params }) {
     ? Math.round(attempts.reduce((acc, item) => acc + (item.score || 0), 0) / attempts.length)
     : 0
 
-  const completionRate = 100
+  const activeStudentCount = quiz.module.enrollments.length
+  const studentsWhoSubmitted = new Set(attempts.map((attempt) => attempt.studentId)).size
+  const completionRate = activeStudentCount
+    ? Math.round((studentsWhoSubmitted / activeStudentCount) * 100)
+    : 0
 
   const questionPerformance = quiz.questions.map((question) => {
     const related = attempts.flatMap((a) => a.responses.filter((r) => r.questionId === question.id))

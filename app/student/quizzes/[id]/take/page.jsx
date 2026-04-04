@@ -9,15 +9,54 @@ export default function StudentQuizTakePage() {
   const { id } = useParams()
   const router = useRouter()
   const [quiz, setQuiz] = useState(null)
+  const [loadingQuiz, setLoadingQuiz] = useState(true)
   const [answers, setAnswers] = useState({})
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    fetch(`/api/quizzes/${id}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setQuiz(data))
-      .catch(() => setQuiz(null))
+    let cancelled = false
+
+    const loadQuiz = async () => {
+      setLoadingQuiz(true)
+      setError("")
+
+      try {
+        const res = await fetch(`/api/quizzes/${id}`)
+        if (!res.ok) {
+          if (!cancelled) {
+            if (res.status === 404) {
+              setError("This quiz is unavailable or no longer accessible.")
+            } else if (res.status === 401) {
+              setError("Please sign in to access this quiz.")
+            } else {
+              setError("Unable to load this quiz right now.")
+            }
+            setQuiz(null)
+          }
+          return
+        }
+
+        const data = await res.json()
+        if (!cancelled) {
+          setQuiz(data)
+        }
+      } catch {
+        if (!cancelled) {
+          setError("Unable to load this quiz right now.")
+          setQuiz(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingQuiz(false)
+        }
+      }
+    }
+
+    loadQuiz()
+    return () => {
+      cancelled = true
+    }
   }, [id])
 
   const setAnswer = (questionId, value) => {
@@ -53,8 +92,21 @@ export default function StudentQuizTakePage() {
     }
   }
 
-  if (!quiz) {
+  if (loadingQuiz) {
     return <main className={ui.page}><section className={ui.pageSection}><div className={`${ui.containerNarrow} py-8`}><p>Loading quiz...</p></div></section></main>
+  }
+
+  if (!quiz) {
+    return (
+      <main className={ui.page}>
+        <section className={ui.pageSection}>
+          <div className={`${ui.containerNarrow} py-8 space-y-3`}>
+            <p className="text-sm text-amber-300">{error || "Quiz unavailable."}</p>
+            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
+          </div>
+        </section>
+      </main>
+    )
   }
 
   return (
