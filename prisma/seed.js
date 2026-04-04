@@ -126,8 +126,8 @@ function mcqQuestion(prompt, difficulty, correct, wrongA, wrongB) {
 
 async function main() {
   console.log('Starting database seed...')
-  const lecturerPassword = process.env.SEED_LECTURER_PASSWORD || 'LecturerPass123!'
-  const studentPassword = process.env.SEED_STUDENT_PASSWORD || 'StudentPass123!'
+  const lecturerPassword = process.env.SEED_LECTURER_PASSWORD || 'LP123!'
+  const studentPassword = process.env.SEED_STUDENT_PASSWORD || 'SP123!'
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'AdminPass123!'
 
   await prisma.quizResponse.deleteMany()
@@ -147,11 +147,11 @@ async function main() {
   })
 
   const lecturerUser = await prisma.user.create({
-    data: { email: 'lecturer@example.com', role: 'LECTURER', passwordHash: hashPassword(lecturerPassword) },
+    data: { email: 'l@example.com', role: 'LECTURER', passwordHash: hashPassword(lecturerPassword) },
   })
 
   const studentA = await prisma.user.create({
-    data: { email: 'student@example.com', studentNumber: 'S1234567', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
+    data: { email: 's@example.com', studentNumber: 'S1234567', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentB = await prisma.user.create({

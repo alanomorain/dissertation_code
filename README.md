@@ -36,8 +36,8 @@ This is the main app for my project - an educational analogy generation system f
    ```
 
 6. Use the seeded credentials to sign in:
-   - Lecturer: `lecturer@example.com` / `LecturerPass123!`
-   - Student: `student@example.com` / `StudentPass123!`
+   - Lecturer: `l@example.com` / `LP123!`
+   - Student: `s@example.com` / `SP123!`
    - Optional for invite links in development: set `NEXT_PUBLIC_APP_URL=http://localhost:3000`
 
 ### Running the Application
