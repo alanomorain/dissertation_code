@@ -1,0 +1,14 @@
+.git
+.gitignore
+.next
+node_modules
+npm-debug.log
+
+# Local environment files should not be baked into the image.
+.env
+.env.local
+.env.*.local
+
+# OS/editor artifacts
+.DS_Store
+.vscode

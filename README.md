@@ -49,6 +49,26 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+### Running Fully In Docker
+
+Build and start both app + database:
+```bash
+docker compose up --build
+```
+
+Run in background:
+```bash
+docker compose up --build -d
+```
+
+Stop services:
+```bash
+docker compose down
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+On startup, the app container runs `prisma migrate deploy` automatically before `next start`.
+
 ### Database Management
 
 - **Prisma Studio**: Visual database editor
