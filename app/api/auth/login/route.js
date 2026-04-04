@@ -13,7 +13,7 @@ export async function POST(req) {
     const password = typeof body.password === "string" ? body.password : ""
     const role = typeof body.role === "string" ? body.role.trim().toUpperCase() : ""
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "auth-login",
       limit: 10,
       windowMs: 60 * 1000,

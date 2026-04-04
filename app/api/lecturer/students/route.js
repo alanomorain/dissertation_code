@@ -59,7 +59,7 @@ export async function POST(req) {
       return csrfResponse
     }
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "lecturer-students-post",
       limit: 30,
       windowMs: 60 * 1000,
@@ -138,7 +138,7 @@ export async function PATCH(req) {
       return csrfResponse
     }
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "lecturer-students-patch",
       limit: 50,
       windowMs: 60 * 1000,

@@ -31,7 +31,7 @@ export async function POST(req) {
       return csrfResponse
     }
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "quizzes-create",
       limit: 20,
       windowMs: 60 * 1000,

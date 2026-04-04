@@ -11,7 +11,7 @@ export async function POST(req) {
     const password = typeof body.password === "string" ? body.password : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "auth-activate",
       limit: 6,
       windowMs: 10 * 60 * 1000,

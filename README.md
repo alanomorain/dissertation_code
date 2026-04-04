@@ -68,6 +68,7 @@ docker compose down
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
 On startup, the app container runs `prisma migrate deploy` automatically before `next start`.
+Docker Compose also starts Redis for distributed rate limiting.
 
 ### Database Management
 

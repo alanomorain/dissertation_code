@@ -162,7 +162,7 @@ export async function POST(req) {
       return csrfResponse
     }
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "generate-analogies-post",
       limit: 20,
       windowMs: 60 * 1000,
@@ -434,7 +434,7 @@ export async function PATCH(req) {
       return csrfResponse
     }
 
-    const rateLimitResponse = enforceRateLimit(req, {
+    const rateLimitResponse = await enforceRateLimit(req, {
       scope: "generate-analogies-patch",
       limit: 40,
       windowMs: 60 * 1000,

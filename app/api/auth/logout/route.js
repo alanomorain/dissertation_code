@@ -10,7 +10,7 @@ export async function POST(req) {
     return csrfResponse
   }
 
-  const rateLimitResponse = enforceRateLimit(req, {
+  const rateLimitResponse = await enforceRateLimit(req, {
     scope: "auth-logout",
     limit: 30,
     windowMs: 60 * 1000,
