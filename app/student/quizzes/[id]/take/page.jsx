@@ -45,6 +45,9 @@ export default function StudentQuizTakePage() {
   const questions = quiz?.questions || []
   const currentQuestion = questions[questionIndex] || null
   const isFinalQuestion = questionIndex === questions.length - 1
+  const progressPercent = questions.length > 0
+    ? Math.max(0, Math.min(99, Math.round((questionIndex / questions.length) * 100)))
+    : 0
 
   const openMediaModal = async ({ questionId, autoAdvance }) => {
     const question = questions.find((item) => item.id === questionId)
@@ -286,12 +289,16 @@ export default function StudentQuizTakePage() {
       <section className={ui.pageSection}>
         <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
-            <div className="flex items-center justify-between text-sm text-slate-400">
-              <span>Question {questionIndex + 1} of {questions.length}</span>
-              <span>{isFinalQuestion ? "Final question" : "In progress"}</span>
+            <div className="mb-4">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-800/80">
+                <div
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
 
-            <h2 className="mt-3 text-base font-semibold">{currentQuestion.prompt}</h2>
+            <h2 className="text-base font-semibold">{currentQuestion.prompt}</h2>
 
             <div className="mt-4 space-y-2 text-sm">
               {currentQuestion.options.map((option) => (
