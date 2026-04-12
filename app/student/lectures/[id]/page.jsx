@@ -5,11 +5,6 @@ import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
 
-function approvedTopicCount(analogySet) {
-  const topics = Array.isArray(analogySet?.topicsJson?.topics) ? analogySet.topicsJson.topics : []
-  return topics.length
-}
-
 export default async function StudentLectureDetailPage({ params }) {
   const student = await getCurrentUser("STUDENT", { id: true, email: true })
   if (!student) redirect("/student/login")
@@ -30,18 +25,18 @@ export default async function StudentLectureDetailPage({ params }) {
     },
     include: {
       module: { select: { code: true, name: true } },
-      analogySets: {
+      quizzes: {
         where: {
-          status: "ready",
-          reviewStatus: "APPROVED",
+          status: "PUBLISHED",
+          OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
         },
         select: {
           id: true,
           title: true,
-          createdAt: true,
-          topicsJson: true,
+          dueAt: true,
+          maxAttempts: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
       },
     },
   })
@@ -67,16 +62,16 @@ export default async function StudentLectureDetailPage({ params }) {
       <section className={ui.pageSection}>
         <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Approved analogies for this lecture</h2>
-            {lecture.analogySets.length === 0 ? (
-              <p className={ui.textSmall}>No approved analogies are linked to this lecture yet.</p>
+            <h2 className={ui.cardHeader}>Published quizzes for this lecture</h2>
+            {lecture.quizzes.length === 0 ? (
+              <p className={ui.textSmall}>No published quizzes are available for this lecture yet.</p>
             ) : (
               <div className="space-y-2 text-sm">
-                {lecture.analogySets.map((analogy) => (
-                  <Link key={analogy.id} href={`/student/analogies/${analogy.id}`} className={ui.linkCard}>
-                    <p className="font-medium">{analogy.title || "Untitled"}</p>
+                {lecture.quizzes.map((quiz) => (
+                  <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
+                    <p className="font-medium">{quiz.title || "Untitled"}</p>
                     <p className="text-xs text-slate-400">
-                      {approvedTopicCount(analogy)} topics · {new Date(analogy.createdAt).toLocaleDateString()}
+                      Max attempts: {quiz.maxAttempts} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}
                     </p>
                   </Link>
                 ))}

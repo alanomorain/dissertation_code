@@ -75,29 +75,55 @@ export async function POST(req) {
       return Response.json({ error: "Unknown lecture for this lecturer/module" }, { status: 400 })
     }
 
+    const lectureAnalogySets = await prisma.analogySet.findMany({
+      where: {
+        ownerId: lecturer.id,
+        lectureId: lectureRecord.id,
+      },
+      select: {
+        id: true,
+        topicsJson: true,
+      },
+    })
+
+    const analogySetById = new Map(lectureAnalogySets.map((set) => [set.id, set]))
+
     const normalizedQuestions = questions
       .slice(0, 50)
       .map((question, questionIndex) => {
-        const type = question?.type === "SHORT" ? "SHORT" : "MCQ"
-        const normalizedOptions = type === "SHORT"
-          ? []
-          : (Array.isArray(question?.options) ? question.options : [])
-              .slice(0, 6)
-              .map((option, optionIndex) => ({
-                text: String(option?.text || "").trim().slice(0, 300),
-                isCorrect: !!option?.isCorrect,
-                orderIndex: optionIndex,
-              }))
-              .filter((option) => option.text.length > 0)
+        const normalizedOptions = (Array.isArray(question?.options) ? question.options : [])
+          .slice(0, 6)
+          .map((option, optionIndex) => ({
+            text: String(option?.text || "").trim().slice(0, 300),
+            isCorrect: !!option?.isCorrect,
+            orderIndex: optionIndex,
+          }))
+          .filter((option) => option.text.length > 0)
+
+        const analogySetId = typeof question?.analogySetId === "string" ? question.analogySetId.trim() : ""
+        const parsedTopicIndex = Number(question?.analogyTopicIndex)
+        const analogyTopicIndex = Number.isInteger(parsedTopicIndex) && parsedTopicIndex >= 0
+          ? parsedTopicIndex
+          : null
+        const videoUrl = typeof question?.videoUrl === "string"
+          ? question.videoUrl.trim().slice(0, 2000)
+          : ""
+
+        const mappedSet = analogySetId ? analogySetById.get(analogySetId) : null
+        const topics = Array.isArray(mappedSet?.topicsJson?.topics) ? mappedSet.topicsJson.topics : []
+        const hasValidTopicIndex = analogyTopicIndex !== null && analogyTopicIndex < topics.length
 
         return {
           prompt: String(question?.prompt || "").trim().slice(0, 1000),
-          type,
+          type: "MCQ",
           difficulty: ["EASY", "MEDIUM", "HARD"].includes(question?.difficulty)
             ? question.difficulty
             : "MEDIUM",
           orderIndex: questionIndex,
           options: normalizedOptions,
+          analogySetId: mappedSet?.id || null,
+          analogyTopicIndex: hasValidTopicIndex ? analogyTopicIndex : null,
+          videoUrl: videoUrl || null,
         }
       })
       .filter((question) => question.prompt.length > 0)
@@ -107,9 +133,7 @@ export async function POST(req) {
     }
 
     const hasInvalidMcq = normalizedQuestions.some(
-      (question) =>
-        question.type === "MCQ"
-        && (question.options.length < 2 || !question.options.some((option) => option.isCorrect)),
+      (question) => question.options.length < 2 || !question.options.some((option) => option.isCorrect),
     )
 
     if (hasInvalidMcq) {
@@ -150,12 +174,12 @@ export async function POST(req) {
             type: question.type,
             difficulty: question.difficulty,
             orderIndex: question.orderIndex,
-            options:
-              question.type === "SHORT"
-                ? undefined
-                : {
-                    create: question.options,
-                  },
+            analogySetId: question.analogySetId,
+            analogyTopicIndex: question.analogyTopicIndex,
+            videoUrl: question.videoUrl,
+            options: {
+              create: question.options,
+            },
           })),
         },
       },

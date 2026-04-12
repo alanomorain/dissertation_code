@@ -341,7 +341,7 @@ async function main() {
       maxAttempts: 1,
       questions: [
         mcqQuestion('Why is multi-region replication used in cloud databases?', 'EASY', 'To improve resilience and reduce regional outage impact.', 'To eliminate the need for backups.', 'To avoid all consistency trade-offs.'),
-        { prompt: 'In your own words, explain one trade-off of synchronous replication across regions.', type: 'SHORT', difficulty: 'MEDIUM' },
+        mcqQuestion('Which trade-off is most common with synchronous cross-region replication?', 'MEDIUM', 'Higher write latency due to coordination across regions.', 'Automatic elimination of all consistency issues.', 'Zero network dependency between replicas.'),
         mcqQuestion('What is the main purpose of automated cloud backups?', 'EASY', 'To restore data after accidental deletion or corruption.', 'To make indexes unnecessary.', 'To remove latency between regions.'),
         mcqQuestion('Which pattern improves read performance for globally distributed users?', 'MEDIUM', 'Read replicas close to user regions.', 'A single write node with no replicas.', 'Disabling caching everywhere.'),
         mcqQuestion('What does eventual consistency usually imply?', 'MEDIUM', 'Recent writes may take time to appear everywhere.', 'All regions always show data instantly.', 'No conflict resolution is ever required.'),
@@ -407,7 +407,7 @@ async function main() {
         mcqQuestion(`(${title}) What is a common reason to automate deployments?`, 'EASY', 'Reduce human error and improve repeatability.', 'Increase manual change approvals per release.', 'Prevent all test execution.'),
         mcqQuestion(`(${title}) Which metric is useful for user experience tracking?`, 'MEDIUM', 'P95 request latency.', 'Number of README files.', 'Total lines of YAML.'),
         mcqQuestion(`(${title}) Why is least-privilege access recommended?`, 'MEDIUM', 'It minimizes blast radius if credentials are compromised.', 'It guarantees zero security incidents.', 'It removes the need for audits.'),
-        { prompt: `(${title}) Briefly describe one cloud trade-off this topic introduces.`, type: 'SHORT', difficulty: 'HARD' },
+        mcqQuestion(`(${title}) Which statement best describes a realistic cloud trade-off?`, 'HARD', 'Improving one reliability attribute can increase cost or complexity elsewhere.', 'Any architecture can optimize every metric simultaneously.', 'Trade-offs disappear when tooling is modern enough.'),
       ],
     })
   })
@@ -470,26 +470,18 @@ async function main() {
   await createSubmittedAttempt({
     quiz: quizB,
     studentId: studentA.id,
-    mcqAnswers: [{ questionIndex: 0, selection: 'correct', isCorrect: true }],
-    shortAnswers: [
-      {
-        questionIndex: 1,
-        text: 'Synchronous replication improves consistency but can increase write latency between regions.',
-        isCorrect: true,
-      },
+    mcqAnswers: [
+      { questionIndex: 0, selection: 'correct', isCorrect: true },
+      { questionIndex: 1, selection: 'correct', isCorrect: true },
     ],
   })
 
   await createSubmittedAttempt({
     quiz: quizB,
     studentId: studentD.id,
-    mcqAnswers: [{ questionIndex: 0, selection: 'wrong', isCorrect: false }],
-    shortAnswers: [
-      {
-        questionIndex: 1,
-        text: 'Replication means data exists in two places, but updates can take longer to confirm everywhere.',
-        isCorrect: true,
-      },
+    mcqAnswers: [
+      { questionIndex: 0, selection: 'wrong', isCorrect: false },
+      { questionIndex: 1, selection: 'wrong', isCorrect: false },
     ],
   })
 

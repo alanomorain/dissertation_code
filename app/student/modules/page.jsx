@@ -54,11 +54,10 @@ export default async function StudentModulesPage() {
                   <div key={enrollment.id} className={ui.cardList}>
                     <p className="font-semibold text-slate-100">{enrollment.module.code} · {enrollment.module.name}</p>
                     <p className="text-xs text-slate-400">
-                      {enrollment.module._count.lectures} lectures · {enrollment.module._count.analogySets} analogy sets · {enrollment.module._count.quizzes} quizzes
+                      {enrollment.module._count.lectures} lectures · {enrollment.module._count.quizzes} quizzes
                     </p>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs">
                       <Link href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`} className="text-slate-300 hover:text-indigo-200 transition">Lectures</Link>
-                      <Link href={`/student/analogies?module=${encodeURIComponent(enrollment.module.code)}`} className="text-slate-300 hover:text-indigo-200 transition">Analogies</Link>
                       <Link href={`/student/quizzes?module=${encodeURIComponent(enrollment.module.code)}`} className="text-slate-300 hover:text-indigo-200 transition">Quizzes</Link>
                     </div>
                   </div>

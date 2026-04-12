@@ -28,6 +28,15 @@ export async function GET(_req, { params }) {
       questions: {
         orderBy: { orderIndex: "asc" },
         include: {
+          analogySet: {
+            select: {
+              id: true,
+              title: true,
+              topicsJson: true,
+              reviewStatus: true,
+              status: true,
+            },
+          },
           options: {
             orderBy: { orderIndex: "asc" },
             select: { id: true, text: true },

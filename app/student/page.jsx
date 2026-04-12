@@ -189,9 +189,9 @@ export default async function StudentDashboard() {
           <div className={ui.cardFull}>
             <h2 className="text-xl font-semibold mb-2">Welcome back 👋</h2>
             <p className="text-sm text-slate-300 mb-3">
-              View approved analogies from your enrolled modules, complete published quizzes, and track your performance trends.
+              Complete published quizzes, review linked learning media in quiz flow, and track your performance trends.
             </p>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Modules</h3>
                 <p className="text-sm text-slate-300 mb-3">Open your enrolled module spaces.</p>
@@ -199,13 +199,8 @@ export default async function StudentDashboard() {
               </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Lectures</h3>
-                <p className="text-sm text-slate-300 mb-3">Browse lecture-specific content and analogies.</p>
+                <p className="text-sm text-slate-300 mb-3">Browse lecture-specific module content.</p>
                 <Link href="/student/lectures" className={ui.buttonPrimary}>View lectures</Link>
-              </div>
-              <div className={ui.cardInner}>
-                <h3 className="text-base font-semibold mb-1">Analogies</h3>
-                <p className="text-sm text-slate-300 mb-3">Browse module-specific analogies approved by your lecturer.</p>
-                <Link href="/student/analogies" className={ui.buttonPrimary}>View analogies</Link>
               </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Quizzes</h3>

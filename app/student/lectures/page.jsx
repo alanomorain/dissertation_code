@@ -31,19 +31,19 @@ export default async function StudentLecturesPage({ searchParams }) {
         where: {
           moduleId: { in: moduleIds },
           ...(selectedModuleId ? { moduleId: selectedModuleId } : {}),
-          analogySets: {
+          quizzes: {
             some: {
-              status: "ready",
-              reviewStatus: "APPROVED",
+              status: "PUBLISHED",
+              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
             },
           },
         },
         include: {
           module: { select: { code: true, name: true } },
-          analogySets: {
+          quizzes: {
             where: {
-              status: "ready",
-              reviewStatus: "APPROVED",
+              status: "PUBLISHED",
+              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
             },
             select: { id: true },
           },
@@ -85,7 +85,7 @@ export default async function StudentLecturesPage({ searchParams }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Lectures with approved analogies</h2>
+            <h2 className={ui.cardHeader}>Lectures with available quizzes</h2>
             {lectures.length === 0 ? (
               <p className={ui.textSmall}>No lecture content is available yet.</p>
             ) : (
@@ -94,7 +94,7 @@ export default async function StudentLecturesPage({ searchParams }) {
                   <Link key={lecture.id} href={`/student/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-indigo-400 transition`}>
                     <p className="font-semibold text-slate-100">{lecture.title}</p>
                     <p className="text-xs text-slate-400">
-                      {lecture.module.code} · {lecture.analogySets.length} approved analogy sets
+                      {lecture.module.code} · {lecture.quizzes.length} published quizzes
                     </p>
                   </Link>
                 ))}

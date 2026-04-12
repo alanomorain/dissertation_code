@@ -10,6 +10,9 @@ function createEmptyQuestion() {
     prompt: "",
     type: "MCQ",
     difficulty: "MEDIUM",
+    analogySetId: "",
+    analogyTopicIndex: "",
+    videoUrl: "",
     options: [
       { text: "Option A", isCorrect: true },
       { text: "Option B", isCorrect: false },
@@ -39,6 +42,11 @@ function normalizeQuestionsForSave(questions) {
         prompt: String(question.prompt || "").trim(),
         type: "MCQ",
         difficulty: ["EASY", "MEDIUM", "HARD"].includes(question.difficulty) ? question.difficulty : "MEDIUM",
+        analogySetId: String(question.analogySetId || "").trim() || null,
+        analogyTopicIndex: question.analogyTopicIndex === "" || question.analogyTopicIndex === null
+          ? null
+          : Number(question.analogyTopicIndex),
+        videoUrl: String(question.videoUrl || "").trim() || null,
         options,
       }
     })
@@ -60,6 +68,8 @@ function LecturerQuizWizardPageInner() {
   const [maxAttempts, setMaxAttempts] = useState(1)
   const [status, setStatus] = useState("DRAFT")
   const [questions, setQuestions] = useState([])
+  const [analogyTopics, setAnalogyTopics] = useState([])
+  const [uploadingVideoByQuestion, setUploadingVideoByQuestion] = useState({})
   const [generationFeedback, setGenerationFeedback] = useState("")
   const [generationContext, setGenerationContext] = useState(null)
   const [creating, setCreating] = useState(false)
@@ -102,6 +112,55 @@ function LecturerQuizWizardPageInner() {
         setSelectedLectureId("")
       })
   }, [selectedModule])
+
+  useEffect(() => {
+    if (!selectedLectureId) {
+      setAnalogyTopics([])
+      return
+    }
+
+    let cancelled = false
+
+    fetch(`/api/lectures/${selectedLectureId}/topics`)
+      .then((r) => (r.ok ? r.json() : { topics: [] }))
+      .then((data) => {
+        if (cancelled) return
+        const nextTopics = Array.isArray(data?.topics) ? data.topics : []
+        setAnalogyTopics(nextTopics)
+      })
+      .catch(() => {
+        if (!cancelled) setAnalogyTopics([])
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedLectureId])
+
+  const handleVideoUpload = async (questionIndex, file) => {
+    if (!file) return
+    setUploadingVideoByQuestion((prev) => ({ ...prev, [questionIndex]: true }))
+    setMessage("")
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/quizzes/video-upload", {
+        method: "POST",
+        body: formData,
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || "Video upload failed")
+
+      setQuestions((prev) =>
+        prev.map((item, idx) => (idx === questionIndex ? { ...item, videoUrl: data.url || "" } : item)),
+      )
+      setMessage("Video uploaded.")
+    } catch (err) {
+      setMessage(err.message || "Unable to upload video")
+    } finally {
+      setUploadingVideoByQuestion((prev) => ({ ...prev, [questionIndex]: false }))
+    }
+  }
 
   const handleGenerate = async () => {
     if (!selectedModule || !selectedLectureId) {
@@ -265,6 +324,9 @@ function LecturerQuizWizardPageInner() {
                   Using {generationContext.topicCount} topic(s) from {generationContext.analogySetCount} analogy set(s) in lecture {generationContext.lectureTitle || "selected lecture"}.
                 </p>
               ) : null}
+              <p className="text-xs text-slate-400">
+                {analogyTopics.length} approved lecture topic(s) are available for question-level analogy/video linking.
+              </p>
             </div>
 
             <div className="mt-4 space-y-3">
@@ -330,6 +392,88 @@ function LecturerQuizWizardPageInner() {
                           <option value="HARD">Hard</option>
                         </select>
                       </label>
+
+                      <label className="mt-2 block space-y-1 text-sm">
+                        <span className="font-medium">Linked analogy topic</span>
+                        <select
+                          value={
+                            question.analogySetId && question.analogyTopicIndex !== ""
+                              ? `${question.analogySetId}::${question.analogyTopicIndex}`
+                              : ""
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value
+                            const [analogySetId, topicIndexText] = value ? value.split("::") : ["", ""]
+                            const matchingTopic = analogyTopics.find(
+                              (topic) => `${topic.analogySetId}::${topic.topicIndex}` === value,
+                            )
+                            setQuestions((prev) =>
+                              prev.map((item, idx) =>
+                                idx === questionIndex
+                                  ? {
+                                      ...item,
+                                      analogySetId: analogySetId || "",
+                                      analogyTopicIndex: topicIndexText || "",
+                                      videoUrl: item.videoUrl || matchingTopic?.topicVideoUrl || "",
+                                    }
+                                  : item,
+                              ),
+                            )
+                          }}
+                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                        >
+                          <option value="">No linked analogy topic</option>
+                          {analogyTopics.map((topic) => (
+                            <option
+                              key={`${topic.analogySetId}-${topic.topicIndex}`}
+                              value={`${topic.analogySetId}::${topic.topicIndex}`}
+                            >
+                              {topic.analogySetTitle} · Topic {topic.topicIndex + 1}: {topic.topic}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="block text-xs text-slate-400">
+                          This controls what appears in the student popup when they click View analogy/video.
+                        </span>
+                      </label>
+
+                      <label className="mt-2 block space-y-1 text-sm">
+                        <span className="font-medium">Video URL (optional)</span>
+                        <input
+                          value={question.videoUrl || ""}
+                          onChange={(e) =>
+                            setQuestions((prev) =>
+                              prev.map((item, idx) =>
+                                idx === questionIndex ? { ...item, videoUrl: e.target.value } : item,
+                              ),
+                            )
+                          }
+                          placeholder="/uploads/quiz-videos/example.mp4 or https://..."
+                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                        />
+                      </label>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                        <label className={ui.buttonSecondary}>
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            className="hidden"
+                            onChange={(e) => handleVideoUpload(questionIndex, e.target.files?.[0])}
+                          />
+                          {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload video"}
+                        </label>
+                        {question.videoUrl ? (
+                          <a
+                            href={question.videoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-indigo-300 hover:text-indigo-200"
+                          >
+                            Preview video
+                          </a>
+                        ) : null}
+                      </div>
 
                       <div className="mt-3 space-y-2 text-sm">
                         <p className="font-medium">Options (select one correct answer)</p>
