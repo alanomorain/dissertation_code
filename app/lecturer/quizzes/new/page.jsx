@@ -448,7 +448,7 @@ function LecturerQuizWizardPageInner() {
                               ),
                             )
                           }
-                          placeholder="/uploads/quiz-videos/example.mp4 or https://..."
+                          placeholder="https://your-media-url/video.mp4"
                           className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
                         />
                       </label>

@@ -70,6 +70,22 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 On startup, the app container runs `prisma migrate deploy` automatically before `next start`.
 Docker Compose also starts Redis for distributed rate limiting.
 
+### Media Storage
+
+The app now uses a storage-first media pipeline for lecturer-uploaded images/videos.
+
+- Default local mode (development): set `MEDIA_PROVIDER=local`
+- S3 mode: set `MEDIA_PROVIDER=s3` and configure:
+  - `AWS_REGION`
+  - `AWS_S3_BUCKET`
+  - `AWS_S3_PREFIX` (optional)
+  - `AWS_S3_PUBLIC_BASE_URL` (optional CloudFront/custom domain base URL)
+
+AI media generation is disabled by default. To re-enable the placeholder endpoint:
+
+- `ENABLE_AI_MEDIA_GENERATION=true`
+- and configure Gemini variables if you plan to use that route.
+
 ### Database Management
 
 - **Prisma Studio**: Visual database editor

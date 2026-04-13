@@ -4,12 +4,20 @@ import { enforceRateLimit } from "../../lib/rateLimit"
 import { enforceCsrf } from "../../lib/security"
 
 export const runtime = "nodejs"
+const AI_MEDIA_ENABLED = String(process.env.ENABLE_AI_MEDIA_GENERATION || "").toLowerCase() === "true"
 
 const apiKey = process.env.GEMINI_API_KEY
 const modelName = process.env.GEMINI_IMAGE_MODEL
 
 export async function POST(req) {
   try {
+    if (!AI_MEDIA_ENABLED) {
+      return Response.json(
+        { error: "AI media generation is not enabled. Upload media manually instead." },
+        { status: 501 },
+      )
+    }
+
     const csrfResponse = enforceCsrf(req)
     if (csrfResponse) {
       return csrfResponse

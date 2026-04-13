@@ -83,8 +83,11 @@ export default async function LecturerTopicDetailPage({ params }) {
             </p>
 
             <MediaImagePanel
-              analogyText={topic.analogy || ""}
               topicTitle={topic.topic || ""}
+              analogySetId={analogy.id}
+              topicIndex={index}
+              initialImageUrl={String(topic.imageUrl || "").trim()}
+              initialVideoUrl={String(topic.videoUrl || "").trim()}
             />
           </div>
         </div>

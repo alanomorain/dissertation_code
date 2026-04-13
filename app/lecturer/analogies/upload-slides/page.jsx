@@ -45,7 +45,7 @@ function UploadSlidesPageInner() {
   const [analogySetId, setAnalogySetId] = useState("")
 
   const [activeStep, setActiveStep] = useState("analogies")
-  const [imageLoadingIndex, setImageLoadingIndex] = useState(null)
+  const [uploadingMediaByKey, setUploadingMediaByKey] = useState({})
   const [savingSummary, setSavingSummary] = useState(false)
 
   const [showModuleModal, setShowModuleModal] = useState(false)
@@ -426,37 +426,47 @@ function UploadSlidesPageInner() {
     }
   }
 
-  const handleGenerateImage = async (index) => {
+  const handleUploadMedia = async (index, kind, file) => {
     const item = topicStates[index]
-    if (!item?.analogy) return
+    if (!item || !file) return
 
-    setImageLoadingIndex(index)
+    const key = `${index}:${kind}`
+    setUploadingMediaByKey((prev) => ({ ...prev, [key]: true }))
     setMessage(null)
 
     try {
-      const res = await fetch("/api/generate-image", {
+      const formData = new FormData()
+      formData.append("kind", kind)
+      formData.append("file", file)
+
+      const res = await fetch("/api/media/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          analogyText: item.analogy,
-          topic: item.topic,
-          style: item.imageStyle,
-        }),
+        body: formData,
       })
 
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || "Image generation failed.")
+        throw new Error(data.error || "Media upload failed.")
       }
 
-      const data = await res.json()
-      updateTopicState(index, { imageUrl: data.dataUrl || "" })
-      setMessage({ type: "success", text: `Image generated for "${item.topic}".` })
+      if (kind === "image") {
+        updateTopicState(index, { imageUrl: String(data.url || "") })
+      } else {
+        updateTopicState(index, { videoUrl: String(data.url || "") })
+      }
+
+      setMessage({
+        type: "success",
+        text: `${kind === "image" ? "Image" : "Video"} uploaded for "${item.topic}".`,
+      })
     } catch (err) {
       console.error(err)
-      setMessage({ type: "error", text: err.message || "Image generation failed." })
+      setMessage({
+        type: "error",
+        text: err.message || "Media upload failed.",
+      })
     } finally {
-      setImageLoadingIndex(null)
+      setUploadingMediaByKey((prev) => ({ ...prev, [key]: false }))
     }
   }
 
@@ -861,8 +871,8 @@ function UploadSlidesPageInner() {
 
             {activeStep === "images" && (
               <>
-                <h2 className={ui.cardHeader}>Optional image generation</h2>
-                <p className="text-sm text-slate-300 mb-4">Generate supporting images for any topic, or skip.</p>
+                <h2 className={ui.cardHeader}>Optional image uploads</h2>
+                <p className="text-sm text-slate-300 mb-4">Upload supporting images for any topic, or skip.</p>
 
                 <div className="space-y-4">
                   {topicStates.map((item, idx) => (
@@ -870,30 +880,32 @@ function UploadSlidesPageInner() {
                       <h3 className="text-sm font-semibold text-indigo-300 mb-1">{item.topic}</h3>
                       <p className="text-xs text-slate-300 mb-3">{item.analogy}</p>
 
-                      <label className="text-xs uppercase tracking-wide text-slate-400">Image style (optional)</label>
+                      <label className="text-xs uppercase tracking-wide text-slate-400">Image URL (optional)</label>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <input
-                          type="text"
-                          value={item.imageStyle}
-                          onChange={(event) => updateTopicState(idx, { imageStyle: event.target.value })}
-                          placeholder="e.g., minimal flat illustration"
+                          type="url"
+                          value={item.imageUrl}
+                          onChange={(event) => updateTopicState(idx, { imageUrl: event.target.value })}
+                          placeholder="https://..."
                           className="min-w-[220px] flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
                         />
-                        <button
-                          type="button"
-                          onClick={() => handleGenerateImage(idx)}
-                          disabled={imageLoadingIndex === idx}
-                          className={ui.buttonSecondary}
-                        >
-                          {imageLoadingIndex === idx ? "Generating..." : "Generate image"}
-                        </button>
+                        <label className={`${ui.buttonSecondary} cursor-pointer`}>
+                          {uploadingMediaByKey[`${idx}:image`] ? "Uploading..." : "Upload image"}
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                            className="hidden"
+                            disabled={uploadingMediaByKey[`${idx}:image`]}
+                            onChange={(event) => handleUploadMedia(idx, "image", event.target.files?.[0])}
+                          />
+                        </label>
                       </div>
 
                       {item.imageUrl && (
                         <div className="mt-3">
                           <Image
                             src={item.imageUrl}
-                            alt={`${item.topic} generated image`}
+                            alt={`${item.topic} uploaded image`}
                             width={768}
                             height={384}
                             unoptimized
@@ -926,8 +938,8 @@ function UploadSlidesPageInner() {
 
             {activeStep === "videos" && (
               <>
-                <h2 className={ui.cardHeader}>Optional video details</h2>
-                <p className="text-sm text-slate-300 mb-4">Add a video link and notes for any topic, or leave blank.</p>
+                <h2 className={ui.cardHeader}>Optional video uploads and details</h2>
+                <p className="text-sm text-slate-300 mb-4">Upload a short video clip or add an existing URL for any topic.</p>
 
                 <div className="space-y-4">
                   {topicStates.map((item, idx) => (
@@ -935,13 +947,25 @@ function UploadSlidesPageInner() {
                       <h3 className="text-sm font-semibold text-indigo-300 mb-2">{item.topic}</h3>
 
                       <label className="text-xs uppercase tracking-wide text-slate-400">Video URL (optional)</label>
-                      <input
-                        type="url"
-                        value={item.videoUrl}
-                        onChange={(event) => updateTopicState(idx, { videoUrl: event.target.value })}
-                        placeholder="https://..."
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
-                      />
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <input
+                          type="url"
+                          value={item.videoUrl}
+                          onChange={(event) => updateTopicState(idx, { videoUrl: event.target.value })}
+                          placeholder="https://..."
+                          className="min-w-[220px] flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                        />
+                        <label className={`${ui.buttonSecondary} cursor-pointer`}>
+                          {uploadingMediaByKey[`${idx}:video`] ? "Uploading..." : "Upload video"}
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                            className="hidden"
+                            disabled={uploadingMediaByKey[`${idx}:video`]}
+                            onChange={(event) => handleUploadMedia(idx, "video", event.target.files?.[0])}
+                          />
+                        </label>
+                      </div>
 
                       <label className="mt-3 block text-xs uppercase tracking-wide text-slate-400">Video notes (optional)</label>
                       <textarea
