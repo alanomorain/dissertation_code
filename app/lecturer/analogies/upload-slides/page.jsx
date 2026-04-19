@@ -696,16 +696,6 @@ function UploadSlidesPageInner() {
                   </div>
                 </form>
 
-                {extractedText && (
-                  <section className="mt-8 border-t border-slate-800 pt-4">
-                    <h2 className={ui.cardHeader}>Extracted text (preview)</h2>
-                    <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-xs text-slate-200 whitespace-pre-wrap">
-                      {extractedText.slice(0, 1500)}
-                      {extractedText.length > 1500 && "..."}
-                    </div>
-                  </section>
-                )}
-
                 {topics.length > 0 && (
                   <section className="mt-8 border-t border-slate-800 pt-4">
                     <h2 className={`${ui.cardHeader} mb-3`}>Suggested topics for analogies</h2>

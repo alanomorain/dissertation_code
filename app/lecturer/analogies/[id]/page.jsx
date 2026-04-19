@@ -67,12 +67,6 @@ export default async function LecturerAnalogyDetailPage({ params }) {
 
             <div className="space-y-2 text-sm">
               <div>
-                <span className={ui.textMuted}>Source:</span>{" "}
-                <span className="text-slate-200">
-                  {analogy.source || "N/A"}
-                </span>
-              </div>
-              <div>
                 <span className={ui.textMuted}>Owner:</span>{" "}
                 <span className="text-slate-200">
                   {analogy.owner?.email || "Unassigned"}
@@ -102,16 +96,6 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                 Error Message
               </h3>
               <p className="text-sm text-red-300">{analogy.errorMessage}</p>
-            </div>
-          )}
-
-          {/* Source Text */}
-          {analogy.sourceText && (
-            <div className={ui.cardFull}>
-              <h3 className={ui.cardHeader}>Source Text</h3>
-              <div className={`${ui.cardInner} text-sm text-slate-300 whitespace-pre-wrap`}>
-                {analogy.sourceText}
-              </div>
             </div>
           )}
 

@@ -206,3 +206,4 @@ async def extract(
             "Unable to extract text from this file.",
             500,
         )
+    
