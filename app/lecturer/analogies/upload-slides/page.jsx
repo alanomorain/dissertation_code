@@ -660,7 +660,7 @@ function UploadSlidesPageInner() {
                     <input
                       id="slides"
                       type="file"
-                      accept=".pdf,.ppt,.pptx,.key,.odp"
+                      accept=".pdf,.ppt,.pptx"
                       onChange={handleFileChange}
                       className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-indigo-400"
                     />

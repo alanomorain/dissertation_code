@@ -12,14 +12,29 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/dissertation_db?schema=public
       REDIS_URL: redis://redis:6379
       NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SLIDE_EXTRACTOR_URL: http://slide-extractor:8000
     command: sh -c "npm run db:migrate && npm run start"
     ports:
       - "3000:3000"
     depends_on:
+      slide-extractor:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  slide-extractor:
+    build:
+      context: ./services/slide-extractor
+      dockerfile: Dockerfile
+    container_name: dissertation_slide_extractor
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:15-alpine

@@ -68,7 +68,17 @@ docker compose down
 
 The app will be available at [http://localhost:3000](http://localhost:3000).
 On startup, the app container runs `prisma migrate deploy` automatically before `next start`.
-Docker Compose also starts Redis for distributed rate limiting.
+Docker Compose also starts Redis for distributed rate limiting and a Python slide extractor microservice.
+
+### Slide Text Extraction Microservice
+
+Lecture slide uploads now run through a Python FastAPI microservice (`services/slide-extractor`) that extracts text from PDF and PPTX files.
+
+- Internal service URL: `SLIDE_EXTRACTOR_URL` (default: `http://slide-extractor:8000` in Docker)
+- Health endpoint: `GET /health`
+- Extraction endpoint: `POST /extract` (multipart file upload)
+- Supported input formats (v1): PDF and PPTX only
+- If extraction fails or returns no text, topic generation is blocked with a clear error.
 
 ### Media Storage
 
@@ -106,3 +116,4 @@ For detailed database setup instructions, see [DATABASE_SETUP.md](./DATABASE_SET
 - `/prisma` - Database schema, migrations, and seed data
 - `/app/lib` - Database client and utilities
 - `/app/api` - API routes for analogies and health checks
+- `/services/slide-extractor` - Python microservice for synchronous slide text extraction
