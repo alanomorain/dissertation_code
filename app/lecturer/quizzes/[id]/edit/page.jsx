@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
 import * as ui from "../../../../styles/ui"
+import QuizEditForm from "./QuizEditForm"
 
 export default async function LecturerQuizEditPage({ params }) {
   const { id } = await params
@@ -11,10 +12,45 @@ export default async function LecturerQuizEditPage({ params }) {
 
   const quiz = await prisma.quiz.findFirst({
     where: { id, ownerId: lecturerUser.id },
-    include: { questions: { orderBy: { orderIndex: "asc" } } },
+    include: {
+      module: { select: { code: true, name: true } },
+      lecture: { select: { title: true } },
+      questions: {
+        orderBy: { orderIndex: "asc" },
+        include: {
+          options: { orderBy: { orderIndex: "asc" } },
+        },
+      },
+      _count: { select: { attempts: true } },
+    },
   })
 
   if (!quiz) notFound()
+
+  const initialQuiz = {
+    id: quiz.id,
+    title: quiz.title,
+    status: quiz.status,
+    maxAttempts: quiz.maxAttempts,
+    dueAt: quiz.dueAt ? quiz.dueAt.toISOString() : null,
+    publishedAt: quiz.publishedAt ? quiz.publishedAt.toISOString() : null,
+    lectureId: quiz.lectureId,
+    module: quiz.module,
+    lecture: quiz.lecture,
+    questions: quiz.questions.map((question) => ({
+      id: question.id,
+      prompt: question.prompt,
+      difficulty: question.difficulty,
+      analogySetId: question.analogySetId,
+      analogyTopicIndex: question.analogyTopicIndex,
+      videoUrl: question.videoUrl,
+      options: question.options.map((option) => ({
+        id: option.id,
+        text: option.text,
+        isCorrect: option.isCorrect,
+      })),
+    })),
+  }
 
   return (
     <main className={ui.page}>
@@ -31,15 +67,7 @@ export default async function LecturerQuizEditPage({ params }) {
       </header>
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Quiz settings</h2>
-            <p className={ui.textSmall}>Editing from this screen will be added next. Current stored data:</p>
-            <div className="mt-3 text-sm space-y-1">
-              <p><span className={ui.textMuted}>Title:</span> {quiz.title}</p>
-              <p><span className={ui.textMuted}>Status:</span> {quiz.status}</p>
-              <p><span className={ui.textMuted}>Questions:</span> {quiz.questions.length}</p>
-            </div>
-          </div>
+          <QuizEditForm quiz={initialQuiz} canEditQuestions={quiz._count.attempts === 0} />
         </div>
       </section>
     </main>
