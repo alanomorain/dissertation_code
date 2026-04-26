@@ -165,7 +165,15 @@ function parseManagedS3Object(url) {
 function parseManagedLocalPath(url) {
   const value = String(url || "").trim()
   if (!value.startsWith("/uploads/")) return null
-  return path.join(process.cwd(), "public", value)
+  const relativePath = value.replace(/^\/uploads\//, "")
+  const localPath = path.resolve(LOCAL_UPLOAD_ROOT, relativePath)
+  const uploadRoot = path.resolve(LOCAL_UPLOAD_ROOT)
+
+  if (localPath !== uploadRoot && !localPath.startsWith(`${uploadRoot}${path.sep}`)) {
+    return null
+  }
+
+  return localPath
 }
 
 async function uploadLocal({ kind, file }) {

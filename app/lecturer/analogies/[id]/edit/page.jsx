@@ -19,7 +19,6 @@ export default function EditAnalogyPage() {
   const [concept, setConcept] = useState("")
   const [moduleCode, setModuleCode] = useState("")
   const [analogyText, setAnalogyText] = useState("")
-  const [imageFile, setImageFile] = useState(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
@@ -144,11 +143,6 @@ export default function EditAnalogyPage() {
       })
       setSaving(false)
     }
-  }
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    setImageFile(file || null)
   }
 
   if (loading) {
@@ -306,30 +300,8 @@ export default function EditAnalogyPage() {
                 />
               </div>
 
-              {/* Replace / update image */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="image"
-                  className="block text-sm font-medium text-slate-200"
-                >
-                  Replace supporting image (optional)
-                </label>
-                <input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-indigo-400"
-                />
-                <p className="text-xs text-slate-400">
-                  Optional: upload a new image to replace the current one.
-                </p>
-                {imageFile && (
-                  <p className="text-xs text-slate-300 mt-1">
-                    New selected file:{" "}
-                    <span className="font-medium">{imageFile.name}</span>
-                  </p>
-                )}
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+                Manage images from the analogy detail page after saving text changes, so each upload is attached to the correct topic.
               </div>
 
               {/* Actions */}

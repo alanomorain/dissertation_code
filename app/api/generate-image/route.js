@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
 import { getCurrentUser } from "../../lib/currentUser"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { enforceCsrf } from "../../lib/security"
+import { attachMediaToTopic, uploadImage } from "../../lib/mediaProvider"
 
 export const runtime = "nodejs"
 const AI_MEDIA_ENABLED = String(process.env.ENABLE_AI_MEDIA_GENERATION || "").toLowerCase() === "true"
@@ -57,6 +58,9 @@ export async function POST(req) {
     const analogyText = String(body?.analogyText || "").trim().slice(0, 4000)
     const topic = String(body?.topic || "").trim().slice(0, 200)
     const style = String(body?.style || "").trim().slice(0, 200)
+    const analogySetId = String(body?.analogySetId || "").trim()
+    const parsedTopicIndex = Number(body?.topicIndex)
+    const topicIndex = Number.isInteger(parsedTopicIndex) ? parsedTopicIndex : null
 
     if (!analogyText) {
       return new Response(
@@ -95,9 +99,31 @@ Analogy:
 
     const { mimeType, data } = inlinePart.inlineData
     const dataUrl = `data:${mimeType};base64,${data}`
+    const bytes = Buffer.from(data, "base64")
+    const generatedFile = {
+      name: `generated-analogy-${Date.now()}.png`,
+      type: mimeType || "image/png",
+      size: bytes.length,
+      arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
+    }
+    const upload = await uploadImage(generatedFile, {
+      lecturerId: lecturer.id,
+      source: "ai-generated-analogy",
+    })
+
+    let attachedTopic = null
+    if (analogySetId && topicIndex !== null) {
+      const result = await attachMediaToTopic({
+        lecturerId: lecturer.id,
+        analogySetId,
+        topicIndex,
+        imageUrl: upload.url,
+      })
+      attachedTopic = result.topic || null
+    }
 
     return new Response(
-      JSON.stringify({ dataUrl }),
+      JSON.stringify({ dataUrl, url: upload.url, media: upload, topic: attachedTopic }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     )
   } catch (err) {

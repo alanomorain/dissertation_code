@@ -144,6 +144,7 @@ export default async function StudentStatisticsPage() {
       },
     },
     select: {
+      id: true,
       quizId: true,
       status: true,
       score: true,
@@ -157,8 +158,55 @@ export default async function StudentStatisticsPage() {
     where: { userId: studentUser.id },
   })
 
+  const quizMediaInteractions = await prisma.quizQuestionInteraction.findMany({
+    where: {
+      studentId: studentUser.id,
+      attempt: {
+        quiz: {
+          status: "PUBLISHED",
+          module: {
+            enrollments: {
+              some: { userId: studentUser.id, status: "ACTIVE" },
+            },
+          },
+        },
+      },
+    },
+    select: {
+      attemptId: true,
+      type: true,
+    },
+  })
+
   const attemptStatsByQuiz = createStudentAttemptStats(attempts)
   const submittedAttempts = attempts.filter((attempt) => attempt.status === "SUBMITTED")
+  const mediaByAttempt = quizMediaInteractions.reduce((acc, interaction) => {
+    if (!acc[interaction.attemptId]) {
+      acc[interaction.attemptId] = { analogy: 0, video: 0 }
+    }
+    if (interaction.type === "ANALOGY_VIEW") acc[interaction.attemptId].analogy += 1
+    if (interaction.type === "VIDEO_VIEW") acc[interaction.attemptId].video += 1
+    return acc
+  }, {})
+  const analogyPopupViews = quizMediaInteractions.filter((interaction) => interaction.type === "ANALOGY_VIEW").length
+  const videoViews = quizMediaInteractions.filter((interaction) => interaction.type === "VIDEO_VIEW").length
+
+  const scoreGroups = submittedAttempts.reduce(
+    (acc, attempt) => {
+      const media = mediaByAttempt[attempt.id] || { analogy: 0, video: 0 }
+      const score = attempt.score || 0
+      const key = media.video > 0 ? "withVideo" : media.analogy > 0 ? "analogyOnly" : "noMedia"
+      acc[key].count += 1
+      acc[key].total += score
+      return acc
+    },
+    {
+      noMedia: { count: 0, total: 0 },
+      analogyOnly: { count: 0, total: 0 },
+      withVideo: { count: 0, total: 0 },
+    },
+  )
+  const averageForGroup = (group) => (group.count ? Math.round(group.total / group.count) : 0)
 
   const averageScore = submittedAttempts.length
     ? Math.round(submittedAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / submittedAttempts.length)
@@ -235,9 +283,32 @@ export default async function StudentStatisticsPage() {
                 <div className={ui.cardFull}><p className={ui.textLabel}>Total quizzes</p><p className="mt-2 text-2xl font-semibold">{accessibleQuizTotal}</p></div>
                 <div className={ui.cardFull}><p className={ui.textLabel}>Average score</p><p className="mt-2 text-2xl font-semibold">{averageScore}%</p></div>
                 <div className={ui.cardFull}><p className={ui.textLabel}>Analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyViews}</p></div>
+                <div className={ui.cardFull}><p className={ui.textLabel}>Quiz analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyPopupViews}</p></div>
+                <div className={ui.cardFull}><p className={ui.textLabel}>Video views</p><p className="mt-2 text-2xl font-semibold">{videoViews}</p></div>
                 <div className={ui.cardFull}><p className={ui.textLabel}>To do</p><p className="mt-2 text-2xl font-semibold">{stateTotals.TO_DO}</p></div>
                 <div className={ui.cardFull}><p className={ui.textLabel}>In progress</p><p className="mt-2 text-2xl font-semibold">{stateTotals.IN_PROGRESS}</p></div>
                 <div className={ui.cardFull}><p className={ui.textLabel}>Completed</p><p className="mt-2 text-2xl font-semibold">{stateTotals.COMPLETED}</p></div>
+              </div>
+            </div>
+
+            <div className={ui.cardFull}>
+              <h2 className={ui.cardHeader}>Media impact</h2>
+              <div className="mt-3 grid gap-3 md:grid-cols-3 text-sm">
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>No analogy/video</p>
+                  <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.noMedia)}%</p>
+                  <p className={ui.textSmall}>{scoreGroups.noMedia.count} submitted attempt(s)</p>
+                </div>
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Analogy only</p>
+                  <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.analogyOnly)}%</p>
+                  <p className={ui.textSmall}>{scoreGroups.analogyOnly.count} submitted attempt(s)</p>
+                </div>
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Analogy plus video</p>
+                  <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.withVideo)}%</p>
+                  <p className={ui.textSmall}>{scoreGroups.withVideo.count} submitted attempt(s)</p>
+                </div>
               </div>
             </div>
 

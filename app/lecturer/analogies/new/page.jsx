@@ -15,7 +15,6 @@ function NewAnalogyPageInner() {
   const [moduleCode, setModuleCode] = useState("")
   const [lectureId, setLectureId] = useState("")
   const [analogyText, setAnalogyText] = useState("")
-  const [imageFile, setImageFile] = useState(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
 
@@ -144,11 +143,6 @@ function NewAnalogyPageInner() {
       })
       setSaving(false)
     }
-  }
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0]
-    setImageFile(file || null)
   }
 
   const handleCreateModule = async () => {
@@ -361,30 +355,8 @@ function NewAnalogyPageInner() {
                 </p>
               </div>
 
-              {/* Image upload */}
-              <div className="space-y-1">
-                <label
-                  htmlFor="image"
-                  className="block text-sm font-medium text-slate-200"
-                >
-                  Supporting image 
-                </label>
-                <input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-indigo-400"
-                />
-                <p className="text-xs text-slate-400">
-                  Upload a diagram, sketch, or visual that reinforces the
-                  analogy.
-                </p>
-                {imageFile && (
-                  <p className="text-xs text-slate-300 mt-1">
-                    Selected file: <span className="font-medium">{imageFile.name}</span>
-                  </p>
-                )}
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+                Add images after creating the analogy. The next page lets you upload and save an image against the specific analogy topic used in quizzes.
               </div>
 
               {/* Actions */}

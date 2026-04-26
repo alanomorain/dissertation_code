@@ -71,6 +71,19 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
               quizId: true,
             },
           },
+          questions: {
+            select: {
+              interactions: {
+                where: from ? { createdAt: { gte: from } } : {},
+                select: {
+                  attemptId: true,
+                  studentId: true,
+                  type: true,
+                  createdAt: true,
+                },
+              },
+            },
+          },
         },
       },
       lectures: {
@@ -110,6 +123,38 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
 
   const activeStudentIds = new Set(moduleRecord.enrollments.map((enrollment) => enrollment.userId))
   const submittedAttempts = moduleRecord.quizzes.flatMap((quiz) => quiz.attempts)
+  const quizMediaInteractions = moduleRecord.quizzes.flatMap((quiz) =>
+    quiz.questions.flatMap((question) => question.interactions),
+  )
+  const mediaByAttempt = quizMediaInteractions.reduce((acc, interaction) => {
+    if (!acc[interaction.attemptId]) acc[interaction.attemptId] = { analogy: 0, video: 0 }
+    if (interaction.type === "ANALOGY_VIEW") acc[interaction.attemptId].analogy += 1
+    if (interaction.type === "VIDEO_VIEW") acc[interaction.attemptId].video += 1
+    return acc
+  }, {})
+  const mediaByStudent = quizMediaInteractions.reduce((acc, interaction) => {
+    if (!acc[interaction.studentId]) acc[interaction.studentId] = { analogy: 0, video: 0 }
+    if (interaction.type === "ANALOGY_VIEW") acc[interaction.studentId].analogy += 1
+    if (interaction.type === "VIDEO_VIEW") acc[interaction.studentId].video += 1
+    return acc
+  }, {})
+  const scoreGroups = submittedAttempts.reduce(
+    (acc, attempt) => {
+      const media = mediaByAttempt[attempt.id] || { analogy: 0, video: 0 }
+      const key = media.video > 0 ? "withVideo" : media.analogy > 0 ? "analogyOnly" : "noMedia"
+      acc[key].count += 1
+      acc[key].total += attempt.score || 0
+      return acc
+    },
+    {
+      noMedia: { count: 0, total: 0 },
+      analogyOnly: { count: 0, total: 0 },
+      withVideo: { count: 0, total: 0 },
+    },
+  )
+  const averageForGroup = (group) => (group.count ? Math.round(group.total / group.count) : 0)
+  const analogyQuestionViews = quizMediaInteractions.filter((interaction) => interaction.type === "ANALOGY_VIEW").length
+  const videoViews = quizMediaInteractions.filter((interaction) => interaction.type === "VIDEO_VIEW").length
   const participants = new Set(submittedAttempts.map((attempt) => attempt.studentId)).size
   const participationRate = activeStudentIds.size ? Math.round((participants / activeStudentIds.size) * 100) : 0
   const avgQuizScore = submittedAttempts.length
@@ -127,6 +172,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
       return acc
     }, {})
     const revisits = Object.values(perStudentCount).reduce((total, count) => total + Math.max(0, count - 1), 0)
+    const quizInteractions = quiz.questions.flatMap((question) => question.interactions)
 
     return {
       id: quiz.id,
@@ -135,6 +181,8 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
       completions,
       revisits,
       avgScore,
+      analogyViews: quizInteractions.filter((interaction) => interaction.type === "ANALOGY_VIEW").length,
+      videoViews: quizInteractions.filter((interaction) => interaction.type === "VIDEO_VIEW").length,
     }
   })
 
@@ -208,6 +256,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
       (total, set) => total + set.interactions.filter((interaction) => interaction.userId === student.id).length,
       0,
     )
+    const quizMedia = mediaByStudent[student.id] || { analogy: 0, video: 0 }
 
     return {
       id: student.id,
@@ -216,6 +265,8 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
       attempts: attempts.length,
       completedQuizzes,
       analogyViews,
+      quizAnalogyViews: quizMedia.analogy,
+      videoViews: quizMedia.video,
       beforeAvg,
       afterAvg,
     }
@@ -249,11 +300,34 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
               </div>
             </div>
 
-            <div className="mt-4 grid gap-4 md:grid-cols-4 text-sm">
+            <div className="mt-4 grid gap-4 md:grid-cols-6 text-sm">
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Students</p><p className="mt-1 text-2xl font-semibold">{activeStudentIds.size}</p></div>
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Participation</p><p className="mt-1 text-2xl font-semibold">{participationRate}%</p></div>
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Average quiz score</p><p className="mt-1 text-2xl font-semibold">{avgQuizScore}%</p></div>
               <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Lectures</p><p className="mt-1 text-2xl font-semibold">{moduleRecord.lectures.length}</p></div>
+              <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Analogy views</p><p className="mt-1 text-2xl font-semibold">{analogyQuestionViews}</p></div>
+              <div className={`${ui.card} p-4`}><p className={ui.textLabel}>Video views</p><p className="mt-1 text-2xl font-semibold">{videoViews}</p></div>
+            </div>
+          </div>
+
+          <div className={ui.cardFull}>
+            <h2 className={ui.cardHeader}>Media impact</h2>
+            <div className="mt-3 grid gap-3 md:grid-cols-3 text-sm">
+              <div className={ui.cardInner}>
+                <p className={ui.textLabel}>No analogy/video</p>
+                <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.noMedia)}%</p>
+                <p className={ui.textSmall}>{scoreGroups.noMedia.count} submitted attempt(s)</p>
+              </div>
+              <div className={ui.cardInner}>
+                <p className={ui.textLabel}>Analogy only</p>
+                <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.analogyOnly)}%</p>
+                <p className={ui.textSmall}>{scoreGroups.analogyOnly.count} submitted attempt(s)</p>
+              </div>
+              <div className={ui.cardInner}>
+                <p className={ui.textLabel}>Analogy plus video</p>
+                <p className="mt-1 text-xl font-semibold">{averageForGroup(scoreGroups.withVideo)}%</p>
+                <p className={ui.textSmall}>{scoreGroups.withVideo.count} submitted attempt(s)</p>
+              </div>
             </div>
           </div>
 
@@ -270,6 +344,9 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                     <p className="text-xs text-slate-400">
                       Analogy views: {student.analogyViews} · Before/After view change: {scoreDeltaLabel(student.beforeAvg, student.afterAvg)}
                     </p>
+                    <p className="text-xs text-slate-400">
+                      Quiz analogy views: {student.quizAnalogyViews} · Video views: {student.videoViews}
+                    </p>
                   </div>
                 ))}
                 {studentRows.length === 0 ? <p className={ui.textSmall}>No active students enrolled.</p> : null}
@@ -284,6 +361,9 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                     <p className="font-medium">{quiz.title}</p>
                     <p className="text-xs text-slate-400">
                       Completions (views): {quiz.completions} · Revisits: {quiz.revisits}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      Quiz analogy views: {quiz.analogyViews} · Video views: {quiz.videoViews}
                     </p>
                     <p className="text-xs text-slate-400">Lecture linked: {quiz.lectureId ? "Yes" : "No"}</p>
                     <p className="text-xs text-slate-400">Average score: {quiz.avgScore}%</p>
