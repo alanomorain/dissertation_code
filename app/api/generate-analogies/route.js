@@ -10,12 +10,108 @@ const MAX_TOPICS = 12
 const MAX_TOPIC_LENGTH = 200
 const MAX_TEXT_LENGTH = 15000
 
+const SINGLE_ANALOGY_RESPONSE_FORMAT = {
+  type: "json_schema",
+  json_schema: {
+    name: "single_analogy",
+    strict: true,
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        topic: { type: "string" },
+        analogy: { type: "string" },
+      },
+      required: ["topic", "analogy"],
+    },
+  },
+}
+
+const BATCH_ANALOGIES_RESPONSE_FORMAT = {
+  type: "json_schema",
+  json_schema: {
+    name: "batch_analogies",
+    strict: true,
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        items: {
+          type: "array",
+          maxItems: MAX_TOPICS,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              original: { type: "string" },
+              analogies: {
+                type: "array",
+                minItems: 1,
+                maxItems: 3,
+                items: { type: "string" },
+              },
+            },
+            required: ["original", "analogies"],
+          },
+        },
+      },
+      required: ["items"],
+    },
+  },
+}
+
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
     throw new Error("OPENAI_API_KEY is not configured")
   }
   return new OpenAI({ apiKey })
+}
+
+function parseStructuredCompletion(response, label) {
+  const text = response.choices[0]?.message?.content || ""
+
+  if (!text) {
+    console.error("OpenAI returned unexpected shape:", response)
+    throw new Error(`No ${label} content received from OpenAI`)
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    console.error(`Failed to parse ${label} JSON:`, text)
+    throw new Error(`Invalid ${label} JSON returned from OpenAI`)
+  }
+}
+
+function validateSingleAnalogy(parsed, fallbackTopic) {
+  const topic = String(parsed?.topic || fallbackTopic || "").trim()
+  const analogy = String(parsed?.analogy || "").trim()
+
+  if (!topic || !analogy) {
+    throw new Error("OpenAI response did not include a valid topic and analogy")
+  }
+
+  return { topic, analogy }
+}
+
+function validateBatchAnalogies(parsed) {
+  const items = Array.isArray(parsed?.items) ? parsed.items : []
+  const normalized = items
+    .map((item) => ({
+      original: String(item?.original || "").trim(),
+      analogies: Array.isArray(item?.analogies)
+        ? item.analogies.map((analogy) => String(analogy || "").trim()).filter(Boolean).slice(0, 3)
+        : [],
+    }))
+    .filter((item) => item.original && item.analogies.length > 0)
+    .slice(0, MAX_TOPICS)
+
+  if (normalized.length === 0) {
+    throw new Error("OpenAI response did not include valid analogies")
+  }
+
+  return normalized
 }
 
 // Given a single topic, ask OpenAI for 1 analogy
@@ -36,7 +132,7 @@ Generate exactly 1 analogy for this topic suitable for students:
 
 Topic: ${topic}
 
-Return STRICTLY in this JSON format (no prose, no other keys):
+Return the response using the required JSON schema:
 
 {
   "topic": "the topic here",
@@ -51,24 +147,10 @@ Return STRICTLY in this JSON format (no prose, no other keys):
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
+    response_format: SINGLE_ANALOGY_RESPONSE_FORMAT,
   })
 
-  const text = response.choices[0]?.message?.content || ""
-
-  if (!text) {
-    console.error("OpenAI returned unexpected shape:", response)
-    throw new Error("No content received from OpenAI")
-  }
-
-  let parsed
-  try {
-    parsed = JSON.parse(text)
-  } catch (err) {
-    console.error("Failed to parse LLM JSON:", text)
-    throw new Error("Invalid JSON returned from OpenAI response")
-  }
-
-  return parsed
+  return validateSingleAnalogy(parseStructuredCompletion(response, "single analogy"), topic)
 }
 
 // Generate multiple analogies for batch topics
@@ -89,18 +171,20 @@ Generate 2-3 analogies for each of these topics:
 
 ${topics.map((t, i) => `${i + 1}. ${t}`).join("\n")}
 
-Return STRICTLY in this JSON format (no prose, no other keys):
+Return the response using the required JSON schema:
 
-[
-  {
-    "original": "first topic",
-    "analogies": ["analogy 1", "analogy 2", "analogy 3"]
-  },
-  {
-    "original": "second topic",
-    "analogies": ["analogy 1", "analogy 2"]
-  }
-]
+{
+  "items": [
+    {
+      "original": "first topic",
+      "analogies": ["analogy 1", "analogy 2", "analogy 3"]
+    },
+    {
+      "original": "second topic",
+      "analogies": ["analogy 1", "analogy 2"]
+    }
+  ]
+}
 `.trim()
 
   const client = getOpenAIClient()
@@ -110,24 +194,10 @@ Return STRICTLY in this JSON format (no prose, no other keys):
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
+    response_format: BATCH_ANALOGIES_RESPONSE_FORMAT,
   })
 
-  const text = response.choices[0]?.message?.content || ""
-
-  if (!text) {
-    console.error("OpenAI returned unexpected shape:", response)
-    throw new Error("No content received from OpenAI")
-  }
-
-  let parsed
-  try {
-    parsed = JSON.parse(text)
-  } catch (err) {
-    console.error("Failed to parse LLM JSON:", text)
-    throw new Error("Invalid JSON returned from OpenAI response")
-  }
-
-  return parsed
+  return validateBatchAnalogies(parseStructuredCompletion(response, "batch analogies"))
 }
 
 function normalizeTopics(topics) {
