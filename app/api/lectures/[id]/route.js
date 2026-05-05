@@ -1,11 +1,17 @@
 import { prisma } from "../../../lib/db"
 import { NextResponse } from "next/server"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 
-export async function DELETE(_request, { params }) {
+export async function DELETE(request, { params }) {
   try {
+    const csrfResponse = enforceCsrf(request)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
     const { id } = await params
     const lecturer = await getCurrentUser("LECTURER", { id: true })
     if (!lecturer) {

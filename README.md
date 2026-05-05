@@ -85,11 +85,13 @@ Lecture slide uploads now run through a Python FastAPI microservice (`services/s
 The app now uses a storage-first media pipeline for lecturer-uploaded images/videos.
 
 - Default local mode (development): set `MEDIA_PROVIDER=local`
+- In Docker local mode, uploads are written to `/app/public/uploads`, which is mounted to the named Docker volume `app_uploads`; uploaded images/videos survive container recreation and rebuilds as long as the volume is not removed.
 - S3 mode: set `MEDIA_PROVIDER=s3` and configure:
   - `AWS_REGION`
   - `AWS_S3_BUCKET`
   - `AWS_S3_PREFIX` (optional)
   - `AWS_S3_PUBLIC_BASE_URL` (optional CloudFront/custom domain base URL)
+- To intentionally delete Docker-hosted uploaded media, remove the `app_uploads` volume, for example with `docker compose down -v`.
 
 AI media generation is disabled by default. To re-enable the placeholder endpoint:
 
