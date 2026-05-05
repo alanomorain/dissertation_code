@@ -157,6 +157,10 @@ export async function POST(req) {
       return Response.json({ error: "Invalid publishedAt value" }, { status: 400 })
     }
 
+    if (parsedDueAt && parsedPublishedAt && parsedDueAt <= parsedPublishedAt) {
+      return Response.json({ error: "Due date must be after the release date" }, { status: 400 })
+    }
+
     const created = await prisma.quiz.create({
       data: {
         title: title.trim().slice(0, 200),

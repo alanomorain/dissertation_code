@@ -56,11 +56,15 @@ export async function GET(_req, { params }) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const now = new Date()
   const quiz = await prisma.quiz.findFirst({
     where: {
       id,
       status: "PUBLISHED",
-      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+      AND: [
+        { OR: [{ publishedAt: null }, { publishedAt: { lte: now } }] },
+        { OR: [{ dueAt: null }, { dueAt: { gt: now } }] },
+      ],
       module: {
         enrollments: {
           some: {
@@ -152,6 +156,10 @@ export async function PATCH(req, { params }) {
 
     if (parsedPublishedAt && Number.isNaN(parsedPublishedAt.getTime())) {
       return Response.json({ error: "Invalid publishedAt value" }, { status: 400 })
+    }
+
+    if (parsedDueAt && parsedPublishedAt && parsedDueAt <= parsedPublishedAt) {
+      return Response.json({ error: "Due date must be after the release date" }, { status: 400 })
     }
 
     if (shouldReplaceQuestions && quiz._count.attempts > 0) {

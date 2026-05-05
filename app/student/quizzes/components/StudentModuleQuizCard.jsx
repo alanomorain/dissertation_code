@@ -22,7 +22,7 @@ function QuizItem({ quiz }) {
     </div>
   )
 
-  if (quiz.state === "UPCOMING") {
+  if (quiz.state === "UPCOMING" || quiz.state === "CLOSED") {
     return <div className={ui.cardList}>{content}</div>
   }
 
@@ -53,6 +53,7 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
           <span className={ui.badgeProcessing}>In progress: {moduleGroup.counts.IN_PROGRESS}</span>
           <span className={ui.badgeApproved}>Completed: {moduleGroup.counts.COMPLETED}</span>
           <span className={ui.badgeProcessing}>Upcoming: {moduleGroup.counts.UPCOMING}</span>
+          <span className={ui.badgeFailed}>Closed: {moduleGroup.counts.CLOSED}</span>
         </div>
       </div>
 

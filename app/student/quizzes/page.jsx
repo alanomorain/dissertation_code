@@ -13,6 +13,7 @@ import StudentModuleQuizCard from "./components/StudentModuleQuizCard"
 function badgeForState(state, quiz, nowTs) {
   const dueTs = quiz.dueAt ? new Date(quiz.dueAt).getTime() : null
   if (state === "UPCOMING") return "Upcoming"
+  if (state === "CLOSED") return "Closed"
   if (state === "COMPLETED" && dueTs && dueTs < nowTs) return "Closed"
   if (state === "COMPLETED") return "Completed"
   if (state === "IN_PROGRESS") return "In progress"
@@ -58,6 +59,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
           IN_PROGRESS: 0,
           COMPLETED: 0,
           UPCOMING: 0,
+          CLOSED: 0,
         },
       }
     }
@@ -86,7 +88,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
   const moduleGroups = Object.values(moduleMap).map((group) => ({
     ...group,
     quizzes: group.quizzes.sort((a, b) => {
-      const priority = { TO_DO: 0, IN_PROGRESS: 1, COMPLETED: 2, UPCOMING: 3 }
+      const priority = { TO_DO: 0, IN_PROGRESS: 1, COMPLETED: 2, CLOSED: 3, UPCOMING: 4 }
       const first = priority[a.state] - priority[b.state]
       if (first !== 0) return first
       return (a.dueAtTs || Number.MAX_SAFE_INTEGER) - (b.dueAtTs || Number.MAX_SAFE_INTEGER)
@@ -99,9 +101,10 @@ export default async function StudentQuizzesPage({ searchParams }) {
       acc.IN_PROGRESS += moduleGroup.counts.IN_PROGRESS
       acc.COMPLETED += moduleGroup.counts.COMPLETED
       acc.UPCOMING += moduleGroup.counts.UPCOMING
+      acc.CLOSED += moduleGroup.counts.CLOSED
       return acc
     },
-    { TO_DO: 0, IN_PROGRESS: 0, COMPLETED: 0, UPCOMING: 0 },
+    { TO_DO: 0, IN_PROGRESS: 0, COMPLETED: 0, UPCOMING: 0, CLOSED: 0 },
   )
 
   return (
@@ -121,7 +124,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className="mx-auto grid w-full max-w-[1260px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto grid w-full max-w-[1260px] gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className={`${ui.card} p-4`}>
               <p className={ui.textLabel}>To do</p>
               <p className="text-2xl font-semibold">{statusTotals.TO_DO}</p>
@@ -137,6 +140,10 @@ export default async function StudentQuizzesPage({ searchParams }) {
             <div className={`${ui.card} p-4`}>
               <p className={ui.textLabel}>Upcoming</p>
               <p className="text-2xl font-semibold">{statusTotals.UPCOMING}</p>
+            </div>
+            <div className={`${ui.card} p-4`}>
+              <p className={ui.textLabel}>Closed</p>
+              <p className="text-2xl font-semibold">{statusTotals.CLOSED}</p>
             </div>
           </div>
 

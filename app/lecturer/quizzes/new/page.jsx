@@ -287,6 +287,7 @@ function LecturerQuizWizardPageInner() {
               <label className="space-y-1">
                 <span className="font-medium">Due at (optional)</span>
                 <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
+                <span className="block text-xs text-slate-400">Students can see this deadline. Attempts are blocked after it passes.</span>
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Schedule release (optional)</span>

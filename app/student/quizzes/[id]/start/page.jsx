@@ -9,11 +9,12 @@ export default async function StudentQuizStartPage({ params }) {
   const studentUser = await getCurrentUser("STUDENT", { id: true })
   if (!studentUser) notFound()
 
+  const now = new Date()
   const quiz = await prisma.quiz.findFirst({
     where: {
       id,
       status: "PUBLISHED",
-      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+      OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
       module: { enrollments: { some: { userId: studentUser.id, status: "ACTIVE" } } },
     },
     include: { _count: { select: { questions: true } } },
@@ -38,6 +39,8 @@ export default async function StudentQuizStartPage({ params }) {
   const bestScore = previousAttempts.length
     ? Math.max(...previousAttempts.map((attempt) => attempt.score || 0))
     : null
+  const dueAt = quiz.dueAt ? new Date(quiz.dueAt) : null
+  const isClosed = dueAt ? dueAt.getTime() <= now.getTime() : false
 
   return (
     <main className={ui.page}>
@@ -62,6 +65,7 @@ export default async function StudentQuizStartPage({ params }) {
               <p><span className={ui.textMuted}>Questions:</span> {quiz._count.questions}</p>
               <p><span className={ui.textMuted}>Attempts used:</span> {submittedAttempts} / {quiz.maxAttempts}</p>
               <p><span className={ui.textMuted}>Best score:</span> {bestScore === null ? "No attempts yet" : `${bestScore}%`}</p>
+              <p><span className={ui.textMuted}>Due:</span> {dueAt ? dueAt.toLocaleString() : "No due date"}</p>
             </div>
           </div>
 
@@ -94,7 +98,9 @@ export default async function StudentQuizStartPage({ params }) {
           </div>
 
           <div className="flex gap-3">
-            {submittedAttempts >= quiz.maxAttempts ? (
+            {isClosed ? (
+              <p className="text-sm text-amber-300">This quiz closed on {dueAt.toLocaleString()}.</p>
+            ) : submittedAttempts >= quiz.maxAttempts ? (
               <p className="text-sm text-amber-300">You have reached the attempt limit for this quiz.</p>
             ) : (
               <Link href={`/student/quizzes/${id}/take`} className={ui.buttonPrimary}>Start quiz</Link>

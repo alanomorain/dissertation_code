@@ -6,11 +6,15 @@ import { enforceCsrf } from "../../../../lib/security"
 export const runtime = "nodejs"
 
 async function getAccessibleQuiz(id, studentId) {
+  const now = new Date()
   return prisma.quiz.findFirst({
     where: {
       id,
       status: "PUBLISHED",
-      OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+      AND: [
+        { OR: [{ publishedAt: null }, { publishedAt: { lte: now } }] },
+        { OR: [{ dueAt: null }, { dueAt: { gt: now } }] },
+      ],
       module: {
         enrollments: {
           some: {
@@ -292,7 +296,7 @@ export async function POST(req, { params }) {
 
     const quiz = await getAccessibleQuiz(id, student.id)
     if (!quiz) {
-      return Response.json({ error: "Quiz not available" }, { status: 404 })
+      return Response.json({ error: "Quiz is unavailable or the due date has passed" }, { status: 404 })
     }
 
     const body = await req.json().catch(() => ({}))

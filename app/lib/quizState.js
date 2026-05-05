@@ -17,7 +17,7 @@ export function getStudentQuizProgressState(quiz, attemptStats, nowTs = new Date
 
   if (releaseTs && releaseTs > nowTs) return "UPCOMING"
   if (submittedCount >= quiz.maxAttempts) return "COMPLETED"
-  if (dueTs && dueTs < nowTs) return "COMPLETED"
+  if (dueTs && dueTs < nowTs) return "CLOSED"
   if (inProgressCount > 0 || submittedCount > 0) return "IN_PROGRESS"
   return "TO_DO"
 }

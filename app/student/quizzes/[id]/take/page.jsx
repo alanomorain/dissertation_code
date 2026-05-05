@@ -279,6 +279,9 @@ export default function StudentQuizTakePage() {
           <div>
             <p className={ui.textLabel}>Student · Quiz</p>
             <h1 className="text-lg font-semibold">{quiz.title}</h1>
+            <p className="text-xs text-slate-400">
+              Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}
+            </p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href={`/student/quizzes/${id}/start`} className={ui.buttonSecondary}>Exit</Link>
