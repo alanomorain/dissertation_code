@@ -217,7 +217,7 @@ function NewAnalogyPageInner() {
       <section className={ui.pageSection}>
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className={`${ui.card} p-6 md:p-8`}>
-            <p className="text-sm text-slate-300 mb-4">
+            <p className="text-sm text-stone-700 mb-4">
               Here you can manually add a new analogy to your modules
             </p>
 
@@ -226,8 +226,8 @@ function NewAnalogyPageInner() {
               <div
                 className={`mb-4 rounded-lg px-3 py-2 text-sm ${
                   message.type === "error"
-                    ? "bg-red-900/40 border border-red-600 text-red-100"
-                    : "bg-emerald-900/40 border border-emerald-500 text-emerald-100"
+                    ? "bg-red-50 border border-red-200 text-red-700"
+                    : "bg-emerald-50 border border-emerald-200 text-emerald-700"
                 }`}
               >
                 {message.text}
@@ -239,7 +239,7 @@ function NewAnalogyPageInner() {
               <div className="space-y-1">
                 <label
                   htmlFor="module"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Module
                 </label>
@@ -254,18 +254,18 @@ function NewAnalogyPageInner() {
                       setModuleCode(val)
                     }
                   }}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 >
                   {modules.map((module) => (
                     <option key={module.id} value={module.code}>
                       {module.code} · {module.name}
                     </option>
                   ))}
-                  <option value="new" className="text-indigo-300">
+                  <option value="new" className="text-teal-700">
                     ➕ Create new module...
                   </option>
                 </select>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   Choose the module this analogy belongs to.
                 </p>
               </div>
@@ -273,7 +273,7 @@ function NewAnalogyPageInner() {
               <div className="space-y-1">
                 <label
                   htmlFor="lecture"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Lecture (optional)
                 </label>
@@ -281,7 +281,7 @@ function NewAnalogyPageInner() {
                   id="lecture"
                   value={lectureId}
                   onChange={(e) => setLectureId(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 >
                   <option value="">{lectures.length === 0 ? "No lectures yet for this module" : "No lecture selected"}</option>
                   {lectures.map((lecture) => (
@@ -290,7 +290,7 @@ function NewAnalogyPageInner() {
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   If selected, the analogy is attached to this lecture.
                 </p>
               </div>
@@ -299,7 +299,7 @@ function NewAnalogyPageInner() {
               <div className="space-y-1">
                 <label
                   htmlFor="title"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Analogy title
                 </label>
@@ -308,9 +308,9 @@ function NewAnalogyPageInner() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   A short, descriptive title for the analogy.
                 </p>
               </div>
@@ -319,7 +319,7 @@ function NewAnalogyPageInner() {
               <div className="space-y-1">
                 <label
                   htmlFor="concept"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Concept being explained
                 </label>
@@ -328,9 +328,9 @@ function NewAnalogyPageInner() {
                   type="text"
                   value={concept}
                   onChange={(e) => setConcept(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   The actual concept students should understand.
                 </p>
               </div>
@@ -339,7 +339,7 @@ function NewAnalogyPageInner() {
               <div className="space-y-1">
                 <label
                   htmlFor="analogyText"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Analogy text
                 </label>
@@ -348,14 +348,14 @@ function NewAnalogyPageInner() {
                   value={analogyText}
                   onChange={(e) => setAnalogyText(e.target.value)}
                   rows={5}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   This is what students will see.
                 </p>
               </div>
 
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+              <div className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-2 text-xs text-stone-600">
                 Add images after creating the analogy. The next page lets you upload and save an image against the specific analogy topic used in quizzes.
               </div>
 
@@ -370,7 +370,7 @@ function NewAnalogyPageInner() {
                 </button>
                 <Link
                   href="/lecturer"
-                  className="text-sm text-slate-300 hover:text-indigo-200"
+                  className="text-sm text-stone-700 hover:text-teal-700"
                 >
                   Cancel and return to dashboard
                 </Link>
@@ -382,16 +382,16 @@ function NewAnalogyPageInner() {
 
       {/* Module creation modal */}
       {showModuleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className={`${ui.card} p-6 w-full max-w-md rounded-lg border border-slate-700`}>
-            <h2 className="text-lg font-semibold text-slate-100 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 backdrop-blur-sm">
+          <div className={`${ui.card} p-6 w-full max-w-md rounded-lg border border-stone-300`}>
+            <h2 className="text-lg font-semibold text-stone-950 mb-4">
               Create New Module
             </h2>
 
             <div className="space-y-3">
               {/* Module code input */}
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">
+                <label className="block text-sm font-medium text-stone-800 mb-1">
                   Module Code
                 </label>
                 <input
@@ -399,16 +399,16 @@ function NewAnalogyPageInner() {
                   value={newModuleCode}
                   onChange={(e) => setNewModuleCode(e.target.value.toUpperCase())}
                   placeholder="e.g., CSC7099"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-stone-600 mt-1">
                   Unique identifier (e.g., CSC7099, 3-10 characters)
                 </p>
               </div>
 
               {/* Module name input */}
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">
+                <label className="block text-sm font-medium text-stone-800 mb-1">
                   Module Name
                 </label>
                 <input
@@ -416,16 +416,16 @@ function NewAnalogyPageInner() {
                   value={newModuleName}
                   onChange={(e) => setNewModuleName(e.target.value)}
                   placeholder="e.g., Advanced Cloud Computing"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-stone-600 mt-1">
                   Full name of the module
                 </p>
               </div>
 
               {/* Optional description */}
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">
+                <label className="block text-sm font-medium text-stone-800 mb-1">
                   Description (optional)
                 </label>
                 <textarea
@@ -433,13 +433,13 @@ function NewAnalogyPageInner() {
                   onChange={(e) => setNewModuleDescription(e.target.value)}
                   placeholder="Brief description of the module..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
               {/* Error message in modal */}
               {moduleError && (
-                <div className="rounded-lg bg-red-900/40 border border-red-600 px-3 py-2 text-xs text-red-100">
+                <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
                   {moduleError}
                 </div>
               )}
@@ -455,7 +455,7 @@ function NewAnalogyPageInner() {
                     setNewModuleDescription("")
                     setModuleError("")
                   }}
-                  className="flex-1 rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 transition-colors"
+                  className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium text-stone-800 hover:bg-stone-100 transition-colors"
                 >
                   Cancel
                 </button>
@@ -478,7 +478,7 @@ function NewAnalogyPageInner() {
 
 export default function NewAnalogyPage() {
   return (
-    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className="mx-auto max-w-4xl px-4 py-6 text-sm text-slate-300">Loading…</div></section></main>}>
+    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className="mx-auto max-w-4xl px-4 py-6 text-sm text-stone-700">Loading…</div></section></main>}>
       <NewAnalogyPageInner />
     </Suspense>
   )

@@ -139,7 +139,7 @@ export default async function LecturerModuleDetailPage({ params }) {
                   {moduleRecord.lectures.slice(0, 8).map((lecture) => (
                     <Link key={lecture.id} href={`/lecturer/lectures/${lecture.id}`} className={ui.linkCard}>
                       <p className="font-medium">{lecture.title}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
                       </p>
                     </Link>
@@ -159,7 +159,7 @@ export default async function LecturerModuleDetailPage({ params }) {
                       <div key={`${topic.analogyId}-${topic.topicIndex}`} className={ui.linkCard}>
                         <Link href={`/lecturer/analogies/${topic.analogyId}/topics/${topic.topicIndex}`} className="block min-w-0">
                           <p className="font-medium truncate">{topic.topicTitle || "Untitled topic"}</p>
-                          <p className="text-xs text-slate-400 mt-1">
+                          <p className="text-xs text-stone-600 mt-1">
                             {topic.lectureTitle} · {new Date(topic.createdAt).toLocaleDateString()}
                           </p>
                         </Link>
@@ -182,7 +182,7 @@ export default async function LecturerModuleDetailPage({ params }) {
                   {moduleRecord.quizzes.map((quiz) => (
                     <Link key={quiz.id} href={`/lecturer/quizzes/${quiz.id}`} className={ui.linkCard}>
                       <p className="font-medium">{quiz.title}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         {quiz.status} · {quiz.attempts.length} submitted {quiz.attempts.length === 1 ? "attempt" : "attempts"}
                       </p>
                     </Link>
@@ -202,14 +202,14 @@ export default async function LecturerModuleDetailPage({ params }) {
                 <div className="space-y-3">
                   {quizPerformanceRows.slice(0, 5).map((quiz) => (
                     <div key={quiz.id}>
-                      <div className="mb-1 flex items-center justify-between gap-3 text-xs text-slate-300">
+                      <div className="mb-1 flex items-center justify-between gap-3 text-xs text-stone-700">
                         <span className="truncate">{quiz.title}</span>
                         <span>{quiz.avgScore}%</span>
                       </div>
-                      <div className="h-2 rounded-full bg-slate-800/70">
-                        <div className="h-full rounded-full bg-indigo-400" style={{ width: `${quiz.avgScore}%` }} />
+                      <div className="h-2 rounded-full bg-stone-100">
+                        <div className="h-full rounded-full bg-teal-600" style={{ width: `${quiz.avgScore}%` }} />
                       </div>
-                      <p className="mt-1 text-[11px] text-slate-500">{quiz.attemptCount} submitted attempts</p>
+                      <p className="mt-1 text-[11px] text-stone-500">{quiz.attemptCount} submitted attempts</p>
                     </div>
                   ))}
                 </div>

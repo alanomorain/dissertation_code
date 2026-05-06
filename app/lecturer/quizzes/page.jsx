@@ -72,10 +72,10 @@ function SidebarSection({ title, helperText, quizzes, nowTs }) {
           <Link
             key={quiz.id}
             href={`/lecturer/quizzes/${quiz.id}`}
-            className={`${ui.cardList} block hover:border-indigo-400 transition`}
+            className={`${ui.cardList} block hover:border-teal-500 transition`}
           >
-            <p className="font-medium text-slate-100">{quiz.title}</p>
-            <p className="text-xs text-slate-400">{quiz.module.code}</p>
+            <p className="font-medium text-stone-950">{quiz.title}</p>
+            <p className="text-xs text-stone-600">{quiz.module.code}</p>
                 <div className="mt-2">
                   <QuizStatusBadge status={badgeLabelForQuiz(quiz, nowTs)} />
                 </div>

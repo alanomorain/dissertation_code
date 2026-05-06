@@ -19,7 +19,7 @@ export default function ModuleQuizCard({ moduleGroup }) {
     <div className={`${ui.card} p-6 md:p-7`}>
       <div className="mb-4">
         <p className={ui.textHighlight}>{moduleGroup.moduleCode}</p>
-        <h2 className="text-lg font-semibold text-slate-100">{moduleGroup.moduleName}</h2>
+        <h2 className="text-lg font-semibold text-stone-950">{moduleGroup.moduleName}</h2>
       </div>
 
       <div className="space-y-3">
@@ -27,15 +27,15 @@ export default function ModuleQuizCard({ moduleGroup }) {
           <Link
             key={quiz.id}
             href={`/lecturer/quizzes/${quiz.id}`}
-            className={`${ui.cardList} block hover:border-indigo-400 transition`}
+            className={`${ui.cardList} block hover:border-teal-500 transition`}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="font-semibold text-slate-100">{quiz.title}</p>
-                <p className="text-xs text-slate-400">
+                <p className="font-semibold text-stone-950">{quiz.title}</p>
+                <p className="text-xs text-stone-600">
                   {quiz.questionCount} questions · {quiz.attemptCount} attempts
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-stone-500">
                   Release: {quiz.releaseText} · Due: {quiz.dueText}
                 </p>
               </div>
@@ -46,7 +46,7 @@ export default function ModuleQuizCard({ moduleGroup }) {
       </div>
 
       {hiddenCount > 0 ? (
-        <div className="mt-4 pt-2 border-t border-slate-800/60">
+        <div className="mt-4 pt-2 border-t border-stone-200">
           <button type="button" className={ui.buttonSecondary} onClick={() => setExpanded((prev) => !prev)}>
             {expanded ? "Show less" : `Show more (${hiddenCount})`}
           </button>

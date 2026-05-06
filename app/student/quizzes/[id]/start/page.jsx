@@ -79,13 +79,13 @@ export default async function StudentQuizStartPage({ params }) {
                   <div key={attempt.id} className={ui.cardInner}>
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <p className="font-medium text-slate-100">Attempt #{submittedAttempts - index}</p>
-                        <p className="text-xs text-slate-400">
+                        <p className="font-medium text-stone-950">Attempt #{submittedAttempts - index}</p>
+                        <p className="text-xs text-stone-600">
                           Submitted: {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleString() : "Not submitted"}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm text-slate-200">{attempt.score ?? 0}%</span>
+                        <span className="text-sm text-stone-800">{attempt.score ?? 0}%</span>
                         <Link href={`/student/quizzes/${id}/results?attemptId=${encodeURIComponent(attempt.id)}`} className={ui.buttonSmall}>
                           View
                         </Link>
@@ -99,9 +99,9 @@ export default async function StudentQuizStartPage({ params }) {
 
           <div className="flex gap-3">
             {isClosed ? (
-              <p className="text-sm text-amber-300">This quiz closed on {dueAt.toLocaleString()}.</p>
+              <p className="text-sm text-amber-700">This quiz closed on {dueAt.toLocaleString()}.</p>
             ) : submittedAttempts >= quiz.maxAttempts ? (
-              <p className="text-sm text-amber-300">You have reached the attempt limit for this quiz.</p>
+              <p className="text-sm text-amber-700">You have reached the attempt limit for this quiz.</p>
             ) : (
               <Link href={`/student/quizzes/${id}/take`} className={ui.buttonPrimary}>Start quiz</Link>
             )}

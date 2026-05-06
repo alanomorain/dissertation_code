@@ -64,7 +64,7 @@ export default async function LecturerLectureDetailPage({ params }) {
                 {lecture.analogySets.map((analogy) => (
                   <Link key={analogy.id} href={`/lecturer/analogies/${analogy.id}`} className={ui.linkCard}>
                     <p className="font-medium">{analogy.title || "Untitled"}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Status: {analogy.status} · Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()} · {new Date(analogy.createdAt).toLocaleDateString()}
                     </p>
                   </Link>

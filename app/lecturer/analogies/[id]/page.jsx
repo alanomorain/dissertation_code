@@ -68,19 +68,19 @@ export default async function LecturerAnalogyDetailPage({ params }) {
             <div className="space-y-2 text-sm">
               <div>
                 <span className={ui.textMuted}>Owner:</span>{" "}
-                <span className="text-slate-200">
+                <span className="text-stone-800">
                   {analogy.owner?.email || "Unassigned"}
                 </span>
               </div>
               <div>
                 <span className={ui.textMuted}>Created:</span>{" "}
-                <span className="text-slate-200">
+                <span className="text-stone-800">
                   {new Date(analogy.createdAt).toLocaleString()}
                 </span>
               </div>
               <div>
                 <span className={ui.textMuted}>Approved:</span>{" "}
-                <span className="text-slate-200">
+                <span className="text-stone-800">
                   {analogy.approvedAt
                     ? new Date(analogy.approvedAt).toLocaleString()
                     : "Not approved"}
@@ -91,11 +91,11 @@ export default async function LecturerAnalogyDetailPage({ params }) {
 
           {/* Error Message (if any) */}
           {analogy.errorMessage && (
-            <div className="bg-red-950/30 border border-red-800 rounded-2xl p-5">
-              <h3 className={`${ui.cardHeader} text-red-200`}>
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-5">
+              <h3 className={`${ui.cardHeader} text-red-700`}>
                 Error Message
               </h3>
-              <p className="text-sm text-red-300">{analogy.errorMessage}</p>
+              <p className="text-sm text-red-700">{analogy.errorMessage}</p>
             </div>
           )}
 
@@ -113,12 +113,12 @@ export default async function LecturerAnalogyDetailPage({ params }) {
                   >
                     <Link
                       href={`/lecturer/analogies/${analogy.id}/topics/${index}`}
-                      className="block rounded-md border border-transparent hover:border-indigo-400/40 transition p-2 -m-2"
+                      className="block rounded-md border border-transparent hover:border-teal-500/40 transition p-2 -m-2"
                     >
-                      <h4 className="font-medium text-indigo-300 mb-2">
+                      <h4 className="font-medium text-teal-700 mb-2">
                         {item.topic || "Unknown Topic"}
                       </h4>
-                      <p className="text-sm text-slate-300">
+                      <p className="text-sm text-stone-700">
                         {item.analogy || "No analogy provided"}
                       </p>
                     </Link>

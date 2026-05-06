@@ -6,35 +6,35 @@
 // Layout & Container
 export const container = "mx-auto max-w-6xl px-4"
 export const containerNarrow = "mx-auto max-w-5xl px-4"
-export const page = "min-h-screen bg-transparent text-slate-100 flex flex-col"
+export const page = "min-h-screen bg-stone-50 text-stone-950 flex flex-col"
 export const pageSection = "flex-1"
 export const pageSpacing = "py-6 space-y-4"
 
 // Cards
-export const card = "bg-slate-950/50 border border-slate-800/50 backdrop-blur rounded-2xl"
+export const card = "bg-white border border-stone-200 rounded-2xl shadow-sm"
 export const cardPadding = "p-5"
-export const cardFull = "bg-slate-950/50 border border-slate-800/50 backdrop-blur rounded-2xl p-5"
-export const cardInner = "bg-slate-900/70 border border-slate-800/50 backdrop-blur rounded-xl p-4"
-export const cardList = "rounded-xl border border-slate-800/50 bg-slate-900/70 px-4 py-3 backdrop-blur"
+export const cardFull = "bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
+export const cardInner = "bg-stone-50 border border-stone-200 rounded-xl p-4"
+export const cardList = "rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm"
 
 // Headers
-export const header = "sticky top-0 z-30 w-full border-b border-slate-800/50 bg-slate-950/70 backdrop-blur-md"
+export const header = "sticky top-0 z-30 w-full border-b border-stone-200 bg-white/90 backdrop-blur-md"
 export const headerContent = "mx-auto max-w-6xl px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between"
 export const headerContentNarrow = "mx-auto max-w-5xl px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between"
 export const cardHeader = "text-base font-semibold mb-3"
 
 // Buttons
-export const buttonPrimary = "rounded-lg bg-indigo-500 px-3 py-1.5 font-medium text-white hover:bg-indigo-400 transition text-sm"
-export const buttonSecondary = "rounded-lg border border-slate-600 px-3 py-1.5 hover:border-indigo-400 hover:text-indigo-200 transition text-sm"
-export const buttonSmall = "text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition"
+export const buttonPrimary = "rounded-lg bg-teal-600 px-3 py-1.5 font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition text-sm"
+export const buttonSecondary = "rounded-lg border border-stone-300 bg-white px-3 py-1.5 font-medium text-stone-700 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition text-sm"
+export const buttonSmall = "text-xs rounded-lg border border-stone-300 bg-white px-3 py-1 text-stone-700 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition"
 
 // Badges
-export const badgeReady = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-green-900/50 text-green-200"
-export const badgeProcessing = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-yellow-900/50 text-yellow-200"
-export const badgeFailed = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-red-900/50 text-red-200"
-export const badgeApproved = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-emerald-900/50 text-emerald-200"
-export const badgeDraft = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-slate-800/60 text-slate-200"
-export const badgeChanges = "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-amber-900/50 text-amber-200"
+export const badgeReady = "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
+export const badgeProcessing = "inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700"
+export const badgeFailed = "inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700"
+export const badgeApproved = "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
+export const badgeDraft = "inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-2 py-1 text-xs font-medium text-stone-700"
+export const badgeChanges = "inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700"
 
 // Status badge helper (use in components)
 export const getBadgeClass = (status) => {
@@ -50,10 +50,18 @@ export const getReviewBadgeClass = (status) => {
 }
 
 // Links
-export const linkCard = "block rounded-xl border border-slate-800/50 bg-slate-900/70 px-4 py-3 hover:border-indigo-400 transition backdrop-blur"
+export const linkCard = "block rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-sm hover:border-teal-200 hover:bg-teal-50 transition"
 
 // Text
-export const textMuted = "text-slate-400"
-export const textSmall = "text-sm text-slate-400"
-export const textLabel = "text-xs uppercase tracking-wide text-slate-400"
-export const textHighlight = "text-xs uppercase tracking-wide text-indigo-300"
+export const textMuted = "text-stone-600"
+export const textSmall = "text-sm text-stone-600"
+export const textLabel = "text-xs uppercase tracking-wide text-stone-600"
+export const textHighlight = "text-xs uppercase tracking-wide text-teal-700"
+
+// Forms
+export const input = "rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 placeholder:text-stone-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+export const inputFull = `w-full ${input}`
+export const calloutTeal = "rounded-2xl border border-teal-100 bg-teal-50 p-6 text-teal-900"
+export const alertSuccess = "rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+export const alertWarning = "rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700"
+export const alertError = "rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"

@@ -184,23 +184,23 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
       <div className="grid gap-4 md:grid-cols-2 text-sm">
         <label className="space-y-1">
           <span className="font-medium">Quiz title</span>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
         </label>
         <div className="space-y-1">
           <span className="font-medium">Module</span>
-          <p className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-slate-300">
+          <p className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-2 text-stone-700">
             {quiz.module.code} · {quiz.module.name}
           </p>
         </div>
         <div className="space-y-1">
           <span className="font-medium">Lecture</span>
-          <p className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-slate-300">
+          <p className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-2 text-stone-700">
             {quiz.lecture?.title || "No lecture linked"}
           </p>
         </div>
         <label className="space-y-1">
           <span className="font-medium">Status</span>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2">
             <option value="DRAFT">Draft</option>
             <option value="PUBLISHED">Published</option>
             <option value="ARCHIVED">Archived</option>
@@ -208,17 +208,17 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
         </label>
         <label className="space-y-1">
           <span className="font-medium">Due at (optional)</span>
-          <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
-          <span className="block text-xs text-slate-400">Students can see this deadline. Attempts are blocked after it passes.</span>
+          <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+          <span className="block text-xs text-stone-600">Students can see this deadline. Attempts are blocked after it passes.</span>
         </label>
         <label className="space-y-1">
           <span className="font-medium">Schedule release (optional)</span>
-          <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
-          <span className="block text-xs text-slate-400">If status is published, this controls when students can first access the quiz.</span>
+          <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+          <span className="block text-xs text-stone-600">If status is published, this controls when students can first access the quiz.</span>
         </label>
         <label className="space-y-1">
           <span className="font-medium">Max attempts</span>
-          <input type="number" min={1} max={5} value={maxAttempts} onChange={(e) => setMaxAttempts(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
+          <input type="number" min={1} max={5} value={maxAttempts} onChange={(e) => setMaxAttempts(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
         </label>
       </div>
 
@@ -247,7 +247,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
           {questions.map((question, questionIndex) => (
             <div key={question.id || questionIndex} className={ui.cardInner}>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs uppercase tracking-wide text-indigo-300">Question {questionIndex + 1}</p>
+                <p className="text-xs uppercase tracking-wide text-teal-700">Question {questionIndex + 1}</p>
                 {canEditQuestions ? (
                   <button
                     type="button"
@@ -270,7 +270,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       prev.map((item, idx) => (idx === questionIndex ? { ...item, prompt: e.target.value } : item)),
                     )
                   }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 disabled:opacity-70"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
                 />
               </label>
 
@@ -284,7 +284,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       prev.map((item, idx) => (idx === questionIndex ? { ...item, difficulty: e.target.value } : item)),
                     )
                   }
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 disabled:opacity-70"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
                 >
                   <option value="EASY">Easy</option>
                   <option value="MEDIUM">Medium</option>
@@ -320,7 +320,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       ),
                     )
                   }}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 disabled:opacity-70"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
                 >
                   <option value="">No linked analogy topic</option>
                   {analogyTopics.map((topic) => (
@@ -345,7 +345,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                     )
                   }
                   placeholder="https://your-media-url/video.mp4"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 disabled:opacity-70"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
                 />
               </label>
 
@@ -361,7 +361,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                     {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload video"}
                   </label>
                   {question.videoUrl ? (
-                    <a href={question.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-indigo-300 hover:text-indigo-200">
+                    <a href={question.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-teal-700 hover:text-teal-700">
                       Preview video
                     </a>
                   ) : null}
@@ -410,7 +410,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                           ),
                         )
                       }
-                      className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 disabled:opacity-70"
+                      className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
                     />
                     {canEditQuestions ? (
                       <button
@@ -455,7 +455,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
         </div>
       </div>
 
-      {message ? <p className="mt-3 text-sm text-amber-300">{message}</p> : null}
+      {message ? <p className="mt-3 text-sm text-amber-700">{message}</p> : null}
 
       <div className="mt-4 flex gap-2">
         <button type="button" disabled={saving} onClick={handleSave} className={ui.buttonPrimary}>

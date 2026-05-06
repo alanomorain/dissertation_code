@@ -104,8 +104,8 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
             <div className="space-y-3 text-sm">
               {orderedResponses.map((response) => (
                 <div key={response.id} className={ui.cardInner}>
-                  <p className="text-slate-200">{response.question.prompt}</p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="text-stone-800">{response.question.prompt}</p>
+                  <p className="mt-1 text-xs text-stone-600">
                     Your answer: {response.selectedOption?.text || "No option selected"} · {response.isCorrect ? "Correct" : "Incorrect"}
                   </p>
                   {(() => {
@@ -113,18 +113,18 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
                     if (!topicPayload || (!topicPayload.analogy && !topicPayload.videoUrl)) return null
 
                     return (
-                      <details className="mt-2 rounded-lg border border-slate-800/70 bg-slate-900/70 p-3">
-                        <summary className="cursor-pointer text-xs font-medium text-indigo-300">
+                      <details className="mt-2 rounded-lg border border-stone-200 bg-white p-3">
+                        <summary className="cursor-pointer text-xs font-medium text-teal-700">
                           View linked analogy and media
                         </summary>
                         <div className="mt-2 space-y-3">
                           {topicPayload.topic ? (
-                            <p className="text-xs text-slate-300">
+                            <p className="text-xs text-stone-700">
                               <span className={ui.textMuted}>Topic:</span> {topicPayload.topic}
                             </p>
                           ) : null}
                           {topicPayload.analogy ? (
-                            <p className="text-sm text-slate-200 whitespace-pre-wrap">{topicPayload.analogy}</p>
+                            <p className="text-sm text-stone-800 whitespace-pre-wrap">{topicPayload.analogy}</p>
                           ) : null}
                           {topicPayload.imageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element

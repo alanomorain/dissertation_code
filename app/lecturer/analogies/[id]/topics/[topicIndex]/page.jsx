@@ -78,7 +78,7 @@ export default async function LecturerTopicDetailPage({ params }) {
             <h2 className="text-xl font-semibold mb-2">
               {topic.topic || "Unknown Topic"}
             </h2>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-stone-700">
               {topic.analogy || "No analogy provided"}
             </p>
 

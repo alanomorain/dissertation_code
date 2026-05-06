@@ -66,10 +66,10 @@ export default async function LecturerQuizDetailPage({ params }) {
             <div className="space-y-3 text-sm">
               {quiz.questions.map((question) => (
                 <div key={question.id} className={ui.cardInner}>
-                  <p className="text-xs text-slate-400">{question.type} · {question.difficulty}</p>
-                  <p className="mt-2 text-slate-100">{question.prompt}</p>
+                  <p className="text-xs text-stone-600">{question.type} · {question.difficulty}</p>
+                  <p className="mt-2 text-stone-950">{question.prompt}</p>
                   {question.options.length > 0 ? (
-                    <ul className="mt-2 space-y-1 text-xs text-slate-300">
+                    <ul className="mt-2 space-y-1 text-xs text-stone-700">
                       {question.options.map((option) => (
                         <li key={option.id}>{option.isCorrect ? "✓" : "•"} {option.text}</li>
                       ))}

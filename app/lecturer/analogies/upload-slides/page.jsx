@@ -562,8 +562,8 @@ function UploadSlidesPageInner() {
     <span
       className={`rounded-full px-3 py-1 text-xs font-medium border ${
         activeStep === step
-          ? "border-indigo-400 bg-indigo-500/20 text-indigo-100"
-          : "border-slate-700 bg-slate-900 text-slate-300"
+          ? "border-teal-200 bg-teal-50 text-teal-700"
+          : "border-stone-300 bg-white text-stone-700"
       }`}
     >
       {label}
@@ -596,8 +596,8 @@ function UploadSlidesPageInner() {
               <div
                 className={`mb-4 rounded-lg px-3 py-2 text-sm ${
                   message.type === "error"
-                    ? "bg-red-900/40 border border-red-600 text-red-100"
-                    : "bg-emerald-900/40 border border-emerald-500 text-emerald-100"
+                    ? "bg-red-50 border border-red-200 text-red-700"
+                    : "bg-emerald-50 border border-emerald-200 text-emerald-700"
                 }`}
               >
                 {message.text}
@@ -606,13 +606,13 @@ function UploadSlidesPageInner() {
 
             {activeStep === "analogies" && (
               <>
-                <p className="text-sm text-slate-300 mb-4">
+                <p className="text-sm text-stone-700 mb-4">
                   Upload slides, confirm topics, choose one analogy per topic, optionally add feedback, and regenerate per topic if needed.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4 text-sm">
                   <div className="space-y-1">
-                    <label htmlFor="module" className="block text-sm font-medium text-slate-200">
+                    <label htmlFor="module" className="block text-sm font-medium text-stone-800">
                       Module
                     </label>
                     <select
@@ -626,21 +626,21 @@ function UploadSlidesPageInner() {
                           setModuleCode(val)
                         }
                       }}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     >
                       {modules.map((module) => (
                         <option key={module.id} value={module.code}>
                           {module.code} · {module.name}
                         </option>
                       ))}
-                      <option value="new" className="text-indigo-300">
+                      <option value="new" className="text-teal-700">
                         Create new module...
                       </option>
                     </select>
                   </div>
 
                   <div className="space-y-1">
-                    <label htmlFor="lectureTitle" className="block text-sm font-medium text-slate-200">
+                    <label htmlFor="lectureTitle" className="block text-sm font-medium text-stone-800">
                       Lecture title
                     </label>
                     <input
@@ -648,13 +648,13 @@ function UploadSlidesPageInner() {
                       type="text"
                       value={lectureTitle}
                       onChange={(e) => setLectureTitle(e.target.value)}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       placeholder="e.g., Week 3 - Distributed Systems Fundamentals"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label htmlFor="slides" className="block text-sm font-medium text-slate-200">
+                    <label htmlFor="slides" className="block text-sm font-medium text-stone-800">
                       Slide deck file
                     </label>
                     <input
@@ -662,17 +662,17 @@ function UploadSlidesPageInner() {
                       type="file"
                       accept=".pdf,.ppt,.pptx"
                       onChange={handleFileChange}
-                      className="block w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-indigo-400"
+                      className="block w-full text-xs text-stone-700 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-600 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-teal-600"
                     />
                     {slidesFile && (
-                      <p className="text-xs text-slate-300 mt-1">
+                      <p className="text-xs text-stone-700 mt-1">
                         Selected file: <span className="font-medium">{slidesFile.name}</span>
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-1">
-                    <label htmlFor="notes" className="block text-sm font-medium text-slate-200">
+                    <label htmlFor="notes" className="block text-sm font-medium text-stone-800">
                       Notes for the generator (optional)
                     </label>
                     <textarea
@@ -680,7 +680,7 @@ function UploadSlidesPageInner() {
                       rows={4}
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       placeholder="Add teaching context, tone preferences, or constraints"
                     />
                   </div>
@@ -697,18 +697,18 @@ function UploadSlidesPageInner() {
                 </form>
 
                 {topics.length > 0 && (
-                  <section className="mt-8 border-t border-slate-800 pt-4">
+                  <section className="mt-8 border-t border-stone-200 pt-4">
                     <h2 className={`${ui.cardHeader} mb-3`}>Suggested topics for analogies</h2>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {topics.map((topic) => (
                         <span
                           key={topic}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs"
+                          className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-3 py-1 text-xs"
                         >
                           {topic}
                           <button
                             type="button"
-                            className="text-slate-400 hover:text-red-300"
+                            className="text-stone-600 hover:text-red-700"
                             onClick={() => handleRemoveTopic(topic)}
                           >
                             x
@@ -723,12 +723,12 @@ function UploadSlidesPageInner() {
                         value={newTopic}
                         onChange={(e) => setNewTopic(e.target.value)}
                         placeholder="Add a new topic"
-                        className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                        className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       />
                       <button
                         type="button"
                         onClick={handleAddTopic}
-                        className="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium hover:bg-slate-600"
+                        className={ui.buttonSecondary}
                       >
                         Add
                       </button>
@@ -746,25 +746,25 @@ function UploadSlidesPageInner() {
                 )}
 
                 {topicStates.length > 0 && (
-                  <section className="mt-8 border-t border-slate-800 pt-4">
+                  <section className="mt-8 border-t border-stone-200 pt-4">
                     <h2 className={`${ui.cardHeader} mb-3`}>Select your favourite analogy for each topic</h2>
-                    <p className="text-xs text-slate-400 mb-4">
+                    <p className="text-xs text-stone-600 mb-4">
                       Selected options are highlighted. Double-click the selected analogy to edit wording, then add feedback and regenerate that topic if needed.
                     </p>
 
                     <div className="space-y-4">
                       {topicStates.map((item, idx) => (
-                        <div key={`${item.topic}-${idx}`} className={`${ui.cardInner} border border-slate-700`}>
+                        <div key={`${item.topic}-${idx}`} className={`${ui.cardInner} border border-stone-300`}>
                           <div className="flex items-start justify-between gap-3 mb-3">
                             <div>
-                              <p className="text-xs font-semibold text-slate-100 mb-1">Topic {idx + 1}</p>
-                              <p className="text-sm text-slate-200">{item.topic || "Untitled topic"}</p>
+                              <p className="text-xs font-semibold text-stone-950 mb-1">Topic {idx + 1}</p>
+                              <p className="text-sm text-stone-800">{item.topic || "Untitled topic"}</p>
                             </div>
                             <button
                               type="button"
                               onClick={() => handleRegenerateTopic(idx)}
                               disabled={regeneratingIndex === idx}
-                              className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-200 hover:border-indigo-400 hover:text-indigo-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="rounded-lg border border-stone-300 px-3 py-1 text-xs text-stone-800 hover:border-teal-500 hover:text-teal-700 disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                               {regeneratingIndex === idx ? "Regenerating..." : "Regenerate"}
                             </button>
@@ -778,8 +778,8 @@ function UploadSlidesPageInner() {
                                   key={`${idx}-${candidateIndex}`}
                                   className={`block rounded-lg border p-3 text-sm cursor-pointer transition ${
                                     selected
-                                      ? "border-emerald-500 bg-emerald-900/20 text-emerald-100"
-                                      : "border-slate-700 bg-slate-900/40 text-slate-300 hover:border-indigo-400/70"
+                                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                                      : "border-stone-300 bg-white/40 text-stone-700 hover:border-teal-500/70"
                                   }`}
                                 >
                                   <input
@@ -811,7 +811,7 @@ function UploadSlidesPageInner() {
                                       }}
                                       rows={3}
                                       autoFocus
-                                      className="mt-2 w-full rounded-lg border border-emerald-500/60 bg-slate-950/60 px-3 py-2 text-sm text-emerald-100 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                                      className="mt-2 w-full rounded-lg border border-emerald-200/60 bg-stone-50/60 px-3 py-2 text-sm text-emerald-700 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
                                     />
                                   ) : (
                                     <span
@@ -829,14 +829,14 @@ function UploadSlidesPageInner() {
                           </div>
 
                           <div className="mt-3">
-                            <label className="text-xs uppercase tracking-wide text-slate-400">
+                            <label className="text-xs uppercase tracking-wide text-stone-600">
                               Feedback for this selected analogy
                             </label>
                             <textarea
                               value={item.feedback}
                               onChange={(event) => updateTopicState(idx, { feedback: event.target.value })}
                               rows={3}
-                              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                              className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                               placeholder="Explain what to improve, what tone to use, or what to avoid"
                             />
                           </div>
@@ -862,22 +862,22 @@ function UploadSlidesPageInner() {
             {activeStep === "images" && (
               <>
                 <h2 className={ui.cardHeader}>Optional image uploads</h2>
-                <p className="text-sm text-slate-300 mb-4">Upload supporting images for any topic, or skip.</p>
+                <p className="text-sm text-stone-700 mb-4">Upload supporting images for any topic, or skip.</p>
 
                 <div className="space-y-4">
                   {topicStates.map((item, idx) => (
                     <div key={`${item.topic}-image-${idx}`} className={ui.cardInner}>
-                      <h3 className="text-sm font-semibold text-indigo-300 mb-1">{item.topic}</h3>
-                      <p className="text-xs text-slate-300 mb-3">{item.analogy}</p>
+                      <h3 className="text-sm font-semibold text-teal-700 mb-1">{item.topic}</h3>
+                      <p className="text-xs text-stone-700 mb-3">{item.analogy}</p>
 
-                      <label className="text-xs uppercase tracking-wide text-slate-400">Image URL (optional)</label>
+                      <label className="text-xs uppercase tracking-wide text-stone-600">Image URL (optional)</label>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <input
                           type="url"
                           value={item.imageUrl}
                           onChange={(event) => updateTopicState(idx, { imageUrl: event.target.value })}
                           placeholder="https://..."
-                          className="min-w-[220px] flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                          className="min-w-[220px] flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         />
                         <label className={`${ui.buttonSecondary} cursor-pointer`}>
                           {uploadingMediaByKey[`${idx}:image`] ? "Uploading..." : "Upload image"}
@@ -899,7 +899,7 @@ function UploadSlidesPageInner() {
                             width={768}
                             height={384}
                             unoptimized
-                            className="h-44 w-full rounded-lg object-cover border border-slate-700"
+                            className="h-44 w-full rounded-lg object-cover border border-stone-300"
                           />
                         </div>
                       )}
@@ -929,21 +929,21 @@ function UploadSlidesPageInner() {
             {activeStep === "videos" && (
               <>
                 <h2 className={ui.cardHeader}>Optional video uploads and details</h2>
-                <p className="text-sm text-slate-300 mb-4">Upload a short video clip or add an existing URL for any topic.</p>
+                <p className="text-sm text-stone-700 mb-4">Upload a short video clip or add an existing URL for any topic.</p>
 
                 <div className="space-y-4">
                   {topicStates.map((item, idx) => (
                     <div key={`${item.topic}-video-${idx}`} className={ui.cardInner}>
-                      <h3 className="text-sm font-semibold text-indigo-300 mb-2">{item.topic}</h3>
+                      <h3 className="text-sm font-semibold text-teal-700 mb-2">{item.topic}</h3>
 
-                      <label className="text-xs uppercase tracking-wide text-slate-400">Video URL (optional)</label>
+                      <label className="text-xs uppercase tracking-wide text-stone-600">Video URL (optional)</label>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <input
                           type="url"
                           value={item.videoUrl}
                           onChange={(event) => updateTopicState(idx, { videoUrl: event.target.value })}
                           placeholder="https://..."
-                          className="min-w-[220px] flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                          className="min-w-[220px] flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         />
                         <label className={`${ui.buttonSecondary} cursor-pointer`}>
                           {uploadingMediaByKey[`${idx}:video`] ? "Uploading..." : "Upload video"}
@@ -957,13 +957,13 @@ function UploadSlidesPageInner() {
                         </label>
                       </div>
 
-                      <label className="mt-3 block text-xs uppercase tracking-wide text-slate-400">Video notes (optional)</label>
+                      <label className="mt-3 block text-xs uppercase tracking-wide text-stone-600">Video notes (optional)</label>
                       <textarea
                         value={item.videoNotes}
                         onChange={(event) => updateTopicState(idx, { videoNotes: event.target.value })}
                         rows={3}
                         placeholder="Describe what video should cover"
-                        className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                        className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       />
                     </div>
                   ))}
@@ -991,23 +991,23 @@ function UploadSlidesPageInner() {
             {activeStep === "summary" && (
               <>
                 <h2 className={ui.cardHeader}>Final summary</h2>
-                <p className="text-sm text-slate-300 mb-4">Review written analogies, images, and videos together before finishing.</p>
+                <p className="text-sm text-stone-700 mb-4">Review written analogies, images, and videos together before finishing.</p>
 
                 <div className="space-y-4">
                   {topicStates.map((item, idx) => (
                     <div key={`${item.topic}-summary-${idx}`} className={ui.cardInner}>
-                      <h3 className="text-sm font-semibold text-indigo-300 mb-2">{item.topic}</h3>
-                      <p className="text-sm text-slate-200 mb-2">{item.analogy}</p>
+                      <h3 className="text-sm font-semibold text-teal-700 mb-2">{item.topic}</h3>
+                      <p className="text-sm text-stone-800 mb-2">{item.analogy}</p>
 
                       {item.feedback && (
-                        <p className="text-xs text-slate-300 mb-3">
-                          <span className="text-slate-400">Feedback:</span> {item.feedback}
+                        <p className="text-xs text-stone-700 mb-3">
+                          <span className="text-stone-600">Feedback:</span> {item.feedback}
                         </p>
                       )}
 
                       <div className="grid gap-3 md:grid-cols-2">
-                        <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
-                          <p className="text-xs text-slate-400 mb-2">Image</p>
+                        <div className="rounded-lg border border-stone-200 bg-white/50 p-3">
+                          <p className="text-xs text-stone-600 mb-2">Image</p>
                           {item.imageUrl ? (
                             <Image
                               src={item.imageUrl}
@@ -1018,19 +1018,19 @@ function UploadSlidesPageInner() {
                               className="h-32 w-full rounded object-cover"
                             />
                           ) : (
-                            <p className="text-xs text-slate-500">No image added.</p>
+                            <p className="text-xs text-stone-500">No image added.</p>
                           )}
                         </div>
 
-                        <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-3">
-                          <p className="text-xs text-slate-400 mb-2">Video</p>
+                        <div className="rounded-lg border border-stone-200 bg-white/50 p-3">
+                          <p className="text-xs text-stone-600 mb-2">Video</p>
                           {item.videoUrl || item.videoNotes ? (
-                            <div className="space-y-2 text-xs text-slate-300">
+                            <div className="space-y-2 text-xs text-stone-700">
                               {item.videoUrl && <p>URL: {item.videoUrl}</p>}
                               {item.videoNotes && <p>Notes: {item.videoNotes}</p>}
                             </div>
                           ) : (
-                            <p className="text-xs text-slate-500">No video details added.</p>
+                            <p className="text-xs text-stone-500">No video details added.</p>
                           )}
                         </div>
                       </div>
@@ -1062,46 +1062,46 @@ function UploadSlidesPageInner() {
       </section>
 
       {showModuleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className={`${ui.card} p-6 w-full max-w-md rounded-lg border border-slate-700`}>
-            <h2 className="text-lg font-semibold text-slate-100 mb-4">Create New Module</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 backdrop-blur-sm">
+          <div className={`${ui.card} p-6 w-full max-w-md rounded-lg border border-stone-300`}>
+            <h2 className="text-lg font-semibold text-stone-950 mb-4">Create New Module</h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">Module Code</label>
+                <label className="block text-sm font-medium text-stone-800 mb-1">Module Code</label>
                 <input
                   type="text"
                   value={newModuleCode}
                   onChange={(e) => setNewModuleCode(e.target.value.toUpperCase())}
                   placeholder="e.g., CSC7099"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">Module Name</label>
+                <label className="block text-sm font-medium text-stone-800 mb-1">Module Name</label>
                 <input
                   type="text"
                   value={newModuleName}
                   onChange={(e) => setNewModuleName(e.target.value)}
                   placeholder="e.g., Advanced Cloud Computing"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-200 mb-1">Description (optional)</label>
+                <label className="block text-sm font-medium text-stone-800 mb-1">Description (optional)</label>
                 <textarea
                   value={newModuleDescription}
                   onChange={(e) => setNewModuleDescription(e.target.value)}
                   placeholder="Brief description of the module..."
                   rows={3}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
               {moduleError && (
-                <div className="rounded-lg bg-red-900/40 border border-red-600 px-3 py-2 text-xs text-red-100">
+                <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">
                   {moduleError}
                 </div>
               )}
@@ -1116,7 +1116,7 @@ function UploadSlidesPageInner() {
                     setNewModuleDescription("")
                     setModuleError("")
                   }}
-                  className="flex-1 rounded-lg border border-slate-600 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 transition-colors"
+                  className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm font-medium text-stone-800 hover:bg-stone-100 transition-colors"
                 >
                   Cancel
                 </button>
@@ -1143,7 +1143,7 @@ export default function UploadSlidesPage() {
       fallback={(
         <main className={ui.page}>
           <section className={ui.pageSection}>
-            <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-slate-300">Loading...</div>
+            <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-stone-700">Loading...</div>
           </section>
         </main>
       )}

@@ -58,58 +58,58 @@ export default function StudentRegisterForm() {
       <div>
         <p className={ui.textLabel}>Student access</p>
         <h2 className="mt-1 text-xl font-semibold">Create account</h2>
-        <p className="mt-2 text-sm text-slate-300">
+        <p className="mt-2 text-sm text-stone-700">
           Create your student account to sign in directly without seeded demo credentials.
         </p>
       </div>
 
       <label className="block space-y-2 text-sm">
-        <span className="text-slate-300">Email</span>
+        <span className="text-stone-700">Email</span>
         <input
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
           autoComplete="email"
           required
         />
       </label>
 
       <label className="block space-y-2 text-sm">
-        <span className="text-slate-300">Student number (optional)</span>
+        <span className="text-stone-700">Student number (optional)</span>
         <input
           type="text"
           value={studentNumber}
           onChange={(event) => setStudentNumber(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
         />
       </label>
 
       <label className="block space-y-2 text-sm">
-        <span className="text-slate-300">Password</span>
+        <span className="text-stone-700">Password</span>
         <input
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
           autoComplete="new-password"
           required
         />
       </label>
 
       <label className="block space-y-2 text-sm">
-        <span className="text-slate-300">Confirm password</span>
+        <span className="text-stone-700">Confirm password</span>
         <input
           type="password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
           autoComplete="new-password"
           required
         />
       </label>
 
-      {error ? <p className="text-sm text-amber-300">{error}</p> : null}
+      {error ? <p className="text-sm text-amber-700">{error}</p> : null}
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={submitting} className={ui.buttonPrimary}>

@@ -80,8 +80,8 @@ export default async function LecturerQuizResultsPage({ params }) {
             <div className="space-y-3 text-sm">
               {questionPerformance.map((q) => (
                 <div key={q.id} className={ui.cardInner}>
-                  <p className="text-slate-200">{q.prompt}</p>
-                  <p className="text-xs text-slate-400">Correct: {q.correctPct}%</p>
+                  <p className="text-stone-800">{q.prompt}</p>
+                  <p className="text-xs text-stone-600">Correct: {q.correctPct}%</p>
                 </div>
               ))}
             </div>
@@ -93,7 +93,7 @@ export default async function LecturerQuizResultsPage({ params }) {
               {attempts.map((attempt) => (
                 <div key={attempt.id} className={ui.cardInner}>
                   <p className="font-medium">{attempt.student.email}</p>
-                  <p className="text-xs text-slate-400">Score: {attempt.score || 0}%</p>
+                  <p className="text-xs text-stone-600">Score: {attempt.score || 0}%</p>
                 </div>
               ))}
             </div>

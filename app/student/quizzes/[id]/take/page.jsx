@@ -261,7 +261,7 @@ export default function StudentQuizTakePage() {
       <main className={ui.page}>
         <section className={ui.pageSection}>
           <div className={`${ui.containerNarrow} py-8 space-y-3`}>
-            <p className="text-sm text-amber-300">{error || "Quiz unavailable."}</p>
+            <p className="text-sm text-amber-700">{error || "Quiz unavailable."}</p>
             <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
           </div>
         </section>
@@ -279,7 +279,7 @@ export default function StudentQuizTakePage() {
           <div>
             <p className={ui.textLabel}>Student · Quiz</p>
             <h1 className="text-lg font-semibold">{quiz.title}</h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-600">
               Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}
             </p>
           </div>
@@ -293,7 +293,7 @@ export default function StudentQuizTakePage() {
         <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
             <div className="mb-4">
-              <div className="h-2 overflow-hidden rounded-full bg-slate-800/80">
+              <div className="h-2 overflow-hidden rounded-full bg-stone-100">
                 <div
                   className="h-full rounded-full bg-emerald-500 transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
@@ -305,7 +305,7 @@ export default function StudentQuizTakePage() {
 
             <div className="mt-4 space-y-2 text-sm">
               {currentQuestion.options.map((option) => (
-                <label key={option.id} className="flex items-center gap-2 rounded-lg border border-slate-800/70 px-3 py-2">
+                <label key={option.id} className="flex items-center gap-2 rounded-lg border border-stone-200 px-3 py-2">
                   <input
                     type="radio"
                     name={currentQuestion.id}
@@ -327,7 +327,7 @@ export default function StudentQuizTakePage() {
               </button>
             </div>
 
-            {error ? <p className="mt-3 text-sm text-amber-300">{error}</p> : null}
+            {error ? <p className="mt-3 text-sm text-amber-700">{error}</p> : null}
 
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <button
@@ -352,10 +352,10 @@ export default function StudentQuizTakePage() {
       </section>
 
       {mediaModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-700 bg-slate-900 p-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4">
+          <div className="w-full max-w-3xl rounded-2xl border border-stone-300 bg-white p-5">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <h3 className="text-base font-semibold text-slate-100">
+              <h3 className="text-base font-semibold text-stone-950">
                 {mediaStage === "ANALOGY" ? "Analogy" : "Video"}
               </h3>
               <button type="button" className={ui.buttonSmall} onClick={closeMediaModal}>Close</button>
@@ -366,12 +366,12 @@ export default function StudentQuizTakePage() {
                 {mediaStage === "ANALOGY" ? (
                   <>
                     <div className={ui.cardInner}>
-                      <p className="text-xs text-slate-400">Topic</p>
-                      <p className="font-medium text-slate-100">{modalTopicPayload.topic || "Quiz topic"}</p>
+                      <p className="text-xs text-stone-600">Topic</p>
+                      <p className="font-medium text-stone-950">{modalTopicPayload.topic || "Quiz topic"}</p>
                     </div>
                     <div className={ui.cardInner}>
-                      <p className="text-xs text-slate-400 mb-1">Analogy</p>
-                      <p className="text-slate-200 whitespace-pre-wrap">{modalTopicPayload.analogy || "No analogy is available for this question."}</p>
+                      <p className="text-xs text-stone-600 mb-1">Analogy</p>
+                      <p className="text-stone-800 whitespace-pre-wrap">{modalTopicPayload.analogy || "No analogy is available for this question."}</p>
                     </div>
                     {modalTopicPayload.imageUrl ? (
                       <div className={ui.cardInner}>
@@ -391,7 +391,7 @@ export default function StudentQuizTakePage() {
                     {modalTopicPayload.videoUrl ? (
                       <video src={modalTopicPayload.videoUrl} controls className="w-full rounded-lg" />
                     ) : (
-                      <p className="text-slate-300">No video is linked for this question yet.</p>
+                      <p className="text-stone-700">No video is linked for this question yet.</p>
                     )}
                   </div>
                 ) : null}
@@ -432,7 +432,7 @@ export default function StudentQuizTakePage() {
               </div>
             ) : (
               <div className="space-y-3 text-sm">
-                <p className="text-slate-300">No analogy or video has been linked to this question yet.</p>
+                <p className="text-stone-700">No analogy or video has been linked to this question yet.</p>
                 <button type="button" className={ui.buttonPrimary} onClick={closeMediaModal}>Continue</button>
               </div>
             )}

@@ -31,7 +31,7 @@ export default function DeleteAnalogyButton({ analogyId }) {
       type="button"
       onClick={handleDelete}
       disabled={deleting}
-      className="rounded-md border border-red-500 px-2 py-1 text-xs text-red-200 hover:bg-red-900/30 disabled:opacity-60 disabled:cursor-not-allowed"
+      className="rounded-md border border-red-500 px-2 py-1 text-xs text-red-700 hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
     >
       {deleting ? "Deleting..." : "Delete"}
     </button>

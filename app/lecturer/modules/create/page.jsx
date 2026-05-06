@@ -81,7 +81,7 @@ export default function CreateModulePage() {
       <section className={ui.pageSection}>
         <div className={`${ui.containerNarrow} py-6`}>
           <div className={`${ui.card} p-6 md:p-8`}>
-            <p className="text-sm text-slate-300 mb-4">
+            <p className="text-sm text-stone-700 mb-4">
               Add a new module so you can generate and manage analogies for it.
             </p>
 
@@ -89,8 +89,8 @@ export default function CreateModulePage() {
               <div
                 className={`mb-4 rounded-lg px-3 py-2 text-sm ${
                   message.type === "error"
-                    ? "bg-red-900/40 border border-red-600 text-red-100"
-                    : "bg-emerald-900/40 border border-emerald-500 text-emerald-100"
+                    ? "bg-red-50 border border-red-200 text-red-700"
+                    : "bg-emerald-50 border border-emerald-200 text-emerald-700"
                 }`}
               >
                 {message.text}
@@ -99,7 +99,7 @@ export default function CreateModulePage() {
 
             <form onSubmit={handleSubmit} className="space-y-4 text-sm">
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-medium text-stone-800">
                   Module Code
                 </label>
                 <input
@@ -107,15 +107,15 @@ export default function CreateModulePage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="e.g., CSC7099"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   Unique identifier (3–10 uppercase letters/numbers).
                 </p>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-medium text-stone-800">
                   Module Name
                 </label>
                 <input
@@ -123,15 +123,15 @@ export default function CreateModulePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., Advanced Cloud Computing"
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   Full name of the module.
                 </p>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-sm font-medium text-slate-200">
+                <label className="block text-sm font-medium text-stone-800">
                   Description (optional)
                 </label>
                 <textarea
@@ -139,7 +139,7 @@ export default function CreateModulePage() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Brief description of the module..."
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
@@ -153,7 +153,7 @@ export default function CreateModulePage() {
                 </button>
                 <Link
                   href="/lecturer"
-                  className="text-sm text-slate-300 hover:text-indigo-200"
+                  className="text-sm text-stone-700 hover:text-teal-700"
                 >
                   Cancel
                 </Link>

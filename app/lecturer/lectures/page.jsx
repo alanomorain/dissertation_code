@@ -79,9 +79,9 @@ export default async function LecturerLecturesPage({ searchParams }) {
               <div className="space-y-3 text-sm">
                 {lectures.map((lecture) => (
                   <div key={lecture.id} className={`${ui.cardList} flex items-start justify-between gap-3`}>
-                    <Link href={`/lecturer/lectures/${lecture.id}`} className="min-w-0 hover:text-indigo-200 transition">
-                      <p className="font-semibold text-slate-100 truncate">{lecture.title}</p>
-                      <p className="text-xs text-slate-400">
+                    <Link href={`/lecturer/lectures/${lecture.id}`} className="min-w-0 hover:text-teal-700 transition">
+                      <p className="font-semibold text-stone-950 truncate">{lecture.title}</p>
+                      <p className="text-xs text-stone-600">
                         {lecture.module.code} · {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
                       </p>
                     </Link>

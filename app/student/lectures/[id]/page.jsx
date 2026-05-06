@@ -70,7 +70,7 @@ export default async function StudentLectureDetailPage({ params }) {
                 {lecture.quizzes.map((quiz) => (
                   <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
                     <p className="font-medium">{quiz.title || "Untitled"}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Max attempts: {quiz.maxAttempts} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}
                     </p>
                   </Link>

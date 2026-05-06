@@ -9,12 +9,12 @@ function QuizItem({ quiz }) {
   const content = (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <p className="font-semibold text-slate-100">{quiz.title}</p>
-        <p className="text-xs text-slate-400">
+        <p className="font-semibold text-stone-950">{quiz.title}</p>
+        <p className="text-xs text-stone-600">
           Attempts: {quiz.submittedAttempts}/{quiz.maxAttempts}
           {quiz.bestScore === null ? "" : ` · Best score: ${quiz.bestScore}%`}
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-stone-500">
           Release: {quiz.releaseText} · Due: {quiz.dueText}
         </p>
       </div>
@@ -27,7 +27,7 @@ function QuizItem({ quiz }) {
   }
 
   return (
-    <Link href={`/student/quizzes/${quiz.id}/start`} className={`${ui.cardList} block hover:border-indigo-400 transition`}>
+    <Link href={`/student/quizzes/${quiz.id}/start`} className={`${ui.cardList} block hover:border-teal-500 transition`}>
       {content}
     </Link>
   )
@@ -46,7 +46,7 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className={ui.textHighlight}>{moduleGroup.moduleCode}</p>
-          <h2 className="text-lg font-semibold text-slate-100">{moduleGroup.moduleName}</h2>
+          <h2 className="text-lg font-semibold text-stone-950">{moduleGroup.moduleName}</h2>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
           <span className={ui.badgeDraft}>To do: {moduleGroup.counts.TO_DO}</span>
@@ -64,7 +64,7 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
       </div>
 
       {hiddenCount > 0 ? (
-        <div className="mt-4 pt-2 border-t border-slate-800/60">
+        <div className="mt-4 pt-2 border-t border-stone-200">
           <button type="button" className={ui.buttonSecondary} onClick={() => setExpanded((prev) => !prev)}>
             {expanded ? "Show less" : `Show more (${hiddenCount})`}
           </button>

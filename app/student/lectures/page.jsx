@@ -91,9 +91,9 @@ export default async function StudentLecturesPage({ searchParams }) {
             ) : (
               <div className="space-y-3 text-sm">
                 {lectures.map((lecture) => (
-                  <Link key={lecture.id} href={`/student/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-indigo-400 transition`}>
-                    <p className="font-semibold text-slate-100">{lecture.title}</p>
-                    <p className="text-xs text-slate-400">
+                  <Link key={lecture.id} href={`/student/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-teal-500 transition`}>
+                    <p className="font-semibold text-stone-950">{lecture.title}</p>
+                    <p className="text-xs text-stone-600">
                       {lecture.module.code} · {lecture.quizzes.length} published quizzes
                     </p>
                   </Link>

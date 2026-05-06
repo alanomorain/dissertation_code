@@ -157,7 +157,7 @@ export default function EditAnalogyPage() {
           </div>
         </header>
         <section className="flex-1 flex items-center justify-center">
-          <div className="text-slate-300">Loading analogy...</div>
+          <div className="text-stone-700">Loading analogy...</div>
         </section>
       </main>
     )
@@ -178,7 +178,7 @@ export default function EditAnalogyPage() {
           </div>
         </header>
         <section className="flex-1 flex items-center">
-          <div className="mx-auto max-w-4xl px-4 py-6 text-sm text-slate-300">
+          <div className="mx-auto max-w-4xl px-4 py-6 text-sm text-stone-700">
             No analogy exists with ID {id}.
           </div>
         </section>
@@ -210,7 +210,7 @@ export default function EditAnalogyPage() {
       <section className={ui.pageSection}>
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className={`${ui.card} p-6 md:p-8`}>
-            <p className="text-sm text-slate-300 mb-4">
+            <p className="text-sm text-stone-700 mb-4">
               You&apos;re editing an existing analogy.
             </p>
 
@@ -218,8 +218,8 @@ export default function EditAnalogyPage() {
               <div
                 className={`mb-4 rounded-lg px-3 py-2 text-sm ${
                   message.type === "error"
-                    ? "bg-red-900/40 border border-red-600 text-red-100"
-                    : "bg-emerald-900/40 border border-emerald-500 text-emerald-100"
+                    ? "bg-red-50 border border-red-200 text-red-700"
+                    : "bg-emerald-50 border border-emerald-200 text-emerald-700"
                 }`}
               >
                 {message.text}
@@ -231,7 +231,7 @@ export default function EditAnalogyPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="module"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Module
                 </label>
@@ -239,7 +239,7 @@ export default function EditAnalogyPage() {
                   id="module"
                   value={moduleCode}
                   onChange={(e) => setModuleCode(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 >
                   {modules.map((module) => (
                     <option key={module.id} value={module.code}>
@@ -253,7 +253,7 @@ export default function EditAnalogyPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="title"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Analogy title
                 </label>
@@ -262,7 +262,7 @@ export default function EditAnalogyPage() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
@@ -270,7 +270,7 @@ export default function EditAnalogyPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="concept"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Concept being explained
                 </label>
@@ -279,7 +279,7 @@ export default function EditAnalogyPage() {
                   type="text"
                   value={concept}
                   onChange={(e) => setConcept(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
@@ -287,7 +287,7 @@ export default function EditAnalogyPage() {
               <div className="space-y-1">
                 <label
                   htmlFor="analogyText"
-                  className="block text-sm font-medium text-slate-200"
+                  className="block text-sm font-medium text-stone-800"
                 >
                   Analogy text
                 </label>
@@ -296,11 +296,11 @@ export default function EditAnalogyPage() {
                   value={analogyText}
                   onChange={(e) => setAnalogyText(e.target.value)}
                   rows={5}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
 
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-xs text-slate-400">
+              <div className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-2 text-xs text-stone-600">
                 Manage images from the analogy detail page after saving text changes, so each upload is attached to the correct topic.
               </div>
 
@@ -315,7 +315,7 @@ export default function EditAnalogyPage() {
                 </button>
                 <Link
                   href="/lecturer/analogies"
-                  className="text-sm text-slate-300 hover:text-indigo-200"
+                  className="text-sm text-stone-700 hover:text-teal-700"
                 >
                   Cancel
                 </Link>

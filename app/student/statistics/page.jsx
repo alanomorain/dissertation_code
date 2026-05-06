@@ -16,14 +16,14 @@ function StackedPipelineBar({ toDo, inProgress, completed }) {
   const toDoPct = Math.max(0, 100 - completedPct - inProgressPct)
 
   return (
-    <div className="rounded-xl border border-slate-800/60 bg-slate-900/80 p-4">
-      <div className="h-4 overflow-visible rounded-full bg-slate-800/90">
+    <div className="rounded-xl border border-stone-200 bg-white p-4">
+      <div className="h-4 overflow-visible rounded-full bg-stone-100">
         <div className="flex h-full w-full">
           <div
             className="group relative bg-emerald-500 transition-all"
             style={{ width: `${completedPct}%` }}
           >
-            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] text-slate-100 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-stone-300 bg-stone-50 px-2 py-1 text-[11px] text-stone-950 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               Completed: {completed}
             </span>
           </div>
@@ -31,15 +31,15 @@ function StackedPipelineBar({ toDo, inProgress, completed }) {
             className="group relative bg-amber-500 transition-all"
             style={{ width: `${inProgressPct}%` }}
           >
-            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] text-slate-100 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-stone-300 bg-stone-50 px-2 py-1 text-[11px] text-stone-950 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               In progress: {inProgress}
             </span>
           </div>
           <div
-            className="group relative bg-slate-500 transition-all"
+            className="group relative bg-stone-400 transition-all"
             style={{ width: `${toDoPct}%` }}
           >
-            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] text-slate-100 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-stone-300 bg-stone-50 px-2 py-1 text-[11px] text-stone-950 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               To do: {toDo}
             </span>
           </div>
@@ -51,13 +51,13 @@ function StackedPipelineBar({ toDo, inProgress, completed }) {
 
 function ScoreTrendSparkline({ scores }) {
   if (!scores || scores.length === 0) {
-    return <p className="text-xs text-slate-400">No submitted quiz scores yet.</p>
+    return <p className="text-xs text-stone-600">No submitted quiz scores yet.</p>
   }
 
   if (scores.length === 1) {
     return (
-      <div className="rounded-md border border-slate-800/60 bg-slate-900/70 px-3 py-2">
-        <p className="text-xs text-slate-300">Only one score available: <span className="font-semibold text-slate-100">{scores[0]}%</span></p>
+      <div className="rounded-md border border-stone-200 bg-white px-3 py-2">
+        <p className="text-xs text-stone-700">Only one score available: <span className="font-semibold text-stone-950">{scores[0]}%</span></p>
       </div>
     )
   }
@@ -76,11 +76,11 @@ function ScoreTrendSparkline({ scores }) {
   const first = scores[0]
 
   return (
-    <div className="rounded-md border border-slate-800/60 bg-slate-900/70 p-2">
+    <div className="rounded-md border border-stone-200 bg-white p-2">
       <svg viewBox={`0 0 ${width} ${height}`} className="h-20 w-full">
         <polyline fill="none" stroke="#22c55e" strokeWidth="3" points={points} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-stone-600">
         {first}% → {last}%
       </p>
     </div>
@@ -95,16 +95,16 @@ function CompletedMiniBar({ completed, total }) {
   const remaining = Math.max(0, safeTotal - safeCompleted)
 
   return (
-    <div className="rounded-md border border-slate-800/60 bg-slate-900/70 p-3">
-      <div className="h-4 overflow-visible rounded-full bg-slate-800/90">
+    <div className="rounded-md border border-stone-200 bg-white p-3">
+      <div className="h-4 overflow-visible rounded-full bg-stone-100">
         <div className="flex h-full w-full">
           <div className="group relative bg-emerald-500 transition-all" style={{ width: `${completedPct}%` }}>
-            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] text-slate-100 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-stone-300 bg-stone-50 px-2 py-1 text-[11px] text-stone-950 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               Completed: {safeCompleted}
             </span>
           </div>
-          <div className="group relative bg-slate-600 transition-all" style={{ width: `${remainingPct}%` }}>
-            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-950 px-2 py-1 text-[11px] text-slate-100 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+          <div className="group relative bg-stone-400 transition-all" style={{ width: `${remainingPct}%` }}>
+            <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-stone-300 bg-stone-50 px-2 py-1 text-[11px] text-stone-950 opacity-0 shadow-md transition-opacity group-hover:opacity-100">
               Remaining: {remaining}
             </span>
           </div>
@@ -338,8 +338,8 @@ export default async function StudentStatisticsPage() {
                       />
                       <ScoreTrendSparkline scores={item.scoreTrend} />
                     </div>
-                    <p className="mt-2 text-sm text-slate-200">
-                      Average submitted score: <span className="font-semibold text-emerald-300">{item.attempts ? Math.round(item.totalScore / item.attempts) : 0}%</span>
+                    <p className="mt-2 text-sm text-stone-800">
+                      Average submitted score: <span className="font-semibold text-emerald-700">{item.attempts ? Math.round(item.totalScore / item.attempts) : 0}%</span>
                     </p>
                   </div>
                 ))}

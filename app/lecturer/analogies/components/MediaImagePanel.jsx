@@ -155,10 +155,10 @@ export default function MediaImagePanel({
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-slate-800/70 bg-slate-900/60 p-3">
+    <div className="mt-4 rounded-lg border border-stone-200 bg-stone-100 p-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-slate-400">
-          Media: <span className="text-slate-200">manual upload</span>
+        <p className="text-xs text-stone-600">
+          Media: <span className="text-stone-800">manual upload</span>
         </p>
         <div className="flex flex-wrap gap-2">
           <input
@@ -179,7 +179,7 @@ export default function MediaImagePanel({
             type="button"
             onClick={() => imageInputRef.current?.click()}
             disabled={uploadingKind === "image"}
-            className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-xs rounded-lg border border-stone-300 px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploadingKind === "image" ? "Uploading..." : "Upload image"}
           </button>
@@ -187,7 +187,7 @@ export default function MediaImagePanel({
             type="button"
             onClick={() => videoInputRef.current?.click()}
             disabled={uploadingKind === "video"}
-            className="text-xs rounded-lg border border-slate-600 px-3 py-1 hover:border-indigo-400 hover:text-indigo-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-xs rounded-lg border border-stone-300 px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {uploadingKind === "video" ? "Uploading..." : "Upload video"}
           </button>
@@ -195,7 +195,7 @@ export default function MediaImagePanel({
             type="button"
             onClick={saveToTopic}
             disabled={saving}
-            className="text-xs rounded-lg border border-emerald-600 px-3 py-1 hover:border-emerald-400 hover:text-emerald-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="text-xs rounded-lg border border-emerald-600 px-3 py-1 hover:border-emerald-400 hover:text-emerald-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save media"}
           </button>
@@ -203,25 +203,25 @@ export default function MediaImagePanel({
       </div>
 
       {topicTitle ? (
-        <p className="mt-2 text-xs text-slate-400">Topic: <span className="text-slate-200">{topicTitle}</span></p>
+        <p className="mt-2 text-xs text-stone-600">Topic: <span className="text-stone-800">{topicTitle}</span></p>
       ) : null}
 
       {hasUnsavedChanges ? (
-        <p className="mt-2 text-xs text-amber-300">Unsaved media changes. Save media before leaving this page.</p>
+        <p className="mt-2 text-xs text-amber-700">Unsaved media changes. Save media before leaving this page.</p>
       ) : null}
-      {error ? <p className="mt-2 text-xs text-red-300">{error}</p> : null}
-      {info ? <p className="mt-2 text-xs text-emerald-300">{info}</p> : null}
+      {error ? <p className="mt-2 text-xs text-red-700">{error}</p> : null}
+      {info ? <p className="mt-2 text-xs text-emerald-700">{info}</p> : null}
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
+        <div className="rounded-md border border-stone-200 bg-stone-50/40 p-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-slate-400">Image</p>
+            <p className="text-xs text-stone-600">Image</p>
             {imageUrl ? (
               <button
                 type="button"
                 onClick={() => clearMedia("image")}
                 disabled={clearingKind === "image"}
-                className="text-[11px] text-slate-400 hover:text-red-300"
+                className="text-[11px] text-stone-600 hover:text-red-700"
               >
                 {clearingKind === "image" ? "Clearing..." : "Clear"}
               </button>
@@ -237,26 +237,26 @@ export default function MediaImagePanel({
               className="mt-2 h-32 w-full rounded object-cover"
             />
           ) : (
-            <div className="mt-2 h-32 rounded bg-slate-800/40" />
+            <div className="mt-2 h-32 rounded bg-stone-100/40" />
           )}
           <input
             type="url"
             value={imageUrl}
             onChange={(event) => setImageUrl(event.target.value)}
             placeholder="https://..."
-            className="mt-2 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+            className="mt-2 w-full rounded border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
           />
         </div>
 
-        <div className="rounded-md border border-slate-800 bg-slate-950/40 p-3">
+        <div className="rounded-md border border-stone-200 bg-stone-50/40 p-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-slate-400">Video</p>
+            <p className="text-xs text-stone-600">Video</p>
             {videoUrl ? (
               <button
                 type="button"
                 onClick={() => clearMedia("video")}
                 disabled={clearingKind === "video"}
-                className="text-[11px] text-slate-400 hover:text-red-300"
+                className="text-[11px] text-stone-600 hover:text-red-700"
               >
                 {clearingKind === "video" ? "Clearing..." : "Clear"}
               </button>
@@ -265,14 +265,14 @@ export default function MediaImagePanel({
           {videoUrl ? (
             <video src={videoUrl} controls className="mt-2 h-32 w-full rounded bg-black object-cover" />
           ) : (
-            <div className="mt-2 h-32 rounded bg-slate-800/40" />
+            <div className="mt-2 h-32 rounded bg-stone-100/40" />
           )}
           <input
             type="url"
             value={videoUrl}
             onChange={(event) => setVideoUrl(event.target.value)}
             placeholder="https://..."
-            className="mt-2 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-xs outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+            className="mt-2 w-full rounded border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
           />
         </div>
       </div>

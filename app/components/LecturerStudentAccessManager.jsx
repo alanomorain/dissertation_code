@@ -7,9 +7,9 @@ import * as ui from "../styles/ui"
 const STATUS_OPTIONS = ["ACTIVE", "INVITED", "DROPPED"]
 
 function statusClass(status) {
-  if (status === "ACTIVE") return "inline-flex rounded-full bg-emerald-900/40 px-2 py-1 text-xs text-emerald-200"
-  if (status === "INVITED") return "inline-flex rounded-full bg-amber-900/40 px-2 py-1 text-xs text-amber-200"
-  return "inline-flex rounded-full bg-slate-800/70 px-2 py-1 text-xs text-slate-300"
+  if (status === "ACTIVE") return "inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-700"
+  if (status === "INVITED") return "inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700"
+  return "inline-flex rounded-full border border-stone-200 bg-stone-100 px-2 py-1 text-xs text-stone-700"
 }
 
 export default function LecturerStudentAccessManager({ modules, initialModuleCode = "" }) {
@@ -126,7 +126,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
             <select
               value={moduleCode}
               onChange={(event) => setModuleCode(event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
             >
               <option value="">All modules</option>
               {modules.map((module) => (
@@ -151,28 +151,28 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
         <div>
           <p className={ui.textLabel}>Existing account access</p>
           <h2 className="mt-1 text-xl font-semibold">Assign or update enrollment</h2>
-          <p className="mt-2 text-sm text-slate-300">
+          <p className="mt-2 text-sm text-stone-700">
             Use this for students with an existing account. For new students, use the invite flow.
           </p>
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           <label className="space-y-2 text-sm">
-            <span className="text-slate-300">Student email</span>
+            <span className="text-stone-700">Student email</span>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
               required
             />
           </label>
           <label className="space-y-2 text-sm">
-            <span className="text-slate-300">Module</span>
+            <span className="text-stone-700">Module</span>
             <select
               value={targetModuleCode}
               onChange={(event) => setTargetModuleCode(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
               required
             >
               {modules.map((module) => (
@@ -183,11 +183,11 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
             </select>
           </label>
           <label className="space-y-2 text-sm">
-            <span className="text-slate-300">Status</span>
+            <span className="text-stone-700">Status</span>
             <select
               value={targetStatus}
               onChange={(event) => setTargetStatus(event.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
             >
               {STATUS_OPTIONS.map((status) => (
                 <option key={status} value={status}>
@@ -203,8 +203,8 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
         </button>
       </form>
 
-      {error ? <div className="rounded-xl border border-amber-600/50 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">{error}</div> : null}
-      {message ? <div className="rounded-xl border border-emerald-600/50 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-200">{message}</div> : null}
+      {error ? <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">{error}</div> : null}
+      {message ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</div> : null}
 
       <div className={ui.cardFull}>
         <h2 className={ui.cardHeader}>Student access</h2>
@@ -217,8 +217,8 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
             {enrollments.map((enrollment) => (
               <div key={enrollment.id} className={`${ui.cardList} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
                 <div>
-                  <p className="font-medium text-slate-100">{enrollment.user.email}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="font-medium text-stone-950">{enrollment.user.email}</p>
+                  <p className="text-xs text-stone-600">
                     {enrollment.user.studentNumber || "No student number"} · {enrollment.module.code} ·{" "}
                     {moduleMap[enrollment.module.code]?.name || enrollment.module.name}
                   </p>
@@ -229,7 +229,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
                     value={enrollment.status}
                     disabled={updatingId === enrollment.id}
                     onChange={(event) => onUpdateStatus(enrollment.id, event.target.value)}
-                    className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-xs outline-none focus:border-indigo-400"
+                    className="rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500"
                   >
                     {STATUS_OPTIONS.map((status) => (
                       <option key={status} value={status}>

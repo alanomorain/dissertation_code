@@ -50,10 +50,10 @@ export default async function LecturerModulesPage() {
                   <Link
                     key={module.id}
                     href={`/lecturer/modules/${encodeURIComponent(module.code)}`}
-                    className={`${ui.cardList} block hover:border-indigo-400 transition`}
+                    className={`${ui.cardList} block hover:border-teal-500 transition`}
                   >
-                    <p className="font-semibold text-slate-100">{module.code} · {module.name}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="font-semibold text-stone-950">{module.code} · {module.name}</p>
+                    <p className="text-xs text-stone-600">
                       {module._count.lectures} lectures · {module._count.analogySets} analogy sets · {module._count.quizzes} quizzes · {module._count.enrollments} students
                     </p>
                   </Link>

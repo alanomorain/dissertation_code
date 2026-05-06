@@ -258,11 +258,11 @@ function LecturerQuizWizardPageInner() {
             <div className="grid gap-4 md:grid-cols-2 text-sm">
               <label className="space-y-1">
                 <span className="font-medium">Quiz title</span>
-                <input value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
+                <input value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Module</span>
-                <select value={selectedModule} onChange={(e) => setSelectedModule(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
+                <select value={selectedModule} onChange={(e) => setSelectedModule(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2">
                   {modules.map((m) => <option key={m.id} value={m.code}>{m.code} · {m.name}</option>)}
                 </select>
               </label>
@@ -271,7 +271,7 @@ function LecturerQuizWizardPageInner() {
                 <select
                   value={selectedLectureId}
                   onChange={(e) => setSelectedLectureId(e.target.value)}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                 >
                   {lectures.length === 0 ? <option value="">No lectures available for this module</option> : null}
                   {lectures.map((lecture) => <option key={lecture.id} value={lecture.id}>{lecture.title}</option>)}
@@ -279,35 +279,35 @@ function LecturerQuizWizardPageInner() {
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Status</span>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2">
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Published</option>
                 </select>
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Due at (optional)</span>
-                <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
-                <span className="block text-xs text-slate-400">Students can see this deadline. Attempts are blocked after it passes.</span>
+                <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+                <span className="block text-xs text-stone-600">Students can see this deadline. Attempts are blocked after it passes.</span>
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Schedule release (optional)</span>
-                <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
-                <span className="block text-xs text-slate-400">If status is published, this controls when students can first access the quiz.</span>
+                <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+                <span className="block text-xs text-stone-600">If status is published, this controls when students can first access the quiz.</span>
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Max attempts</span>
-                <input type="number" min={1} max={5} value={maxAttempts} onChange={(e) => setMaxAttempts(e.target.value)} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2" />
+                <input type="number" min={1} max={5} value={maxAttempts} onChange={(e) => setMaxAttempts(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
               </label>
             </div>
 
-            <div className="mt-4 space-y-3 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div className="mt-4 space-y-3 rounded-xl border border-stone-200 bg-stone-100 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-sm font-semibold text-slate-100">AI Question Generation</h2>
+                <h2 className="text-sm font-semibold text-stone-950">AI Question Generation</h2>
                 <button type="button" onClick={handleGenerate} disabled={generating || !selectedModule} className={ui.buttonSecondary}>
                   {generating ? "Generating..." : "Generate from module analogies"}
                 </button>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-stone-600">
                 Generation is only available when the selected lecture has at least one ready analogy saved by this lecturer.
               </p>
               <label className="space-y-1 text-sm">
@@ -317,15 +317,15 @@ function LecturerQuizWizardPageInner() {
                   value={generationFeedback}
                   onChange={(e) => setGenerationFeedback(e.target.value)}
                   placeholder="Example: Make questions harder and include more scenario-based wording."
-                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                 />
               </label>
               {generationContext ? (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-stone-600">
                   Using {generationContext.topicCount} topic(s) from {generationContext.analogySetCount} analogy set(s) in lecture {generationContext.lectureTitle || "selected lecture"}.
                 </p>
               ) : null}
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-stone-600">
                 {analogyTopics.length} approved lecture topic(s) are available for question-level analogy/video linking.
               </p>
             </div>
@@ -349,7 +349,7 @@ function LecturerQuizWizardPageInner() {
                   {questions.map((question, questionIndex) => (
                     <div key={questionIndex} className={ui.cardInner}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-xs uppercase tracking-wide text-indigo-300">Question {questionIndex + 1}</p>
+                        <p className="text-xs uppercase tracking-wide text-teal-700">Question {questionIndex + 1}</p>
                         <button
                           type="button"
                           className={ui.buttonSmall}
@@ -371,7 +371,7 @@ function LecturerQuizWizardPageInner() {
                               ),
                             )
                           }
-                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                         />
                       </label>
 
@@ -386,7 +386,7 @@ function LecturerQuizWizardPageInner() {
                               ),
                             )
                           }
-                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                         >
                           <option value="EASY">Easy</option>
                           <option value="MEDIUM">Medium</option>
@@ -421,7 +421,7 @@ function LecturerQuizWizardPageInner() {
                               ),
                             )
                           }}
-                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                         >
                           <option value="">No linked analogy topic</option>
                           {analogyTopics.map((topic) => (
@@ -433,7 +433,7 @@ function LecturerQuizWizardPageInner() {
                             </option>
                           ))}
                         </select>
-                        <span className="block text-xs text-slate-400">
+                        <span className="block text-xs text-stone-600">
                           This controls what appears in the student popup when they click View analogy/video.
                         </span>
                       </label>
@@ -450,7 +450,7 @@ function LecturerQuizWizardPageInner() {
                             )
                           }
                           placeholder="https://your-media-url/video.mp4"
-                          className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
                         />
                       </label>
 
@@ -469,7 +469,7 @@ function LecturerQuizWizardPageInner() {
                             href={question.videoUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-indigo-300 hover:text-indigo-200"
+                            className="text-xs text-teal-700 hover:text-teal-700"
                           >
                             Preview video
                           </a>
@@ -516,7 +516,7 @@ function LecturerQuizWizardPageInner() {
                                   ),
                                 )
                               }
-                              className="flex-1 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2"
+                              className="flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2"
                             />
                             <button
                               type="button"
@@ -561,7 +561,7 @@ function LecturerQuizWizardPageInner() {
               )}
             </div>
 
-            {message ? <p className="mt-3 text-sm text-amber-300">{message}</p> : null}
+            {message ? <p className="mt-3 text-sm text-amber-700">{message}</p> : null}
 
             <div className="mt-4 flex gap-2">
               <button type="button" disabled={creating} onClick={handleCreate} className={ui.buttonPrimary}>
@@ -578,7 +578,7 @@ function LecturerQuizWizardPageInner() {
 
 export default function LecturerQuizWizardPage() {
   return (
-    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className={`${ui.container} ${ui.pageSpacing} text-sm text-slate-300`}>Loading…</div></section></main>}>
+    <Suspense fallback={<main className={ui.page}><section className={ui.pageSection}><div className={`${ui.container} ${ui.pageSpacing} text-sm text-stone-700`}>Loading…</div></section></main>}>
       <LecturerQuizWizardPageInner />
     </Suspense>
   )

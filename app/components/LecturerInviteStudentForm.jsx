@@ -59,38 +59,38 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
         <div>
           <p className={ui.textLabel}>Lecturer tools</p>
           <h2 className="mt-1 text-xl font-semibold">Invite a student</h2>
-          <p className="mt-2 text-sm text-slate-300">
+          <p className="mt-2 text-sm text-stone-700">
             Invite a student to a module. They will receive an activation link.
           </p>
         </div>
 
         <label className="block space-y-2 text-sm">
-          <span className="text-slate-300">Student email</span>
+          <span className="text-stone-700">Student email</span>
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+            className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
             required
           />
         </label>
 
         <label className="block space-y-2 text-sm">
-          <span className="text-slate-300">Student number (optional)</span>
+          <span className="text-stone-700">Student number (optional)</span>
           <input
             type="text"
             value={studentNumber}
             onChange={(event) => setStudentNumber(event.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+            className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
           />
         </label>
 
         <label className="block space-y-2 text-sm">
-          <span className="text-slate-300">Module</span>
+          <span className="text-stone-700">Module</span>
           <select
             value={moduleCode}
             onChange={(event) => setModuleCode(event.target.value)}
-            className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400"
+            className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
             required
           >
             {modules.map((module) => (
@@ -101,7 +101,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
           </select>
         </label>
 
-        {error ? <p className="text-sm text-amber-300">{error}</p> : null}
+        {error ? <p className="text-sm text-amber-700">{error}</p> : null}
 
         <button type="submit" disabled={submitting} className={ui.buttonPrimary}>
           {submitting ? "Creating invite..." : "Create invite"}
@@ -111,11 +111,11 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
       {result ? (
         <div className={ui.cardFull}>
           <h3 className={ui.cardHeader}>Invite created</h3>
-          <p className="text-sm text-slate-300">Share this activation link with {result.email}:</p>
-          <p className="mt-2 break-all rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-2 text-xs text-slate-200">
+          <p className="text-sm text-stone-700">Share this activation link with {result.email}:</p>
+          <p className="mt-2 break-all rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800">
             {result.activationLink}
           </p>
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-stone-600">
             Expires at: {new Date(result.expiresAt).toLocaleString()}
           </p>
         </div>

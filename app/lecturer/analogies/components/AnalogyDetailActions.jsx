@@ -84,12 +84,12 @@ export default function AnalogyDetailActions({ analogyId, reviewStatus }) {
           type="button"
           onClick={remove}
           disabled={working !== ""}
-          className="rounded-lg border border-red-500 px-3 py-2 text-sm text-red-200 hover:bg-red-900/30 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="rounded-lg border border-red-500 px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {working === "delete" ? "Deleting..." : "Delete"}
         </button>
       </div>
-      {message && <p className="text-xs text-slate-300">{message}</p>}
+      {message && <p className="text-xs text-stone-700">{message}</p>}
     </div>
   )
 }

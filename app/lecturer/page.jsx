@@ -106,7 +106,7 @@ export default async function LecturerDashboard() {
             <p className={ui.textSmall}>A cleaner home for your core teaching workflows.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:inline text-slate-300">
+            <span className="hidden sm:inline text-stone-700">
               <span className="font-medium">{lecturerUser.email}</span> signed in as a Lecturer
             </span>
             <SignOutButton />
@@ -121,7 +121,7 @@ export default async function LecturerDashboard() {
               <div>
                 <p className={ui.textLabel}>Overview</p>
                 <h2 className="text-xl font-semibold">Everything important in one place</h2>
-                <p className="mt-2 max-w-2xl text-sm text-slate-300">
+                <p className="mt-2 max-w-2xl text-sm text-stone-700">
                   Jump quickly into modules, analogies, quizzes, statistics, and student management without hunting through scattered actions.
                 </p>
               </div>
@@ -159,13 +159,13 @@ export default async function LecturerDashboard() {
                   <div>
                     <p className={ui.textHighlight}>{area.stat}</p>
                     <h4 className="mt-1 text-base font-semibold">{area.title}</h4>
-                    <p className="mt-2 text-sm text-slate-300">{area.description}</p>
+                    <p className="mt-2 text-sm text-stone-700">{area.description}</p>
                   </div>
                   <div className="flex flex-col items-start gap-2 text-sm">
                     <Link href={area.href} className={ui.buttonPrimary}>
                       {area.cta}
                     </Link>
-                    <Link href={area.secondaryHref} className="text-slate-300 hover:text-indigo-200 transition">
+                    <Link href={area.secondaryHref} className="text-stone-700 hover:text-teal-700 transition">
                       {area.secondaryCta}
                     </Link>
                   </div>
@@ -194,18 +194,18 @@ export default async function LecturerDashboard() {
                       <div key={moduleItem.id} className={ui.cardList}>
                         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                           <div>
-                            <p className="font-medium text-slate-100">{moduleItem.code} · {moduleItem.name}</p>
-                            <p className="text-xs text-slate-400">
+                            <p className="font-medium text-stone-950">{moduleItem.code} · {moduleItem.name}</p>
+                            <p className="text-xs text-stone-600">
                               {moduleItem.enrollments.length} students · {moduleItem.analogySets.length} analogies · {moduleItem.quizzes.length} quizzes
                             </p>
                           </div>
-                          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-300">
-                            <Link href={`/lecturer/analogies?module=${moduleCode}`} className="hover:text-indigo-200 transition">Analogies</Link>
-                            <Link href={`/lecturer/lectures?module=${moduleCode}`} className="hover:text-indigo-200 transition">Lectures</Link>
-                            <Link href={`/lecturer/quizzes?module=${moduleCode}`} className="hover:text-indigo-200 transition">Quizzes</Link>
-                            <Link href={`/lecturer/statistics/${encodeURIComponent(moduleItem.code)}`} className="hover:text-indigo-200 transition">Statistics</Link>
-                            <Link href={`/lecturer/students?module=${moduleCode}`} className="hover:text-indigo-200 transition">Students</Link>
-                            <Link href={`/lecturer/analogies/new?module=${moduleCode}`} className="hover:text-indigo-200 transition">Create analogy</Link>
+                          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-stone-700">
+                            <Link href={`/lecturer/analogies?module=${moduleCode}`} className="hover:text-teal-700 transition">Analogies</Link>
+                            <Link href={`/lecturer/lectures?module=${moduleCode}`} className="hover:text-teal-700 transition">Lectures</Link>
+                            <Link href={`/lecturer/quizzes?module=${moduleCode}`} className="hover:text-teal-700 transition">Quizzes</Link>
+                            <Link href={`/lecturer/statistics/${encodeURIComponent(moduleItem.code)}`} className="hover:text-teal-700 transition">Statistics</Link>
+                            <Link href={`/lecturer/students?module=${moduleCode}`} className="hover:text-teal-700 transition">Students</Link>
+                            <Link href={`/lecturer/analogies/new?module=${moduleCode}`} className="hover:text-teal-700 transition">Create analogy</Link>
                           </div>
                         </div>
                       </div>
@@ -218,19 +218,19 @@ export default async function LecturerDashboard() {
             <div className={ui.cardFull}>
               <div className="mb-3 flex items-center justify-between">
                 <h3 className={ui.cardHeader}>Recent analogy uploads</h3>
-                <Link href="/lecturer/analogies" className="text-xs text-slate-300 hover:text-indigo-200 transition">
+                <Link href="/lecturer/analogies" className="text-xs text-stone-700 hover:text-teal-700 transition">
                   View all
                 </Link>
               </div>
               {recentUploads.length === 0 ? (
-                <p className="text-sm text-slate-400">You haven&apos;t created any analogies yet.</p>
+                <p className="text-sm text-stone-600">You haven&apos;t created any analogies yet.</p>
               ) : (
                 <ul className="space-y-2 text-sm">
                   {recentUploads.map((item) => (
                     <li key={item.id} className={`${ui.cardInner} flex items-center justify-between gap-3`}>
                       <div>
                         <p className="font-medium">{item.title || "Untitled"}</p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-stone-600">
                           {item.module?.code || "Unassigned"} · {formatDate(item.createdAt)}
                         </p>
                       </div>

@@ -301,27 +301,27 @@ export default async function LecturerStatisticsPage({ searchParams }) {
                 <Link
                   key={module.code}
                   href={`/lecturer/statistics/${encodeURIComponent(module.code)}?range=${range}`}
-                  className={`${ui.cardList} block hover:border-indigo-400 transition`}
+                  className={`${ui.cardList} block hover:border-teal-500 transition`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-slate-100">{module.code} · {module.name}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="font-semibold text-stone-950">{module.code} · {module.name}</p>
+                      <p className="text-xs text-stone-600">
                         Lecture instances: {module.lectureInstances} · Analogies (active/draft/upcoming): {module.analogyStats.active}/{module.analogyStats.draft}/{module.analogyStats.upcoming}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Avg quiz score: {module.avgQuizScore}% · Participation: {module.participationRate}% ({module.participants}/{module.activeStudents})
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Quiz completions: {module.completions} · Revisits: {module.revisits} · Active lectures: {module.lecturesWithQuizActivity}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Quiz analogy views: {module.analogyQuestionViews} · Video views: {module.videoViews}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Avg score no media/analogy/video: {module.noMediaScore}%/{module.analogyOnlyScore}%/{module.withVideoScore}%
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Lecture-scoped avg score: {module.lectureAvgScore}% · Lecture-scoped completions: {module.lectureCompletions}
                       </p>
                     </div>

@@ -338,13 +338,13 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                 {studentRows.map((student) => (
                   <div key={student.id} className={ui.cardInner}>
                     <p className="font-medium">{student.label}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Avg score: {student.avgScore}% · Attempts: {student.attempts} · Completed quizzes: {student.completedQuizzes}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Analogy views: {student.analogyViews} · Before/After view change: {scoreDeltaLabel(student.beforeAvg, student.afterAvg)}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Quiz analogy views: {student.quizAnalogyViews} · Video views: {student.videoViews}
                     </p>
                   </div>
@@ -359,14 +359,14 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                 {quizRows.map((quiz) => (
                   <div key={quiz.id} className={ui.cardInner}>
                     <p className="font-medium">{quiz.title}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Completions (views): {quiz.completions} · Revisits: {quiz.revisits}
                     </p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-stone-600">
                       Quiz analogy views: {quiz.analogyViews} · Video views: {quiz.videoViews}
                     </p>
-                    <p className="text-xs text-slate-400">Lecture linked: {quiz.lectureId ? "Yes" : "No"}</p>
-                    <p className="text-xs text-slate-400">Average score: {quiz.avgScore}%</p>
+                    <p className="text-xs text-stone-600">Lecture linked: {quiz.lectureId ? "Yes" : "No"}</p>
+                    <p className="text-xs text-stone-600">Average score: {quiz.avgScore}%</p>
                   </div>
                 ))}
                 {quizRows.length === 0 ? <p className={ui.textSmall}>No quizzes in this module yet.</p> : null}
@@ -383,10 +383,10 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                     <p className="font-medium">{lecture.title}</p>
                     <Link href={`/lecturer/lectures/${lecture.id}`} className={ui.buttonSmall}>Open lecture</Link>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-stone-600">
                     Quizzes: {lecture.quizCount} · Completions: {lecture.completions} · Participants: {lecture.participants} · Revisits: {lecture.revisits}
                   </p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-stone-600">
                     Avg quiz score: {lecture.avgScore}% · Analogy sets: {lecture.analogySetCount} · Analogy views: {lecture.analogyViews}
                   </p>
                 </div>

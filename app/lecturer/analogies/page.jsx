@@ -52,7 +52,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
           </div>
 
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:inline text-slate-300">
+            <span className="hidden sm:inline text-stone-700">
               <span className="font-medium">
                 {lecturerUser.email}
               </span>{" "}
@@ -85,7 +85,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           {/* Intro */}
           <div className={ui.cardFull}>
-            <p className="text-slate-300 mb-2 text-sm">
+            <p className="text-stone-700 mb-2 text-sm">
               Here are all the analogies you have created for your modules. You can edit,add or delete analogies from this dashboard.
             </p>
           </div>
@@ -125,7 +125,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
             {analogies.length === 0 ? (
               <p className={ui.textSmall}>
                 You haven&apos;t created any analogies yet. Click{" "}
-                <span className="font-medium text-indigo-300">
+                <span className="font-medium text-teal-700">
                   &quot;New analogy&quot;
                 </span>{" "}
                 to add your first one.
@@ -136,7 +136,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                   <Link
                     key={analogy.id}
                     href={`/lecturer/analogies/${analogy.id}`}
-                    className={`${ui.cardList} flex flex-col gap-2 md:flex-row md:items-center md:justify-between hover:border-indigo-400 transition`}
+                    className={`${ui.cardList} flex flex-col gap-2 md:flex-row md:items-center md:justify-between hover:border-teal-500 transition`}
                   >
                     <div>
                       <p className={ui.textHighlight}>
@@ -145,13 +145,13 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                       <p className="font-medium">
                         {analogy.module?.code || "No module"} · {analogy.lecture?.title || "No lecture"}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Status: {analogy.status}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-stone-600">
                         Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-stone-500">
                         Created: {new Date(analogy.createdAt).toLocaleString()}
                       </p>
                     </div>

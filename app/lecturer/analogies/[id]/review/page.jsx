@@ -176,8 +176,8 @@ export default function LecturerAnalogyReviewPage() {
             <div
               className={`rounded-xl border px-3 py-2 text-sm ${
                 message.type === "error"
-                  ? "border-red-600 bg-red-900/30 text-red-100"
-                  : "border-emerald-500 bg-emerald-900/30 text-emerald-100"
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-700"
               }`}
             >
               {message.text}
@@ -190,11 +190,11 @@ export default function LecturerAnalogyReviewPage() {
               <span className={ui.getReviewBadgeClass(reviewStatus)}>
                 {reviewStatus.toLowerCase()}
               </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-stone-600">
                 Approved at: {approvedAt}
               </span>
             </div>
-            <p className="mt-3 text-sm text-slate-300">
+            <p className="mt-3 text-sm text-stone-700">
               Feedback is lecturer-only and will not be shown to students.
             </p>
           </div>
@@ -207,18 +207,18 @@ export default function LecturerAnalogyReviewPage() {
               <div className="space-y-4">
                 {topics.map((item, index) => (
                   <div key={`${item.topic}-${index}`} className={ui.cardInner}>
-                    <h3 className="text-sm font-semibold text-indigo-300 mb-2">
+                    <h3 className="text-sm font-semibold text-teal-700 mb-2">
                       {item.topic || "Untitled topic"}
                     </h3>
-                    <p className="text-sm text-slate-200 mb-3">{item.analogy || ""}</p>
-                    <label className="text-xs uppercase tracking-wide text-slate-400">
+                    <p className="text-sm text-stone-800 mb-3">{item.analogy || ""}</p>
+                    <label className="text-xs uppercase tracking-wide text-stone-600">
                       Feedback
                     </label>
                     <textarea
                       value={item.feedback}
                       onChange={(event) => updateFeedback(index, event.target.value)}
                       rows={3}
-                      className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400"
+                      className="mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-950 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                       placeholder="Add feedback for this topic"
                     />
                   </div>

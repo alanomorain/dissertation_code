@@ -9,18 +9,18 @@ function QuickStatBar({ label, value, description, barClass }) {
   const clampedValue = Math.max(0, Math.min(100, value))
 
   return (
-    <div className="rounded-xl border border-slate-800/50 bg-slate-900/70 px-3 py-2">
+    <div className="rounded-xl border border-stone-200 bg-white px-3 py-2">
       <div className="mb-2 flex items-center justify-between text-sm">
-        <p className="text-slate-300">{label}</p>
-        <p className="font-semibold text-slate-100">{clampedValue}%</p>
+        <p className="text-stone-700">{label}</p>
+        <p className="font-semibold text-stone-950">{clampedValue}%</p>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-800/80">
+      <div className="h-2 overflow-hidden rounded-full bg-stone-100">
         <div
           className={`h-full rounded-full transition-all ${barClass}`}
           style={{ width: `${clampedValue}%` }}
         />
       </div>
-      <p className="mt-2 text-xs text-slate-400">{description}</p>
+      <p className="mt-2 text-xs text-stone-600">{description}</p>
     </div>
   )
 }
@@ -170,7 +170,7 @@ export default async function StudentDashboard() {
             <h1 className="text-lg font-semibold">Student Dashboard</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:inline text-slate-300">
+            <span className="hidden sm:inline text-stone-700">
               <span className="font-medium">{studentUser.email}</span> · Student
             </span>
             <SignOutButton />
@@ -181,35 +181,35 @@ export default async function StudentDashboard() {
       <section className={ui.pageSection}>
         <div className={`${ui.container} py-6 space-y-5`}>
           {databaseUnavailable ? (
-            <div className="rounded-xl border border-amber-500/50 bg-amber-900/20 px-4 py-3 text-sm text-amber-200">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
               Database is unavailable in this environment. Showing a safe preview state so UI screenshots can still be captured.
             </div>
           ) : null}
 
           <div className={ui.cardFull}>
             <h2 className="text-xl font-semibold mb-2">Welcome back 👋</h2>
-            <p className="text-sm text-slate-300 mb-3">
+            <p className="text-sm text-stone-700 mb-3">
               Complete published quizzes, review linked learning media in quiz flow, and track your performance trends.
             </p>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Modules</h3>
-                <p className="text-sm text-slate-300 mb-3">Open your enrolled module spaces.</p>
+                <p className="text-sm text-stone-700 mb-3">Open your enrolled module spaces.</p>
                 <Link href="/student/modules" className={ui.buttonPrimary}>View modules</Link>
               </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Lectures</h3>
-                <p className="text-sm text-slate-300 mb-3">Browse lecture-specific module content.</p>
+                <p className="text-sm text-stone-700 mb-3">Browse lecture-specific module content.</p>
                 <Link href="/student/lectures" className={ui.buttonPrimary}>View lectures</Link>
               </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Quizzes</h3>
-                <p className="text-sm text-slate-300 mb-3">Take quizzes for your active modules and review feedback.</p>
+                <p className="text-sm text-stone-700 mb-3">Take quizzes for your active modules and review feedback.</p>
                 <Link href="/student/quizzes" className={ui.buttonPrimary}>Open quizzes</Link>
               </div>
               <div className={ui.cardInner}>
                 <h3 className="text-base font-semibold mb-1">Statistics</h3>
-                <p className="text-sm text-slate-300 mb-3">Monitor scores, attempts, and engagement across modules.</p>
+                <p className="text-sm text-stone-700 mb-3">Monitor scores, attempts, and engagement across modules.</p>
                 <Link href="/student/statistics" className={ui.buttonPrimary}>View statistics</Link>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default async function StudentDashboard() {
                 {activeEnrollments.map((enrollment) => (
                   <div key={enrollment.id} className={ui.cardList}>
                     <p className="font-medium">{enrollment.module.code} · {enrollment.module.name}</p>
-                    <p className="text-xs text-slate-400">Enrollment active</p>
+                    <p className="text-xs text-stone-600">Enrollment active</p>
                   </div>
                 ))}
                 {activeEnrollments.length === 0 ? <p className={ui.textSmall}>No active module enrollments yet.</p> : null}
@@ -232,7 +232,7 @@ export default async function StudentDashboard() {
             <div className="space-y-6">
               <div className={ui.cardFull}>
                 <h3 className={ui.cardHeader}>Quick stats</h3>
-                <ul className="mb-4 space-y-1 text-sm text-slate-300">
+                <ul className="mb-4 space-y-1 text-sm text-stone-700">
                   <li>• {activeEnrollments.length} active modules</li>
                   <li>• {lectureCount} lectures with approved analogies</li>
                   <li>• {publishedQuizCount} published quizzes</li>
@@ -250,7 +250,7 @@ export default async function StudentDashboard() {
                     label="Average quiz score"
                     value={averageScore}
                     description={quizAttempts.length ? `Based on ${quizAttempts.length} submitted attempts` : "No submitted attempts yet"}
-                    barClass="bg-indigo-500"
+                    barClass="bg-teal-600"
                   />
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default async function StudentDashboard() {
                   {upcomingQuizzes.map((quiz) => (
                     <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
                       <p className="font-medium">{quiz.title}</p>
-                      <p className="text-xs text-slate-400">{quiz.module.code} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}</p>
+                      <p className="text-xs text-stone-600">{quiz.module.code} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}</p>
                     </Link>
                   ))}
                   {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No published quizzes available right now.</p> : null}
