@@ -43,56 +43,50 @@ export default async function LecturerDashboard() {
   const coreAreas = [
     {
       title: "Modules",
-      description: "See and organise all module spaces you teach.",
       href: "/lecturer/modules",
-      cta: "Open modules",
+      cta: "Manage modules",
       secondaryHref: "/lecturer/modules/create",
-      secondaryCta: "Create module",
+      secondaryCta: "+ Module",
       stat: `${taughtModules.length} active`,
     },
     {
       title: "Lectures",
-      description: "Manage lecture uploads and lecture-specific content.",
       href: "/lecturer/lectures",
-      cta: "Open lectures",
+      cta: "Manage lectures",
       secondaryHref: "/lecturer/analogies/upload-slides",
-      secondaryCta: "Upload slides",
+      secondaryCta: "+ Slides",
       stat: `${totalLectures} total`,
     },
     {
       title: "Analogies",
-      description: "Build and maintain analogy content for your classes.",
       href: "/lecturer/analogies",
-      cta: "Open analogies",
+      cta: "Manage analogies",
       secondaryHref: "/lecturer/analogies/new",
-      secondaryCta: "Create analogy",
+      secondaryCta: "+ Analogy",
       stat: `${totalAnalogies} total`,
     },
     {
       title: "Quizzes",
-      description: "Create, publish, and monitor assessments.",
       href: "/lecturer/quizzes",
-      cta: "Open quizzes",
+      cta: "Manage quizzes",
       secondaryHref: "/lecturer/quizzes/new",
-      secondaryCta: "New quiz",
+      secondaryCta: "+ Quiz",
       stat: `${totalQuizzes} total`,
     },
     {
       title: "Statistics",
-      description: "Track engagement and learner outcomes by module.",
       href: "/lecturer/statistics",
       cta: "View statistics",
       secondaryHref: "/lecturer/statistics",
-      secondaryCta: "Module insights",
+      secondaryCta: "Insights",
       stat: `${taughtModules.length} modules tracked`,
     },
     {
       title: "Student management",
-      description: "Manage access, invites, and cohort membership.",
       href: "/lecturer/students",
       cta: "Manage students",
       secondaryHref: "/lecturer/students/invite",
-      secondaryCta: "Invite students",
+      secondaryCta: "+ Invite",
       stat: `${totalStudents} enrolled`,
     },
   ]
@@ -147,11 +141,8 @@ export default async function LecturerDashboard() {
           </div>
 
           <div className={ui.cardFull}>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4">
               <h3 className={ui.cardHeader}>Core areas</h3>
-              <Link href="/lecturer/modules/create" className={ui.buttonSmall}>
-                New module
-              </Link>
             </div>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
               {coreAreas.map((area) => (
@@ -159,7 +150,6 @@ export default async function LecturerDashboard() {
                   <div>
                     <p className={ui.textHighlight}>{area.stat}</p>
                     <h4 className="mt-1 text-base font-semibold">{area.title}</h4>
-                    <p className="mt-2 text-sm text-stone-700">{area.description}</p>
                   </div>
                   <div className="flex flex-col items-start gap-2 text-sm">
                     <Link href={area.href} className={ui.buttonPrimary}>
