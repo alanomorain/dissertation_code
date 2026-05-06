@@ -228,7 +228,7 @@ export default function MediaImagePanel({
             ) : null}
           </div>
           {imageUrl ? (
-            <div className="mt-2 aspect-[4/3] w-full overflow-hidden rounded">
+            <div className="mt-2 aspect-video w-full overflow-hidden rounded">
               <Image
                 src={imageUrl}
                 alt={topicTitle ? `${topicTitle} illustration` : "Topic illustration"}
@@ -239,7 +239,7 @@ export default function MediaImagePanel({
               />
             </div>
           ) : (
-            <div className="mt-2 aspect-[4/3] rounded bg-stone-100/40" />
+            <div className="mt-2 aspect-video rounded bg-stone-100/40" />
           )}
           <input
             type="url"
