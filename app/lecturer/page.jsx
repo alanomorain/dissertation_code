@@ -44,7 +44,7 @@ export default async function LecturerDashboard() {
     {
       title: "Modules",
       href: "/lecturer/modules",
-      cta: "Manage modules",
+      cta: "Manage",
       secondaryHref: "/lecturer/modules/create",
       secondaryCta: "+ Module",
       stat: `${taughtModules.length} active`,
@@ -52,7 +52,7 @@ export default async function LecturerDashboard() {
     {
       title: "Lectures",
       href: "/lecturer/lectures",
-      cta: "Manage lectures",
+      cta: "Manage",
       secondaryHref: "/lecturer/analogies/upload-slides",
       secondaryCta: "+ Slides",
       stat: `${totalLectures} total`,
@@ -60,7 +60,7 @@ export default async function LecturerDashboard() {
     {
       title: "Analogies",
       href: "/lecturer/analogies",
-      cta: "Manage analogies",
+      cta: "Manage",
       secondaryHref: "/lecturer/analogies/new",
       secondaryCta: "+ Analogy",
       stat: `${totalAnalogies} total`,
@@ -68,7 +68,7 @@ export default async function LecturerDashboard() {
     {
       title: "Quizzes",
       href: "/lecturer/quizzes",
-      cta: "Manage quizzes",
+      cta: "Manage",
       secondaryHref: "/lecturer/quizzes/new",
       secondaryCta: "+ Quiz",
       stat: `${totalQuizzes} total`,
@@ -76,15 +76,15 @@ export default async function LecturerDashboard() {
     {
       title: "Statistics",
       href: "/lecturer/statistics",
-      cta: "View statistics",
+      cta: "View",
       secondaryHref: "/lecturer/statistics",
       secondaryCta: "Insights",
       stat: `${taughtModules.length} modules tracked`,
     },
     {
-      title: "Student management",
+      title: "Students",
       href: "/lecturer/students",
-      cta: "Manage students",
+      cta: "Manage",
       secondaryHref: "/lecturer/students/invite",
       secondaryCta: "+ Invite",
       stat: `${totalStudents} enrolled`,
