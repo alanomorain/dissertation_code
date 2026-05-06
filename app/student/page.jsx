@@ -5,6 +5,8 @@ import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
 import * as ui from "../styles/ui"
 
+const formatDate = (value) => new Date(value).toLocaleDateString()
+
 function QuickStatBar({ label, value, description, barClass }) {
   const clampedValue = Math.max(0, Math.min(100, value))
 
@@ -62,7 +64,18 @@ export default async function StudentDashboard() {
 
     activeEnrollments = await prisma.moduleEnrollment.findMany({
       where: { userId: studentUser.id, status: "ACTIVE" },
-      include: { module: true },
+      include: {
+        module: {
+          include: {
+            _count: {
+              select: {
+                lectures: true,
+                quizzes: true,
+              },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     })
 
@@ -162,12 +175,41 @@ export default async function StudentDashboard() {
 
   }
 
+  const coreAreas = [
+    {
+      title: "Modules",
+      href: "/student/modules",
+      stat: `${activeEnrollments.length} active`,
+    },
+    {
+      title: "Lectures",
+      href: "/student/lectures",
+      stat: `${lectureCount} available`,
+    },
+    {
+      title: "Analogies",
+      href: "/student/analogies",
+      stat: `${recentAnalogies.length} recent`,
+    },
+    {
+      title: "Quizzes",
+      href: "/student/quizzes",
+      stat: `${publishedQuizCount} published`,
+    },
+    {
+      title: "Statistics",
+      href: "/student/statistics",
+      stat: `${averageScore}% average`,
+    },
+  ]
+
   return (
     <main className={ui.page}>
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Student Dashboard</h1>
+            <p className={ui.textSmall}>A cleaner home for your modules, quizzes, and progress.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-stone-700">
@@ -187,58 +229,102 @@ export default async function StudentDashboard() {
           ) : null}
 
           <div className={ui.cardFull}>
-            <h2 className="text-xl font-semibold mb-2">Welcome back 👋</h2>
-            <p className="text-sm text-stone-700 mb-3">
-              Complete published quizzes, review linked learning media in quiz flow, and track your performance trends.
-            </p>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className={ui.cardInner}>
-                <h3 className="text-base font-semibold mb-1">Modules</h3>
-                <p className="text-sm text-stone-700 mb-3">Open your enrolled module spaces.</p>
-                <Link href="/student/modules" className={ui.buttonPrimary}>View modules</Link>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className={ui.textLabel}>Overview</p>
+                <h2 className="text-xl font-semibold">Everything important in one place</h2>
+                <p className="mt-2 max-w-2xl text-sm text-stone-700">
+                  Jump quickly into modules, lectures, analogies, quizzes, and statistics while keeping your current progress in view.
+                </p>
               </div>
-              <div className={ui.cardInner}>
-                <h3 className="text-base font-semibold mb-1">Lectures</h3>
-                <p className="text-sm text-stone-700 mb-3">Browse lecture-specific module content.</p>
-                <Link href="/student/lectures" className={ui.buttonPrimary}>View lectures</Link>
-              </div>
-              <div className={ui.cardInner}>
-                <h3 className="text-base font-semibold mb-1">Quizzes</h3>
-                <p className="text-sm text-stone-700 mb-3">Take quizzes for your active modules and review feedback.</p>
-                <Link href="/student/quizzes" className={ui.buttonPrimary}>Open quizzes</Link>
-              </div>
-              <div className={ui.cardInner}>
-                <h3 className="text-base font-semibold mb-1">Statistics</h3>
-                <p className="text-sm text-stone-700 mb-3">Monitor scores, attempts, and engagement across modules.</p>
-                <Link href="/student/statistics" className={ui.buttonPrimary}>View statistics</Link>
+              <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Modules</p>
+                  <p className="mt-1 text-lg font-semibold">{activeEnrollments.length}</p>
+                </div>
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Lectures</p>
+                  <p className="mt-1 text-lg font-semibold">{lectureCount}</p>
+                </div>
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Quizzes</p>
+                  <p className="mt-1 text-lg font-semibold">{publishedQuizCount}</p>
+                </div>
+                <div className={ui.cardInner}>
+                  <p className={ui.textLabel}>Avg score</p>
+                  <p className="mt-1 text-lg font-semibold">{averageScore}%</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[2fr,1.5fr]">
-            <div className={ui.cardFull}>
-              <h3 className={ui.cardHeader}>Your active modules</h3>
-              <div className="space-y-3 text-sm">
-                {activeEnrollments.map((enrollment) => (
-                  <div key={enrollment.id} className={ui.cardList}>
-                    <p className="font-medium">{enrollment.module.code} · {enrollment.module.name}</p>
-                    <p className="text-xs text-stone-600">Enrollment active</p>
+          <div className={ui.cardFull}>
+            <div className="mb-4">
+              <h3 className={ui.cardHeader}>Core areas</h3>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              {coreAreas.map((area) => (
+                <Link
+                  key={area.title}
+                  href={area.href}
+                  className={`${ui.cardInner} block transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2`}
+                >
+                  <div>
+                    <p className={ui.textHighlight}>{area.stat}</p>
+                    <h4 className="mt-1 text-base font-semibold">{area.title}</h4>
                   </div>
-                ))}
-                {activeEnrollments.length === 0 ? <p className={ui.textSmall}>No active module enrollments yet.</p> : null}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] gap-6">
+            <div id="modules" className={`${ui.cardFull} relative`}>
+              <Link
+                href="/student/modules"
+                className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                aria-label="View enrolled modules"
+              />
+              <div className="relative z-10 pointer-events-none">
+                <div className="mb-4">
+                  <h3 className={ui.cardHeader}>Your active modules</h3>
+                </div>
+                {activeEnrollments.length === 0 ? (
+                  <p className={ui.textSmall}>No active module enrollments yet.</p>
+                ) : (
+                  <div className="space-y-3 text-sm">
+                    {activeEnrollments.map((enrollment) => (
+                      <Link
+                        key={enrollment.id}
+                        href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`}
+                        className={`${ui.linkCard} pointer-events-auto`}
+                      >
+                        <p className="font-medium text-stone-950">{enrollment.module.code} · {enrollment.module.name}</p>
+                        <p className="text-xs text-stone-600">
+                          {enrollment.module._count.lectures} lectures · {enrollment.module._count.quizzes} quizzes
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="space-y-6">
               <div className={ui.cardFull}>
-                <h3 className={ui.cardHeader}>Quick stats</h3>
-                <ul className="mb-4 space-y-1 text-sm text-stone-700">
-                  <li>• {activeEnrollments.length} active modules</li>
-                  <li>• {lectureCount} lectures with approved analogies</li>
-                  <li>• {publishedQuizCount} published quizzes</li>
-                  <li>• {recentAnalogies.length} approved analogies</li>
-                  <li>• {completedQuizCount} quizzes completed</li>
-                </ul>
+                <div className="mb-3">
+                  <h3 className={ui.cardHeader}>Progress snapshot</h3>
+                </div>
+                <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
+                  <div className={ui.cardInner}>
+                    <p className={ui.textLabel}>Completed</p>
+                    <p className="mt-1 text-lg font-semibold">{completedQuizCount}</p>
+                  </div>
+                  <div className={ui.cardInner}>
+                    <p className={ui.textLabel}>Analogies</p>
+                    <p className="mt-1 text-lg font-semibold">{recentAnalogies.length}</p>
+                  </div>
+                </div>
                 <div className="space-y-3">
                   <QuickStatBar
                     label="Quiz completion"
@@ -256,12 +342,14 @@ export default async function StudentDashboard() {
               </div>
 
               <div className={ui.cardFull}>
-                <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
+                <div className="mb-3">
+                  <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
+                </div>
                 <div className="space-y-2 text-sm">
                   {upcomingQuizzes.map((quiz) => (
                     <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
                       <p className="font-medium">{quiz.title}</p>
-                      <p className="text-xs text-stone-600">{quiz.module.code} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}</p>
+                      <p className="text-xs text-stone-600">{quiz.module.code} · Due {quiz.dueAt ? formatDate(quiz.dueAt) : "Any time"}</p>
                     </Link>
                   ))}
                   {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No published quizzes available right now.</p> : null}

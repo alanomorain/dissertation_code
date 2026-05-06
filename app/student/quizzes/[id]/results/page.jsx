@@ -128,11 +128,13 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
                           ) : null}
                           {topicPayload.imageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={topicPayload.imageUrl}
-                              alt={topicPayload.topic || "Analogy image"}
-                              className="max-h-64 w-full rounded-lg object-cover"
-                            />
+                            <div className="aspect-[4/3] w-full overflow-hidden rounded-lg">
+                              <img
+                                src={topicPayload.imageUrl}
+                                alt={topicPayload.topic || "Analogy image"}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
                           ) : null}
                           {topicPayload.videoUrl ? (
                             <video src={topicPayload.videoUrl} controls className="w-full rounded-lg" />

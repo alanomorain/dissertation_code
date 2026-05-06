@@ -893,14 +893,16 @@ function UploadSlidesPageInner() {
 
                       {item.imageUrl && (
                         <div className="mt-3">
-                          <Image
-                            src={item.imageUrl}
-                            alt={`${item.topic} uploaded image`}
-                            width={768}
-                            height={384}
-                            unoptimized
-                            className="h-44 w-full rounded-lg object-cover border border-stone-300"
-                          />
+                          <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-stone-300">
+                            <Image
+                              src={item.imageUrl}
+                              alt={`${item.topic} uploaded image`}
+                              width={768}
+                              height={576}
+                              unoptimized
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1009,14 +1011,16 @@ function UploadSlidesPageInner() {
                         <div className="rounded-lg border border-stone-200 bg-white/50 p-3">
                           <p className="text-xs text-stone-600 mb-2">Image</p>
                           {item.imageUrl ? (
-                            <Image
-                              src={item.imageUrl}
-                              alt={`${item.topic} summary image`}
-                              width={640}
-                              height={320}
-                              unoptimized
-                              className="h-32 w-full rounded object-cover"
-                            />
+                            <div className="aspect-[4/3] w-full overflow-hidden rounded">
+                              <Image
+                                src={item.imageUrl}
+                                alt={`${item.topic} summary image`}
+                                width={640}
+                                height={480}
+                                unoptimized
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
                           ) : (
                             <p className="text-xs text-stone-500">No image added.</p>
                           )}

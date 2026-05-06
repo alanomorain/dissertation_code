@@ -228,16 +228,18 @@ export default function MediaImagePanel({
             ) : null}
           </div>
           {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={topicTitle ? `${topicTitle} illustration` : "Topic illustration"}
-              width={512}
-              height={256}
-              unoptimized
-              className="mt-2 h-32 w-full rounded object-cover"
-            />
+            <div className="mt-2 aspect-[4/3] w-full overflow-hidden rounded">
+              <Image
+                src={imageUrl}
+                alt={topicTitle ? `${topicTitle} illustration` : "Topic illustration"}
+                width={512}
+                height={384}
+                unoptimized
+                className="h-full w-full object-cover"
+              />
+            </div>
           ) : (
-            <div className="mt-2 h-32 rounded bg-stone-100/40" />
+            <div className="mt-2 aspect-[4/3] rounded bg-stone-100/40" />
           )}
           <input
             type="url"

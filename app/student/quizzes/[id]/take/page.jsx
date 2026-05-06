@@ -375,12 +375,14 @@ export default function StudentQuizTakePage() {
                     </div>
                     {modalTopicPayload.imageUrl ? (
                       <div className={ui.cardInner}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={modalTopicPayload.imageUrl}
-                          alt={modalTopicPayload.topic || "Analogy image"}
-                          className="max-h-72 w-full rounded-lg object-cover"
-                        />
+                        <div className="aspect-[4/3] w-full overflow-hidden rounded-lg">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={modalTopicPayload.imageUrl}
+                            alt={modalTopicPayload.topic || "Analogy image"}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
                       </div>
                     ) : null}
                   </>
