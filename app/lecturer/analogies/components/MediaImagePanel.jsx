@@ -15,7 +15,6 @@ export default function MediaImagePanel({
   const [savedImageUrl, setSavedImageUrl] = useState(initialImageUrl)
   const [savedVideoUrl, setSavedVideoUrl] = useState(initialVideoUrl)
   const [uploadingKind, setUploadingKind] = useState("")
-  const [saving, setSaving] = useState(false)
   const [clearingKind, setClearingKind] = useState("")
   const [error, setError] = useState("")
   const [info, setInfo] = useState("")
@@ -24,8 +23,6 @@ export default function MediaImagePanel({
   const videoInputRef = useRef(null)
 
   const canSaveToTopic = Boolean(analogySetId) && Number.isInteger(Number(topicIndex))
-  const hasUnsavedChanges = imageUrl !== savedImageUrl || videoUrl !== savedVideoUrl
-
   const persistTopicMedia = async (nextImageUrl, nextVideoUrl) => {
     if (!canSaveToTopic) {
       setInfo("Media changes are only saved after this analogy topic exists.")
@@ -82,39 +79,29 @@ export default function MediaImagePanel({
         throw new Error(data.error || "Upload failed")
       }
 
+      const uploadedUrl = String(data.url || "")
+
       if (kind === "image") {
-        setImageUrl(String(data.url || ""))
+        setImageUrl(uploadedUrl)
       } else {
-        setVideoUrl(String(data.url || ""))
+        setVideoUrl(uploadedUrl)
       }
 
-      setInfo(`${kind === "image" ? "Image" : "Video"} uploaded. Save media to attach it to this topic.`)
+      if (canSaveToTopic) {
+        const nextImageUrl = kind === "image" ? uploadedUrl : imageUrl
+        const nextVideoUrl = kind === "video" ? uploadedUrl : videoUrl
+        await persistTopicMedia(nextImageUrl, nextVideoUrl)
+        setInfo(`${kind === "image" ? "Image" : "Video"} uploaded and saved to this topic.`)
+        return
+      }
+
+      setInfo(`${kind === "image" ? "Image" : "Video"} uploaded.`)
     } catch (err) {
       setError(err.message || "Upload failed")
     } finally {
       setUploadingKind("")
       if (kind === "image" && imageInputRef.current) imageInputRef.current.value = ""
       if (kind === "video" && videoInputRef.current) videoInputRef.current.value = ""
-    }
-  }
-
-  const saveToTopic = async () => {
-    if (!canSaveToTopic) {
-      setInfo("Media changes are only saved after this analogy topic exists.")
-      return
-    }
-
-    setSaving(true)
-    setError("")
-    setInfo("")
-
-    try {
-      await persistTopicMedia(imageUrl, videoUrl)
-      setInfo("Media saved to this topic.")
-    } catch (err) {
-      setError(err.message || "Failed to save media")
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -156,59 +143,39 @@ export default function MediaImagePanel({
 
   return (
     <div className="mt-4 rounded-lg border border-stone-200 bg-stone-100 p-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-stone-600">
-          Media: <span className="text-stone-800">manual upload</span>
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-            className="hidden"
-            onChange={(event) => upload("image", event.target.files?.[0])}
-          />
-          <input
-            ref={videoInputRef}
-            type="file"
-            accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
-            className="hidden"
-            onChange={(event) => upload("video", event.target.files?.[0])}
-          />
-          <button
-            type="button"
-            onClick={() => imageInputRef.current?.click()}
-            disabled={uploadingKind === "image"}
-            className="text-xs rounded-lg border border-stone-300 px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {uploadingKind === "image" ? "Uploading..." : "Upload image"}
-          </button>
-          <button
-            type="button"
-            onClick={() => videoInputRef.current?.click()}
-            disabled={uploadingKind === "video"}
-            className="text-xs rounded-lg border border-stone-300 px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {uploadingKind === "video" ? "Uploading..." : "Upload video"}
-          </button>
-          <button
-            type="button"
-            onClick={saveToTopic}
-            disabled={saving}
-            className="text-xs rounded-lg border border-emerald-600 px-3 py-1 hover:border-emerald-400 hover:text-emerald-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {saving ? "Saving..." : "Save media"}
-          </button>
-        </div>
+      <div className="flex flex-wrap justify-end gap-2">
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+          className="hidden"
+          onChange={(event) => upload("image", event.target.files?.[0])}
+        />
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+          className="hidden"
+          onChange={(event) => upload("video", event.target.files?.[0])}
+        />
+        <button
+          type="button"
+          onClick={() => imageInputRef.current?.click()}
+          disabled={uploadingKind === "image"}
+          className="text-xs rounded-lg border border-stone-300 bg-white px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {uploadingKind === "image" ? "Uploading..." : "Upload image"}
+        </button>
+        <button
+          type="button"
+          onClick={() => videoInputRef.current?.click()}
+          disabled={uploadingKind === "video"}
+          className="text-xs rounded-lg border border-stone-300 bg-white px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {uploadingKind === "video" ? "Uploading..." : "Upload video"}
+        </button>
       </div>
 
-      {topicTitle ? (
-        <p className="mt-2 text-xs text-stone-600">Topic: <span className="text-stone-800">{topicTitle}</span></p>
-      ) : null}
-
-      {hasUnsavedChanges ? (
-        <p className="mt-2 text-xs text-amber-700">Unsaved media changes. Save media before leaving this page.</p>
-      ) : null}
       {error ? <p className="mt-2 text-xs text-red-700">{error}</p> : null}
       {info ? <p className="mt-2 text-xs text-emerald-700">{info}</p> : null}
 
@@ -241,13 +208,6 @@ export default function MediaImagePanel({
           ) : (
             <div className="mt-2 aspect-video rounded bg-stone-100/40" />
           )}
-          <input
-            type="url"
-            value={imageUrl}
-            onChange={(event) => setImageUrl(event.target.value)}
-            placeholder="https://..."
-            className="mt-2 w-full rounded border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-          />
         </div>
 
         <div className="rounded-md border border-stone-200 bg-stone-50/40 p-3">
@@ -269,13 +229,6 @@ export default function MediaImagePanel({
           ) : (
             <div className="mt-2 h-32 rounded bg-stone-100/40" />
           )}
-          <input
-            type="url"
-            value={videoUrl}
-            onChange={(event) => setVideoUrl(event.target.value)}
-            placeholder="https://..."
-            className="mt-2 w-full rounded border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
-          />
         </div>
       </div>
     </div>
