@@ -28,7 +28,7 @@ export default async function LecturerDashboard() {
     orderBy: { createdAt: "desc" },
   })
 
-  const recentUploads = await prisma.analogySet.findMany({
+  const recentLectureUploads = await prisma.lecture.findMany({
     where: { ownerId: lecturerUser.id },
     orderBy: { createdAt: "desc" },
     take: 3,
@@ -164,7 +164,7 @@ export default async function LecturerDashboard() {
             </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+          <div className="grid gap-6 md:grid-cols-[2fr,1fr]">
             <div id="modules" className={`${ui.cardFull} relative`}>
               <Link href="/lecturer/modules" className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" aria-label="Manage modules" />
               <div className="relative z-10 pointer-events-none">
@@ -194,27 +194,19 @@ export default async function LecturerDashboard() {
             </div>
 
             <div className={ui.cardFull}>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className={ui.cardHeader}>Recent analogy uploads</h3>
-                <Link href="/lecturer/analogies" className="text-xs text-stone-700 hover:text-teal-700 transition">
-                  View all
-                </Link>
+              <div className="mb-3">
+                <h3 className={ui.cardHeader}>Recent lecture uploads</h3>
               </div>
-              {recentUploads.length === 0 ? (
-                <p className="text-sm text-stone-600">You haven&apos;t created any analogies yet.</p>
+              {recentLectureUploads.length === 0 ? (
+                <p className="text-sm text-stone-600">You haven&apos;t uploaded any lectures yet.</p>
               ) : (
                 <ul className="space-y-2 text-sm">
-                  {recentUploads.map((item) => (
-                    <li key={item.id} className={`${ui.cardInner} flex items-center justify-between gap-3`}>
-                      <div>
-                        <p className="font-medium">{item.title || "Untitled"}</p>
-                        <p className="text-xs text-stone-600">
-                          {item.module?.code || "Unassigned"} · {formatDate(item.createdAt)}
-                        </p>
-                      </div>
-                      <Link href={`/lecturer/analogies/${item.id}`} className={ui.buttonSmall}>
-                        Open
-                      </Link>
+                  {recentLectureUploads.map((lecture) => (
+                    <li key={lecture.id} className={ui.cardInner}>
+                      <p className="font-medium">{lecture.title}</p>
+                      <p className="text-xs text-stone-600">
+                        {lecture.module?.code || "Unassigned"} · {formatDate(lecture.createdAt)}
+                      </p>
                     </li>
                   ))}
                 </ul>
