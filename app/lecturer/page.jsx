@@ -152,7 +152,7 @@ export default async function LecturerDashboard() {
                     <h4 className="mt-1 text-base font-semibold">{area.title}</h4>
                   </div>
                   <div className="flex flex-col items-start gap-2 text-sm">
-                    <Link href={area.href} className={ui.buttonPrimary}>
+                    <Link href={area.href} className={`${ui.buttonPrimary} w-32 text-center`}>
                       {area.cta}
                     </Link>
                     <Link href={area.secondaryHref} className="text-stone-700 hover:text-teal-700 transition">
