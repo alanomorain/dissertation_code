@@ -165,44 +165,32 @@ export default async function LecturerDashboard() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-            <div id="modules" className={ui.cardFull}>
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className={ui.cardHeader}>Modules you teach</h3>
-                <Link href="/lecturer/modules/create" className={ui.buttonSmall}>
-                  Create module
-                </Link>
-              </div>
-
-              {taughtModules.length === 0 ? (
-                <p className={ui.textSmall}>No modules assigned yet.</p>
-              ) : (
-                <div className="space-y-3 text-sm">
-                  {taughtModules.map((moduleItem) => {
-                    const moduleCode = encodeURIComponent(moduleItem.code)
-
-                    return (
-                      <div key={moduleItem.id} className={ui.cardList}>
-                        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                          <div>
-                            <p className="font-medium text-stone-950">{moduleItem.code} · {moduleItem.name}</p>
-                            <p className="text-xs text-stone-600">
-                              {moduleItem.enrollments.length} students · {moduleItem.analogySets.length} analogies · {moduleItem.quizzes.length} quizzes
-                            </p>
-                          </div>
-                          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-stone-700">
-                            <Link href={`/lecturer/analogies?module=${moduleCode}`} className="hover:text-teal-700 transition">Analogies</Link>
-                            <Link href={`/lecturer/lectures?module=${moduleCode}`} className="hover:text-teal-700 transition">Lectures</Link>
-                            <Link href={`/lecturer/quizzes?module=${moduleCode}`} className="hover:text-teal-700 transition">Quizzes</Link>
-                            <Link href={`/lecturer/statistics/${encodeURIComponent(moduleItem.code)}`} className="hover:text-teal-700 transition">Statistics</Link>
-                            <Link href={`/lecturer/students?module=${moduleCode}`} className="hover:text-teal-700 transition">Students</Link>
-                            <Link href={`/lecturer/analogies/new?module=${moduleCode}`} className="hover:text-teal-700 transition">Create analogy</Link>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
+            <div id="modules" className={`${ui.cardFull} relative`}>
+              <Link href="/lecturer/modules" className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" aria-label="Manage modules" />
+              <div className="relative z-10 pointer-events-none">
+                <div className="mb-4">
+                  <h3 className={ui.cardHeader}>Modules you teach</h3>
                 </div>
-              )}
+
+                {taughtModules.length === 0 ? (
+                  <p className={ui.textSmall}>No modules assigned yet.</p>
+                ) : (
+                  <div className="space-y-3 text-sm">
+                    {taughtModules.map((moduleItem) => {
+                      const moduleCode = encodeURIComponent(moduleItem.code)
+
+                      return (
+                        <Link key={moduleItem.id} href={`/lecturer/modules/${moduleCode}`} className={`${ui.linkCard} pointer-events-auto`}>
+                          <p className="font-medium text-stone-950">{moduleItem.code} · {moduleItem.name}</p>
+                          <p className="text-xs text-stone-600">
+                            {moduleItem.enrollments.length} students · {moduleItem.analogySets.length} analogies · {moduleItem.quizzes.length} quizzes
+                          </p>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className={ui.cardFull}>
