@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
-export default function AnalogyDetailActions({ analogyId, reviewStatus }) {
+export default function AnalogyDetailActions({ analogyId, returnHref = "/lecturer/lectures", reviewStatus }) {
   const router = useRouter()
   const [working, setWorking] = useState("")
   const [message, setMessage] = useState("")
@@ -61,7 +61,7 @@ export default function AnalogyDetailActions({ analogyId, reviewStatus }) {
   return (
     <div className="flex flex-col gap-2 items-end">
       <div className="flex items-center gap-2 text-sm">
-        <Link href="/lecturer/lectures" className={ui.buttonSecondary}>
+        <Link href={returnHref} className={ui.buttonSecondary}>
           Return to Lecture
         </Link>
         <Link href={`/lecturer/analogies/${analogyId}/edit`} className={ui.buttonSecondary}>

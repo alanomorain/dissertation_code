@@ -17,7 +17,7 @@ export default async function LecturerAnalogyDetailPage({ params }) {
   const analogy = await prisma.analogySet.findFirst({
     where: { id, ownerId: lecturerUser.id },
     include: {
-      lecture: { select: { title: true } },
+      lecture: { select: { id: true, title: true } },
       owner: true,
     },
   })
@@ -43,6 +43,7 @@ export default async function LecturerAnalogyDetailPage({ params }) {
           </div>
           <AnalogyDetailActions
             analogyId={analogy.id}
+            returnHref={analogy.lecture?.id ? `/lecturer/lectures/${analogy.lecture.id}` : "/lecturer/lectures"}
             reviewStatus={analogy.reviewStatus || "DRAFT"}
           />
         </div>
