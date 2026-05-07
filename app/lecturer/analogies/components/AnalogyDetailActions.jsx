@@ -62,7 +62,7 @@ export default function AnalogyDetailActions({ analogyId, reviewStatus }) {
     <div className="flex flex-col gap-2 items-end">
       <div className="flex items-center gap-2 text-sm">
         <Link href="/lecturer/lectures" className={ui.buttonSecondary}>
-          Return to Lectures
+          Return to Lecture
         </Link>
         <Link href={`/lecturer/analogies/${analogyId}/edit`} className={ui.buttonSecondary}>
           Edit

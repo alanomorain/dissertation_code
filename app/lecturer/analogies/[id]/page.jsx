@@ -71,12 +71,6 @@ export default async function LecturerAnalogyDetailPage({ params }) {
 
             <div className="space-y-2 text-sm">
               <div>
-                <span className={ui.textMuted}>Owner:</span>{" "}
-                <span className="text-stone-800">
-                  {analogy.owner?.email || "Unassigned"}
-                </span>
-              </div>
-              <div>
                 <span className={ui.textMuted}>Created:</span>{" "}
                 <span className="text-stone-800">
                   {new Date(analogy.createdAt).toLocaleDateString()}
