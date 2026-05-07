@@ -127,7 +127,7 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
                             <p className="text-sm text-stone-800 whitespace-pre-wrap">{topicPayload.analogy}</p>
                           ) : null}
                           {topicPayload.imageUrl ? (
-                            <div className="aspect-video w-full overflow-hidden rounded-lg">
+                            <div className="aspect-[4/3] w-full overflow-hidden rounded-lg">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={topicPayload.imageUrl}

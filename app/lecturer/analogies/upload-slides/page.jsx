@@ -893,7 +893,7 @@ function UploadSlidesPageInner() {
 
                       {item.imageUrl && (
                         <div className="mt-3">
-                          <div className="aspect-video w-full overflow-hidden rounded-lg border border-stone-300">
+                          <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-stone-300">
                             <Image
                               src={item.imageUrl}
                               alt={`${item.topic} uploaded image`}
@@ -1011,7 +1011,7 @@ function UploadSlidesPageInner() {
                         <div className="rounded-lg border border-stone-200 bg-white/50 p-3">
                           <p className="text-xs text-stone-600 mb-2">Image</p>
                           {item.imageUrl ? (
-                            <div className="aspect-video w-full overflow-hidden rounded">
+                            <div className="aspect-[4/3] w-full overflow-hidden rounded">
                               <Image
                                 src={item.imageUrl}
                                 alt={`${item.topic} summary image`}

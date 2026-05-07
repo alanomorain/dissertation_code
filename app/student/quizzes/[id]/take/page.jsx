@@ -375,7 +375,7 @@ export default function StudentQuizTakePage() {
                     </div>
                     {modalTopicPayload.imageUrl ? (
                       <div className={ui.cardInner}>
-                        <div className="aspect-video w-full overflow-hidden rounded-lg">
+                        <div className="aspect-[4/3] w-full overflow-hidden rounded-lg">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={modalTopicPayload.imageUrl}
