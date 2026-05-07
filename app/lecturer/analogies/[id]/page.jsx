@@ -16,7 +16,10 @@ export default async function LecturerAnalogyDetailPage({ params }) {
 
   const analogy = await prisma.analogySet.findFirst({
     where: { id, ownerId: lecturerUser.id },
-    include: { owner: true },
+    include: {
+      lecture: { select: { title: true } },
+      owner: true,
+    },
   })
 
   if (!analogy) {
@@ -28,6 +31,7 @@ export default async function LecturerAnalogyDetailPage({ params }) {
   if (analogy.topicsJson !== null && analogy.topicsJson !== undefined && typeof analogy.topicsJson === "object") {
     topics = analogy.topicsJson.topics || []
   }
+  const displayTitle = analogy.lecture?.title || analogy.title || "Untitled"
 
   return (
     <main className={ui.page}>
@@ -52,7 +56,7 @@ export default async function LecturerAnalogyDetailPage({ params }) {
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>
                 <h2 className="text-xl font-semibold mb-2">
-                  {analogy.title || "Untitled"}
+                  {displayTitle}
                 </h2>
                 <div className="flex items-center gap-2 text-sm">
                   <span className={ui.getBadgeClass(analogy.status)}>
@@ -75,14 +79,14 @@ export default async function LecturerAnalogyDetailPage({ params }) {
               <div>
                 <span className={ui.textMuted}>Created:</span>{" "}
                 <span className="text-stone-800">
-                  {new Date(analogy.createdAt).toLocaleString()}
+                  {new Date(analogy.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <div>
                 <span className={ui.textMuted}>Approved:</span>{" "}
                 <span className="text-stone-800">
                   {analogy.approvedAt
-                    ? new Date(analogy.approvedAt).toLocaleString()
+                    ? new Date(analogy.approvedAt).toLocaleDateString()
                     : "Not approved"}
                 </span>
               </div>

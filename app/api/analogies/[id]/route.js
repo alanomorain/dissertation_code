@@ -14,6 +14,7 @@ export async function GET(request, { params }) {
     const analogy = await prisma.analogySet.findFirst({
       where: { id, ownerId: lecturer.id },
       include: {
+        lecture: true,
         module: true,
       },
     })

@@ -9,7 +9,7 @@ const formatDateTime = (value) => {
   if (!value) return "Not approved"
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return "Not approved"
-  return date.toLocaleString()
+  return date.toLocaleDateString()
 }
 
 export default function LecturerAnalogyReviewPage() {
@@ -24,6 +24,7 @@ export default function LecturerAnalogyReviewPage() {
 
   const reviewStatus = analogy?.reviewStatus || "DRAFT"
   const approvedAt = useMemo(() => formatDateTime(analogy?.approvedAt), [analogy?.approvedAt])
+  const displayTitle = analogy?.lecture?.title || analogy?.title || "Untitled"
 
   const loadAnalogy = useCallback(async () => {
     if (!id) return
@@ -160,7 +161,7 @@ export default function LecturerAnalogyReviewPage() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Review Analogy</h1>
-            <p className={ui.textSmall}>{analogy.title || "Untitled"}</p>
+            <p className={ui.textSmall}>{displayTitle}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href={`/lecturer/analogies/${id}`} className={ui.buttonSecondary}>

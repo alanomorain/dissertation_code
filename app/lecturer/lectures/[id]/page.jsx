@@ -20,10 +20,12 @@ export default async function LecturerLectureDetailPage({ params }) {
       analogySets: {
         select: {
           id: true,
+          lecture: { select: { title: true } },
           title: true,
           status: true,
           reviewStatus: true,
           createdAt: true,
+          topicsJson: true,
         },
         orderBy: { createdAt: "desc" },
       },
@@ -56,19 +58,32 @@ export default async function LecturerLectureDetailPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Analogies</h2>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <h2 className={ui.cardHeader}>Analogies</h2>
+              <Link
+                href={`/lecturer/analogies/upload-slides?module=${encodeURIComponent(lecture.module.code)}&lectureId=${encodeURIComponent(lecture.id)}`}
+                className={ui.buttonPrimary}
+              >
+                Create Analogy Set
+              </Link>
+            </div>
             {lecture.analogySets.length === 0 ? (
               <p className={ui.textSmall}>No analogies linked to this lecture yet.</p>
             ) : (
               <div className="space-y-2 text-sm">
-                {lecture.analogySets.map((analogy) => (
-                  <Link key={analogy.id} href={`/lecturer/analogies/${analogy.id}`} className={ui.linkCard}>
-                    <p className="font-medium">{analogy.title || "Untitled"}</p>
-                    <p className="text-xs text-stone-600">
-                      Status: {analogy.status} · Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()} · {new Date(analogy.createdAt).toLocaleDateString()}
-                    </p>
-                  </Link>
-                ))}
+                {lecture.analogySets.map((analogy, index) => {
+                  const topicCount = Array.isArray(analogy.topicsJson?.topics) ? analogy.topicsJson.topics.length : 0
+
+                  return (
+                    <Link key={analogy.id} href={`/lecturer/analogies/${analogy.id}`} className={ui.linkCard}>
+                      <p className="font-medium">Set {index + 1}</p>
+                      <p className="text-xs text-stone-600">
+                        Status: {analogy.status} · Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()} · {new Date(analogy.createdAt).toLocaleDateString()}
+                        {topicCount > 0 ? ` · ${topicCount} ${topicCount === 1 ? "topic" : "topics"}` : ""}
+                      </p>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>

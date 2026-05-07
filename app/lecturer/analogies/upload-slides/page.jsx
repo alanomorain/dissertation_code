@@ -56,6 +56,7 @@ function UploadSlidesPageInner() {
   const [moduleError, setModuleError] = useState("")
 
   const moduleFromUrl = searchParams.get("module") || ""
+  const lectureIdFromUrl = searchParams.get("lectureId") || ""
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -86,6 +87,30 @@ function UploadSlidesPageInner() {
       setModuleCode(modules[0].code)
     }
   }, [modules, moduleFromUrl, moduleCode])
+
+  useEffect(() => {
+    if (!moduleCode || !lectureIdFromUrl) {
+      return
+    }
+
+    const fetchLectures = async () => {
+      try {
+        const res = await fetch(`/api/lectures?moduleCode=${encodeURIComponent(moduleCode)}`)
+        if (!res.ok) return
+        const data = await res.json()
+        const nextLectures = Array.isArray(data) ? data : []
+
+        const selectedLecture = nextLectures.find((lecture) => lecture.id === lectureIdFromUrl)
+        if (selectedLecture) {
+          setLectureTitle(selectedLecture.title || "")
+        }
+      } catch (err) {
+        console.error("Failed to fetch lectures:", err)
+      }
+    }
+
+    fetchLectures()
+  }, [moduleCode, lectureIdFromUrl])
 
   const canApproveAnalogies = useMemo(
     () => topicStates.length > 0 && topicStates.every((item) => item.analogy.trim()),
@@ -378,14 +403,15 @@ function UploadSlidesPageInner() {
           body: JSON.stringify({
             persist: true,
             moduleCode,
-            lectureTitle: lectureTitle.trim() || `Lecture from ${slidesFile?.name || "slides"}`,
+            lectureId: lectureIdFromUrl || undefined,
+            lectureTitle: lectureIdFromUrl ? "" : lectureTitle.trim() || `Lecture from ${slidesFile?.name || "slides"}`,
             lectureSourceType: "slides",
             sourceFilename: slidesFile?.name || "",
             topics: topicStates.map((item) => item.topic),
             selectedAnalogies: selectedTopics,
             sourceText: extractedText,
             notes,
-            title: `Slides: ${slidesFile?.name || "Untitled"}`,
+            title: lectureIdFromUrl ? "Set" : lectureTitle.trim() || `Lecture from ${slidesFile?.name || "slides"}`,
           }),
         })
 
@@ -648,9 +674,15 @@ function UploadSlidesPageInner() {
                       type="text"
                       value={lectureTitle}
                       onChange={(e) => setLectureTitle(e.target.value)}
-                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                      readOnly={Boolean(lectureIdFromUrl)}
+                      className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 read-only:bg-stone-100 read-only:text-stone-700"
                       placeholder="e.g., Week 3 - Distributed Systems Fundamentals"
                     />
+                    {lectureIdFromUrl ? (
+                      <p className="text-xs text-stone-600">
+                        This upload will create a new set for the selected lecture.
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className="space-y-1">

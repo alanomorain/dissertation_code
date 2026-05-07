@@ -15,6 +15,7 @@ export default async function LecturerTopicDetailPage({ params }) {
 
   const analogy = await prisma.analogySet.findFirst({
     where: { id, ownerId: lecturerUser.id },
+    include: { lecture: { select: { title: true } } },
   })
 
   if (!analogy) {
@@ -32,6 +33,7 @@ export default async function LecturerTopicDetailPage({ params }) {
   }
 
   const topic = topics[index] || {}
+  const displayTitle = analogy.lecture?.title || analogy.title || "Analogy"
   const prevIndex = index > 0 ? index - 1 : null
   const nextIndex = index < topics.length - 1 ? index + 1 : null
 
@@ -42,7 +44,7 @@ export default async function LecturerTopicDetailPage({ params }) {
           <div>
             <p className={ui.textLabel}>Lecturer · Topic</p>
             <h1 className="text-lg font-semibold">
-              {analogy.title || "Analogy"}
+              {displayTitle}
             </h1>
           </div>
           <div className="flex items-center gap-2 text-sm">

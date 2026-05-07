@@ -140,7 +140,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                   >
                     <div>
                       <p className={ui.textHighlight}>
-                        {analogy.title || "Untitled"}
+                        {analogy.lecture?.title || analogy.title || "Untitled"}
                       </p>
                       <p className="font-medium">
                         {analogy.module?.code || "No module"} · {analogy.lecture?.title || "No lecture"}
@@ -152,7 +152,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                         Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()}
                       </p>
                       <p className="text-xs text-stone-500">
-                        Created: {new Date(analogy.createdAt).toLocaleString()}
+                        Created: {new Date(analogy.createdAt).toLocaleDateString()}
                       </p>
                     </div>
 
