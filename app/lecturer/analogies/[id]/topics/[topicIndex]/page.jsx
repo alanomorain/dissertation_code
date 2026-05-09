@@ -60,14 +60,20 @@ export default async function LecturerTopicDetailPage({ params }) {
               href={`/lecturer/analogies/${id}`}
               className={ui.buttonSecondary}
             >
-              ← Back to analogy
+              ← Back to Analogy
+            </Link>
+            <Link
+              href="/lecturer/analogies"
+              className={ui.buttonSecondary}
+            >
+              Analogy Dashboard
             </Link>
             {nextIndex !== null && (
               <Link
                 href={`/lecturer/analogies/${id}/topics/${nextIndex}`}
                 className={ui.buttonSecondary}
               >
-                Next topic →
+                Next Topic →
               </Link>
             )}
           </div>
