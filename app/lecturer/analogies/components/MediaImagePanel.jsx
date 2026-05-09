@@ -147,7 +147,7 @@ export default function MediaImagePanel({
         <input
           ref={imageInputRef}
           type="file"
-          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+          accept="image/png,image/jpeg,image/webp,image/gif"
           className="hidden"
           onChange={(event) => upload("image", event.target.files?.[0])}
         />

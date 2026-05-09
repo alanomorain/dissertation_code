@@ -25,7 +25,9 @@ function getTopicPayload(question) {
 
 export default async function StudentQuizResultsPage({ params, searchParams }) {
   const { id } = await params
-  const attemptId = (await searchParams).attemptId
+  const attemptId = String((await searchParams).attemptId || "").trim()
+  if (!attemptId) notFound()
+
   const studentUser = await getCurrentUser("STUDENT", { id: true })
   if (!studentUser) notFound()
 

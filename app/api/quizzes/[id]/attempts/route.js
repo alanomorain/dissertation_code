@@ -39,47 +39,70 @@ async function getAccessibleQuiz(id, studentId) {
 }
 
 async function handleStart({ quiz, studentId }) {
-  const submittedCount = await prisma.quizAttempt.count({
-    where: { quizId: quiz.id, studentId, status: "SUBMITTED" },
-  })
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const submittedCount = await tx.quizAttempt.count({
+        where: { quizId: quiz.id, studentId, status: "SUBMITTED" },
+      })
 
-  if (submittedCount >= quiz.maxAttempts) {
-    return Response.json({ error: "Maximum attempts reached" }, { status: 400 })
-  }
+      if (submittedCount >= quiz.maxAttempts) {
+        return { error: "Maximum attempts reached", status: 400 }
+      }
 
-  const existing = await prisma.quizAttempt.findFirst({
-    where: {
-      quizId: quiz.id,
-      studentId,
-      status: "IN_PROGRESS",
-    },
-    include: {
-      responses: {
-        select: {
-          questionId: true,
+      const existing = await tx.quizAttempt.findFirst({
+        where: {
+          quizId: quiz.id,
+          studentId,
+          status: "IN_PROGRESS",
         },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+        include: {
+          responses: {
+            select: {
+              questionId: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      })
 
-  if (existing) {
-    return Response.json({
-      attemptId: existing.id,
-      answeredQuestionIds: existing.responses.map((response) => response.questionId),
-    })
+      if (existing) {
+        return {
+          attemptId: existing.id,
+          answeredQuestionIds: existing.responses.map((response) => response.questionId),
+        }
+      }
+
+      const latestSubmittedCount = await tx.quizAttempt.count({
+        where: { quizId: quiz.id, studentId, status: "SUBMITTED" },
+      })
+
+      if (latestSubmittedCount >= quiz.maxAttempts) {
+        return { error: "Maximum attempts reached", status: 400 }
+      }
+
+      const attempt = await tx.quizAttempt.create({
+        data: {
+          quizId: quiz.id,
+          studentId,
+          status: "IN_PROGRESS",
+        },
+        select: { id: true },
+      })
+
+      return { attemptId: attempt.id, answeredQuestionIds: [] }
+    }, { isolationLevel: "Serializable" })
+
+    if (result.error) {
+      return Response.json({ error: result.error }, { status: result.status })
+    }
+
+    return Response.json(result)
+  } catch (error) {
+    if (error?.code === "P2034") {
+      return Response.json({ error: "Attempt is already being started. Please retry." }, { status: 409 })
+    }
+    throw error
   }
-
-  const attempt = await prisma.quizAttempt.create({
-    data: {
-      quizId: quiz.id,
-      studentId,
-      status: "IN_PROGRESS",
-    },
-    select: { id: true },
-  })
-
-  return Response.json({ attemptId: attempt.id, answeredQuestionIds: [] })
 }
 
 async function handleAnswer({ quiz, body, studentId }) {
@@ -210,66 +233,89 @@ async function handleFinish({ quiz, body, studentId }) {
     return Response.json({ error: "attemptId is required" }, { status: 400 })
   }
 
-  const attempt = await prisma.quizAttempt.findFirst({
-    where: {
-      id: attemptId,
-      quizId: quiz.id,
-      studentId,
-    },
-    include: {
-      responses: {
-        select: {
-          questionId: true,
-          isCorrect: true,
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const attempt = await tx.quizAttempt.findFirst({
+        where: {
+          id: attemptId,
+          quizId: quiz.id,
+          studentId,
         },
-      },
-    },
-  })
+        include: {
+          responses: {
+            select: {
+              questionId: true,
+              isCorrect: true,
+            },
+          },
+        },
+      })
 
-  if (!attempt) {
-    return Response.json({ error: "Attempt not found" }, { status: 404 })
+      if (!attempt) {
+        return { error: "Attempt not found", status: 404 }
+      }
+
+      if (attempt.status === "SUBMITTED") {
+        return { attemptId: attempt.id, score: attempt.score ?? 0 }
+      }
+
+      const submittedCount = await tx.quizAttempt.count({
+        where: { quizId: quiz.id, studentId, status: "SUBMITTED" },
+      })
+
+      if (submittedCount >= quiz.maxAttempts) {
+        return { error: "Maximum attempts reached", status: 400 }
+      }
+
+      const existingQuestionIds = new Set(attempt.responses.map((response) => response.questionId))
+      const missingQuestions = quiz.questions.filter((question) => !existingQuestionIds.has(question.id))
+
+      if (missingQuestions.length > 0) {
+        await tx.quizResponse.createMany({
+          data: missingQuestions.map((question) => ({
+            attemptId: attempt.id,
+            questionId: question.id,
+            selectedOptionId: null,
+            isCorrect: false,
+            textAnswer: null,
+            answeredAt: new Date(),
+          })),
+        })
+      }
+
+      const allResponses = await tx.quizResponse.findMany({
+        where: { attemptId: attempt.id },
+        select: { isCorrect: true },
+      })
+
+      const total = quiz.questions.length
+      const correct = allResponses.filter((response) => response.isCorrect === true).length
+      const score = total > 0 ? Math.round((correct / total) * 100) : 0
+
+      const submitted = await tx.quizAttempt.update({
+        where: { id: attempt.id },
+        data: {
+          status: "SUBMITTED",
+          score,
+          submittedAt: new Date(),
+        },
+        select: { id: true, score: true },
+      })
+
+      return { attemptId: submitted.id, score: submitted.score ?? 0 }
+    }, { isolationLevel: "Serializable" })
+
+    if (result.error) {
+      return Response.json({ error: result.error }, { status: result.status })
+    }
+
+    return Response.json(result)
+  } catch (error) {
+    if (error?.code === "P2034") {
+      return Response.json({ error: "Attempt is already being submitted. Please retry." }, { status: 409 })
+    }
+    throw error
   }
-
-  if (attempt.status === "SUBMITTED") {
-    return Response.json({ attemptId: attempt.id, score: attempt.score ?? 0 })
-  }
-
-  const existingQuestionIds = new Set(attempt.responses.map((response) => response.questionId))
-  const missingQuestions = quiz.questions.filter((question) => !existingQuestionIds.has(question.id))
-
-  if (missingQuestions.length > 0) {
-    await prisma.quizResponse.createMany({
-      data: missingQuestions.map((question) => ({
-        attemptId: attempt.id,
-        questionId: question.id,
-        selectedOptionId: null,
-        isCorrect: false,
-        textAnswer: null,
-        answeredAt: new Date(),
-      })),
-    })
-  }
-
-  const allResponses = await prisma.quizResponse.findMany({
-    where: { attemptId: attempt.id },
-    select: { isCorrect: true },
-  })
-
-  const total = quiz.questions.length
-  const correct = allResponses.filter((response) => response.isCorrect === true).length
-  const score = total > 0 ? Math.round((correct / total) * 100) : 0
-
-  const submitted = await prisma.quizAttempt.update({
-    where: { id: attempt.id },
-    data: {
-      status: "SUBMITTED",
-      score,
-      submittedAt: new Date(),
-    },
-    select: { id: true, score: true },
-  })
-
-  return Response.json({ attemptId: submitted.id, score: submitted.score ?? 0 })
 }
 
 export async function POST(req, { params }) {

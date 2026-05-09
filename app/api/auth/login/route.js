@@ -2,12 +2,18 @@ import { prisma } from "../../../lib/db"
 import { buildSessionCookie } from "../../../lib/auth"
 import { verifyPassword } from "../../../lib/passwords"
 import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
     const body = await req.json().catch(() => ({}))
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const password = typeof body.password === "string" ? body.password : ""

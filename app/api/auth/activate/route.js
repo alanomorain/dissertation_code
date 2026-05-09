@@ -1,11 +1,17 @@
 import { prisma } from "../../../lib/db"
 import { hashPassword } from "../../../lib/passwords"
 import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
     const body = await req.json().catch(() => ({}))
     const token = typeof body.token === "string" ? body.token.trim() : ""
     const password = typeof body.password === "string" ? body.password : ""

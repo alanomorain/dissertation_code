@@ -1,5 +1,6 @@
 // app/api/upload-slides/route.js
 import OpenAI from "openai"
+import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import { enforceRateLimit } from "../../lib/rateLimit"
 import { enforceCsrf } from "../../lib/security"
@@ -210,7 +211,7 @@ export async function POST(req) {
 
     const formData = await req.formData()
     const file = formData.get("file")
-    const moduleCode = String(formData.get("moduleCode") || "UNKNOWN_MODULE").trim().slice(0, 50)
+    const moduleCode = String(formData.get("moduleCode") || "").trim().toUpperCase().slice(0, 50)
     const notes = String(formData.get("notes") || "").slice(0, 15000)
 
     if (!file || typeof file === "string") {
@@ -235,6 +236,22 @@ export async function POST(req) {
         { error: "Unsupported file type. Please upload PDF or PPTX files." },
         { status: 415 },
       )
+    }
+
+    if (!moduleCode) {
+      return Response.json({ error: "moduleCode is required" }, { status: 400 })
+    }
+
+    const moduleRecord = await prisma.module.findFirst({
+      where: {
+        code: moduleCode,
+        lecturerId: lecturer.id,
+      },
+      select: { id: true },
+    })
+
+    if (!moduleRecord) {
+      return Response.json({ error: "Unknown module for this lecturer" }, { status: 400 })
     }
 
     const extraction = await extractSlides({ file, moduleCode })

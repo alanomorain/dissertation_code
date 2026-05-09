@@ -915,7 +915,7 @@ function UploadSlidesPageInner() {
                           {uploadingMediaByKey[`${idx}:image`] ? "Uploading..." : "Upload image"}
                           <input
                             type="file"
-                            accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                            accept="image/png,image/jpeg,image/webp,image/gif"
                             className="hidden"
                             disabled={uploadingMediaByKey[`${idx}:image`]}
                             onChange={(event) => handleUploadMedia(idx, "image", event.target.files?.[0])}

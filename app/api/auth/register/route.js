@@ -1,12 +1,18 @@
 import { prisma } from "../../../lib/db"
 import { hashPassword } from "../../../lib/passwords"
 import { enforceRateLimit, getClientIp } from "../../../lib/rateLimit"
+import { enforceCsrf } from "../../../lib/security"
 
 export const runtime = "nodejs"
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req) {
   try {
+    const csrfResponse = enforceCsrf(req)
+    if (csrfResponse) {
+      return csrfResponse
+    }
+
     const body = await req.json().catch(() => ({}))
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""

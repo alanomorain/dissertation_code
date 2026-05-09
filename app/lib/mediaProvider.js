@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto"
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
 import { prisma } from "./db"
 
-const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"])
+const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"])
 const VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"])
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -46,8 +46,7 @@ function inferExtension(file, kind) {
     if (type === "image/jpeg") return ".jpg"
     if (type === "image/webp") return ".webp"
     if (type === "image/gif") return ".gif"
-    if (type === "image/svg+xml") return ".svg"
-    if ([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"].includes(originalExt)) return originalExt
+    if ([".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(originalExt)) return originalExt
     return ".png"
   }
 
@@ -78,7 +77,7 @@ function assertFile(file, kind) {
       throw new Error("Image is too large. Maximum size is 10MB.")
     }
     if (type && !IMAGE_TYPES.has(type)) {
-      throw new Error("Unsupported image format. Upload PNG, JPG, WebP, GIF, or SVG.")
+      throw new Error("Unsupported image format. Upload PNG, JPG, WebP, or GIF.")
     }
   }
 
@@ -335,8 +334,4 @@ export async function attachMediaToTopic({
     topicIndex: index,
     topic: nextTopics[index],
   }
-}
-
-export async function generateMediaFromPrompt() {
-  throw new Error("AI media generation is disabled")
 }
