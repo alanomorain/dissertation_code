@@ -1088,7 +1088,7 @@ function UploadSlidesPageInner() {
                     disabled={savingSummary}
                     className={`${ui.buttonPrimary} disabled:opacity-60 disabled:cursor-not-allowed`}
                   >
-                    {savingSummary ? "Saving..." : "Finish and open saved set"}
+                    {savingSummary ? "Saving..." : "Finish & Open"}
                   </button>
                 </div>
               </>

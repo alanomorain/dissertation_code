@@ -4,6 +4,10 @@ import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
 
+function getTopics(topicsJson) {
+  return Array.isArray(topicsJson?.topics) ? topicsJson.topics : []
+}
+
 export default async function AnalogiesDashboardPage({ searchParams }) {
   const lecturerUser = await getCurrentUser("LECTURER", {
     id: true,
@@ -15,29 +19,63 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
   }
 
   const resolvedSearchParams = await searchParams
-  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
+  const moduleCode = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
-  let moduleFilterId = null
-  if (moduleCodeFilter) {
-    const moduleRecord = await prisma.module.findFirst({
-      where: { code: moduleCodeFilter, lecturerId: lecturerUser.id },
-      select: { id: true },
-    })
-    moduleFilterId = moduleRecord?.id || "missing-module"
-  }
+  const modules = await prisma.module.findMany({
+    where: { lecturerId: lecturerUser.id },
+    select: { id: true, code: true, name: true },
+    orderBy: { code: "asc" },
+  })
 
-  const analogies = await prisma.analogySet.findMany({
+  const moduleFilter = moduleCode
+    ? modules.find((module) => module.code === moduleCode)
+    : null
+
+  const analogySets = await prisma.analogySet.findMany({
     where: {
       ownerId: lecturerUser.id,
-      ...(moduleCodeFilter ? { moduleId: moduleFilterId } : {}),
+      ...(moduleFilter ? { moduleId: moduleFilter.id } : {}),
     },
     include: {
-      module: { select: { code: true } },
-      lecture: { select: { title: true } },
+      module: { select: { code: true, name: true } },
+      lecture: { select: { id: true, title: true } },
     },
     orderBy: {
       createdAt: "desc",
     },
+  })
+
+  const setCountsByLecture = new Map()
+  const setNumbersById = new Map()
+  const analogySetsOldestFirst = [...analogySets].sort((a, b) => a.createdAt - b.createdAt)
+  for (const set of analogySetsOldestFirst) {
+    const lectureKey = set.lecture?.id || `no-lecture:${set.id}`
+    const nextCount = (setCountsByLecture.get(lectureKey) || 0) + 1
+    setCountsByLecture.set(lectureKey, nextCount)
+    setNumbersById.set(set.id, nextCount)
+  }
+
+  const analogies = analogySets.flatMap((set) => {
+    const moduleLabel = set.module
+      ? `${set.module.code} · ${set.module.name}`
+      : "No module"
+    const lectureLabel = set.lecture?.title || "No lecture"
+    const lectureKey = set.lecture?.id || `no-lecture:${set.id}`
+    const showSetLabel = (setCountsByLecture.get(lectureKey) || 0) > 1
+    const setLabel = showSetLabel ? `Set ${setNumbersById.get(set.id)}` : ""
+
+    return getTopics(set.topicsJson).map((topic, topicIndex) => ({
+      id: `${set.id}-${topicIndex}`,
+      analogySetId: set.id,
+      topicIndex,
+      topicTitle: String(topic?.topic || "").trim() || "Untitled analogy",
+      moduleLabel,
+      lectureLabel,
+      setLabel,
+      status: set.status,
+      reviewStatus: set.reviewStatus || "DRAFT",
+      createdAt: set.createdAt,
+    }))
   })
 
   return (
@@ -46,6 +84,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
+            <p className={ui.textLabel}>Lecturer · Analogies</p>
             <h1 className="text-lg font-semibold">
               Manage Analogies
             </h1>
@@ -65,16 +104,10 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
               Back to dashboard
             </Link>
             <Link
-              href="/lecturer/analogies/upload-slides"
+              href="/lecturer/lectures"
               className={ui.buttonSecondary}
             >
-              Upload slides
-            </Link>
-            <Link
-              href="/lecturer/analogies/new"
-              className={ui.buttonPrimary}
-            >
-              + New analogy
+              Lecture Dashboard
             </Link>
           </div>
         </div>
@@ -83,11 +116,21 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
       {/* Content */}
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          {/* Intro */}
           <div className={ui.cardFull}>
-            <p className="text-stone-700 mb-2 text-sm">
-              Here are all the analogies you have created for your modules. You can edit,add or delete analogies from this dashboard.
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Link href="/lecturer/analogies" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>
+                All modules
+              </Link>
+              {modules.map((module) => (
+                <Link
+                  key={module.id}
+                  href={`/lecturer/analogies?module=${encodeURIComponent(module.code)}`}
+                  className={moduleCode === module.code ? ui.buttonPrimary : ui.buttonSecondary}
+                >
+                  {module.code}
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Summary blocks */}
@@ -103,7 +146,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                 Ready analogies
               </p>
               <p className="text-2xl font-semibold">
-                {analogies.filter((a) => a.status === "ready").length}
+                {analogies.filter((analogy) => analogy.status === "ready").length}
               </p>
             </div>
             <div className={`${ui.card} p-4`}>
@@ -111,7 +154,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                 Processing
               </p>
               <p className="text-2xl font-semibold">
-                {analogies.filter((a) => a.status === "processing").length}
+                {analogies.filter((analogy) => analogy.status === "processing").length}
               </p>
             </div>
           </div>
@@ -124,51 +167,60 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
 
             {analogies.length === 0 ? (
               <p className={ui.textSmall}>
-                You haven&apos;t created any analogies yet. Click{" "}
-                <span className="font-medium text-teal-700">
-                  &quot;New analogy&quot;
-                </span>{" "}
-                to add your first one.
+                No individual analogies found for this selection.
               </p>
             ) : (
               <div className="space-y-3 text-sm">
                 {analogies.map((analogy) => (
-                  <Link
+                  <div
                     key={analogy.id}
-                    href={`/lecturer/analogies/${analogy.id}`}
                     className={`${ui.cardList} flex flex-col gap-2 md:flex-row md:items-center md:justify-between hover:border-teal-500 transition`}
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className={ui.textHighlight}>
-                        {analogy.lecture?.title || analogy.title || "Untitled"}
+                        {analogy.moduleLabel}
                       </p>
-                      <p className="font-medium">
-                        {analogy.module?.code || "No module"} · {analogy.lecture?.title || "No lecture"}
+                      <p className="font-semibold text-stone-950">
+                        {analogy.topicTitle}
                       </p>
-                      <p className="text-xs text-stone-600">
-                        Status: {analogy.status}
+                      <p className="mt-2 text-xs text-stone-600">
+                        Lecture: {analogy.lectureLabel}
                       </p>
-                      <p className="text-xs text-stone-600">
-                        Review: {(analogy.reviewStatus || "DRAFT").toLowerCase()}
-                      </p>
+                      {analogy.setLabel && (
+                        <p className="text-xs text-stone-600">
+                          {analogy.setLabel}
+                        </p>
+                      )}
                       <p className="text-xs text-stone-500">
                         Created: {new Date(analogy.createdAt).toLocaleDateString()}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 md:flex-col md:items-end">
-                      <span
-                        className={ui.getBadgeClass(analogy.status)}
-                      >
-                        {analogy.status}
-                      </span>
-                      <span
-                        className={ui.getReviewBadgeClass(analogy.reviewStatus || "DRAFT")}
-                      >
-                        {(analogy.reviewStatus || "DRAFT").toLowerCase()}
-                      </span>
+                    <div className="flex flex-wrap items-center gap-2 md:flex-col md:items-end">
+                      <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                        <span className={ui.getBadgeClass(analogy.status)}>
+                          {analogy.status}
+                        </span>
+                        <span className={ui.getReviewBadgeClass(analogy.reviewStatus)}>
+                          {analogy.reviewStatus.toLowerCase()}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                        <Link
+                          href={`/lecturer/analogies/${analogy.analogySetId}/topics/${analogy.topicIndex}`}
+                          className={ui.buttonPrimary}
+                        >
+                          Open analogy
+                        </Link>
+                        <Link
+                          href={`/lecturer/analogies/${analogy.analogySetId}`}
+                          className={ui.buttonSecondary}
+                        >
+                          Open set
+                        </Link>
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}
