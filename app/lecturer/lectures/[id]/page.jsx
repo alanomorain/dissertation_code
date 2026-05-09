@@ -44,7 +44,7 @@ export default async function LecturerLectureDetailPage({ params }) {
             <p className={ui.textSmall}>{lecture.module.code} · {lecture.module.name}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer/lectures" className={ui.buttonSecondary}>All lectures</Link>
+            <Link href="/lecturer/lectures" className={ui.buttonSecondary}>Back to Lectures</Link>
             <Link href={`/lecturer/modules/${encodeURIComponent(lecture.module.code)}`} className={ui.buttonSecondary}>Open module</Link>
           </div>
         </div>
