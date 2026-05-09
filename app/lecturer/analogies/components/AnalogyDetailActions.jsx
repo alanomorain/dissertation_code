@@ -5,35 +5,10 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import * as ui from "../../../styles/ui"
 
-export default function AnalogyDetailActions({ analogyId, returnHref = "/lecturer/lectures", reviewStatus }) {
+export default function AnalogyDetailActions({ analogyId, returnHref = "/lecturer/lectures" }) {
   const router = useRouter()
   const [working, setWorking] = useState("")
   const [message, setMessage] = useState("")
-
-  const approve = async () => {
-    setWorking("approve")
-    setMessage("")
-
-    try {
-      const res = await fetch("/api/generate-analogies", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: analogyId, action: "approve" }),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to approve analogy")
-      }
-
-      setMessage("Analogy approved.")
-      router.refresh()
-    } catch (err) {
-      setMessage(err.message || "Failed to approve analogy")
-    } finally {
-      setWorking("")
-    }
-  }
 
   const remove = async () => {
     const confirmed = window.confirm("Delete this analogy set? This cannot be undone.")
@@ -64,22 +39,9 @@ export default function AnalogyDetailActions({ analogyId, returnHref = "/lecture
         <Link href={returnHref} className={ui.buttonSecondary}>
           Return to Lecture
         </Link>
-        <Link href={`/lecturer/analogies/${analogyId}/edit`} className={ui.buttonSecondary}>
-          Edit
-        </Link>
         <Link href={`/lecturer/analogies/${analogyId}/review`} className={ui.buttonSecondary}>
           Review
         </Link>
-        {reviewStatus !== "APPROVED" && (
-          <button
-            type="button"
-            onClick={approve}
-            disabled={working !== ""}
-            className={`${ui.buttonPrimary} disabled:opacity-60 disabled:cursor-not-allowed`}
-          >
-            {working === "approve" ? "Approving..." : "Approve"}
-          </button>
-        )}
         <button
           type="button"
           onClick={remove}

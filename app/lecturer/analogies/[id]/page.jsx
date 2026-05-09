@@ -39,12 +39,11 @@ export default async function LecturerAnalogyDetailPage({ params }) {
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
-            <h1 className="text-lg font-semibold">Analogy Details</h1>
+            <h1 className="text-lg font-semibold">Analogy Set Details</h1>
           </div>
           <AnalogyDetailActions
             analogyId={analogy.id}
             returnHref={analogy.lecture?.id ? `/lecturer/lectures/${analogy.lecture.id}` : "/lecturer/lectures"}
-            reviewStatus={analogy.reviewStatus || "DRAFT"}
           />
         </div>
       </header>
