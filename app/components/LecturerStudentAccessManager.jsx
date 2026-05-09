@@ -4,12 +4,21 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import * as ui from "../styles/ui"
 
-const STATUS_OPTIONS = ["ACTIVE", "INVITED", "DROPPED"]
+const STATUS_OPTIONS = [
+  { value: "ACTIVE", label: "Active" },
+  { value: "INVITED", label: "Invited" },
+  { value: "DROPPED", label: "Removed" },
+]
 
-function statusClass(status) {
-  if (status === "ACTIVE") return "inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-700"
-  if (status === "INVITED") return "inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700"
-  return "inline-flex rounded-full border border-stone-200 bg-stone-100 px-2 py-1 text-xs text-stone-700"
+function getAggregateStatus(statuses) {
+  if (statuses.every((status) => status === statuses[0])) return statuses[0] || "ACTIVE"
+  if (statuses.includes("ACTIVE")) return "ACTIVE"
+  if (statuses.includes("INVITED")) return "INVITED"
+  return "DROPPED"
+}
+
+function getDisplayName(user) {
+  return String(user?.fullName || "").trim() || "Name not provided"
 }
 
 export default function LecturerStudentAccessManager({ modules, initialModuleCode = "" }) {
@@ -19,6 +28,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
 
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [targetModuleCode, setTargetModuleCode] = useState(
     initialModuleCode && modules.some((module) => module.code === initialModuleCode)
@@ -29,10 +39,30 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
   const [adding, setAdding] = useState(false)
   const [updatingId, setUpdatingId] = useState("")
 
-  const moduleMap = useMemo(
-    () => Object.fromEntries(modules.map((module) => [module.code, module])),
-    [modules],
-  )
+  const studentRows = useMemo(() => {
+    const rowsByUser = new Map()
+
+    for (const enrollment of enrollments) {
+      const key = enrollment.user.id || enrollment.user.email
+      const row = rowsByUser.get(key) || {
+        userId: key,
+        user: enrollment.user,
+        enrollmentIds: [],
+        statuses: [],
+      }
+
+      row.enrollmentIds.push(enrollment.id)
+      row.statuses.push(enrollment.status)
+      rowsByUser.set(key, row)
+    }
+
+    return Array.from(rowsByUser.values())
+      .map((row) => ({
+        ...row,
+        status: getAggregateStatus(row.statuses),
+      }))
+      .sort((a, b) => getDisplayName(a.user).localeCompare(getDisplayName(b.user)))
+  }, [enrollments])
 
   const loadEnrollments = async (selectedModuleCode) => {
     setLoading(true)
@@ -68,6 +98,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+          fullName,
           moduleCode: targetModuleCode,
           status: targetStatus,
         }),
@@ -76,6 +107,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
       if (!res.ok) throw new Error(data.error || "Unable to update enrollment")
 
       setMessage(`Enrollment updated for ${data.enrollment.user.email}`)
+      setFullName("")
       setEmail("")
       await loadEnrollments(moduleCode)
     } catch (err) {
@@ -85,21 +117,22 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
     }
   }
 
-  const onUpdateStatus = async (enrollmentId, status) => {
-    setUpdatingId(enrollmentId)
+  const onUpdateStatus = async (student, status) => {
+    setUpdatingId(student.userId)
     setError("")
     setMessage("")
     try {
       const res = await fetch("/api/lecturer/students", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enrollmentId, status }),
+        body: JSON.stringify({ enrollmentIds: student.enrollmentIds, status }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || "Unable to update access")
 
+      const updatedEnrollmentIds = new Set((data.enrollments || []).map((item) => item.id))
       setEnrollments((prev) =>
-        prev.map((item) => (item.id === enrollmentId ? { ...item, status: data.enrollment.status } : item)),
+        prev.map((item) => (updatedEnrollmentIds.has(item.id) ? { ...item, status } : item)),
       )
       setMessage("Access updated.")
     } catch (err) {
@@ -145,7 +178,16 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-4">
+          <label className="space-y-2 text-sm">
+            <span className="text-stone-700">Full name</span>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
+              className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
+            />
+          </label>
           <label className="space-y-2 text-sm">
             <span className="text-stone-700">Student email</span>
             <input
@@ -179,8 +221,8 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
               className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
             >
               {STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status}
+                <option key={status.value} value={status.value}>
+                  {status.label}
                 </option>
               ))}
             </select>
@@ -199,30 +241,28 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
         <h2 className={ui.cardHeader}>Student access</h2>
         {loading ? (
           <p className={ui.textSmall}>Loading students...</p>
-        ) : enrollments.length === 0 ? (
+        ) : studentRows.length === 0 ? (
           <p className={ui.textSmall}>No students found for the selected module scope.</p>
         ) : (
           <div className="space-y-3">
-            {enrollments.map((enrollment) => (
-              <div key={enrollment.id} className={`${ui.cardList} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
+            {studentRows.map((student) => (
+              <div key={student.userId} className={`${ui.cardList} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
                 <div>
-                  <p className="font-medium text-stone-950">{enrollment.user.email}</p>
+                  <p className="font-medium text-stone-950">{getDisplayName(student.user)}</p>
                   <p className="text-xs text-stone-600">
-                    {enrollment.user.studentNumber || "No student number"} · {enrollment.module.code} ·{" "}
-                    {moduleMap[enrollment.module.code]?.name || enrollment.module.name}
+                    {student.user.email} · {student.user.studentNumber || "No student number"}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={statusClass(enrollment.status)}>{enrollment.status.toLowerCase()}</span>
+                <div>
                   <select
-                    value={enrollment.status}
-                    disabled={updatingId === enrollment.id}
-                    onChange={(event) => onUpdateStatus(enrollment.id, event.target.value)}
+                    value={student.status}
+                    disabled={updatingId === student.userId}
+                    onChange={(event) => onUpdateStatus(student, event.target.value)}
                     className="rounded-lg border border-stone-300 bg-white px-2 py-1 text-xs outline-none focus:border-teal-500"
                   >
                     {STATUS_OPTIONS.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                      <option key={status.value} value={status.value}>
+                        {status.label}
                       </option>
                     ))}
                   </select>

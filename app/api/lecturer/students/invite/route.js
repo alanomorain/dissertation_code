@@ -31,6 +31,7 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}))
+    const fullName = typeof body.fullName === "string" ? body.fullName.trim() : ""
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""
     const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim() : ""
@@ -40,6 +41,9 @@ export async function POST(req) {
     }
     if (!EMAIL_REGEX.test(email)) {
       return Response.json({ error: "Invalid email format" }, { status: 400 })
+    }
+    if (fullName.length > 120) {
+      return Response.json({ error: "Full name is too long" }, { status: 400 })
     }
     if (studentNumber.length > 40) {
       return Response.json({ error: "Student number is too long" }, { status: 400 })
@@ -66,7 +70,7 @@ export async function POST(req) {
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, role: true, studentNumber: true },
+      select: { id: true, role: true, fullName: true, studentNumber: true },
     })
 
     if (existingUser && existingUser.role !== "STUDENT") {
@@ -82,6 +86,7 @@ export async function POST(req) {
           data: {
             inviteToken,
             inviteExpires,
+            fullName: fullName || existingUser.fullName || null,
             studentNumber: studentNumber || existingUser.studentNumber || null,
           },
           select: { id: true, email: true },
@@ -89,6 +94,7 @@ export async function POST(req) {
       : await prisma.user.create({
           data: {
             email,
+            fullName: fullName || null,
             role: "STUDENT",
             studentNumber: studentNumber || null,
             inviteToken,

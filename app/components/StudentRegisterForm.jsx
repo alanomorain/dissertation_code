@@ -7,6 +7,7 @@ import * as ui from "../styles/ui"
 
 export default function StudentRegisterForm() {
   const router = useRouter()
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [studentNumber, setStudentNumber] = useState("")
   const [password, setPassword] = useState("")
@@ -34,6 +35,7 @@ export default function StudentRegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fullName,
           email,
           studentNumber,
           password,
@@ -62,6 +64,16 @@ export default function StudentRegisterForm() {
           Create your student account to sign in directly without seeded demo credentials.
         </p>
       </div>
+
+      <label className="block space-y-2 text-sm">
+        <span className="text-stone-700">Full name</span>
+        <input
+          type="text"
+          value={fullName}
+          onChange={(event) => setFullName(event.target.value)}
+          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
+        />
+      </label>
 
       <label className="block space-y-2 text-sm">
         <span className="text-stone-700">Email</span>

@@ -151,19 +151,19 @@ async function main() {
   })
 
   const studentA = await prisma.user.create({
-    data: { email: 's@example.com', studentNumber: 'S1234567', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
+    data: { fullName: 'Sam Taylor', email: 's@example.com', studentNumber: 'S1234567', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentB = await prisma.user.create({
-    data: { email: 'student2@example.com', studentNumber: 'S1234568', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
+    data: { fullName: 'Aisha Morgan', email: 'student2@example.com', studentNumber: 'S1234568', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentC = await prisma.user.create({
-    data: { email: 'student3@example.com', studentNumber: 'S1234569', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
+    data: { fullName: 'Daniel Hughes', email: 'student3@example.com', studentNumber: 'S1234569', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const studentD = await prisma.user.create({
-    data: { email: 'student4@example.com', studentNumber: 'S1234570', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
+    data: { fullName: 'Niamh O Connor', email: 'student4@example.com', studentNumber: 'S1234570', role: 'STUDENT', passwordHash: hashPassword(studentPassword) },
   })
 
   const moduleCsc7058 = await prisma.module.create({

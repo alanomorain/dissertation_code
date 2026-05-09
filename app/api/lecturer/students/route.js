@@ -40,7 +40,7 @@ export async function GET(req) {
         status: true,
         createdAt: true,
         module: { select: { id: true, code: true, name: true } },
-        user: { select: { id: true, email: true, studentNumber: true } },
+        user: { select: { id: true, fullName: true, email: true, studentNumber: true } },
       },
       orderBy: [{ module: { code: "asc" } }, { createdAt: "desc" }],
     })
@@ -74,6 +74,7 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}))
+    const fullName = typeof body.fullName === "string" ? body.fullName.trim() : ""
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const moduleCode = typeof body.moduleCode === "string" ? body.moduleCode.trim().toUpperCase() : ""
     const requestedStatus = typeof body.status === "string" ? body.status.toUpperCase() : "ACTIVE"
@@ -84,6 +85,9 @@ export async function POST(req) {
     }
     if (!EMAIL_REGEX.test(email)) {
       return Response.json({ error: "Invalid email format" }, { status: 400 })
+    }
+    if (fullName.length > 120) {
+      return Response.json({ error: "Full name is too long" }, { status: 400 })
     }
 
     const moduleRecord = await prisma.module.findFirst({
@@ -120,9 +124,17 @@ export async function POST(req) {
         status: true,
         createdAt: true,
         module: { select: { code: true, name: true } },
-        user: { select: { email: true, studentNumber: true } },
+        user: { select: { fullName: true, email: true, studentNumber: true } },
       },
     })
+
+    if (fullName) {
+      await prisma.user.update({
+        where: { id: student.id },
+        data: { fullName },
+      })
+      enrollment.user.fullName = fullName
+    }
 
     return Response.json({ ok: true, enrollment }, { status: 200 })
   } catch (error) {
@@ -154,30 +166,36 @@ export async function PATCH(req) {
 
     const body = await req.json().catch(() => ({}))
     const enrollmentId = typeof body.enrollmentId === "string" ? body.enrollmentId.trim() : ""
+    const enrollmentIds = Array.isArray(body.enrollmentIds)
+      ? body.enrollmentIds.filter((id) => typeof id === "string" && id.trim()).map((id) => id.trim())
+      : []
     const requestedStatus = typeof body.status === "string" ? body.status.toUpperCase() : ""
+    const targetEnrollmentIds = enrollmentIds.length > 0 ? enrollmentIds : (enrollmentId ? [enrollmentId] : [])
 
-    if (!enrollmentId || !VALID_STATUS.has(requestedStatus)) {
-      return Response.json({ error: "Valid enrollmentId and status are required" }, { status: 400 })
+    if (targetEnrollmentIds.length === 0 || !VALID_STATUS.has(requestedStatus)) {
+      return Response.json({ error: "Valid enrollment id and status are required" }, { status: 400 })
     }
 
-    const enrollment = await prisma.moduleEnrollment.findFirst({
+    const enrollments = await prisma.moduleEnrollment.findMany({
       where: {
-        id: enrollmentId,
+        id: { in: targetEnrollmentIds },
         module: { lecturerId: lecturer.id },
       },
       select: { id: true },
     })
-    if (!enrollment) {
+    if (enrollments.length !== targetEnrollmentIds.length) {
       return Response.json({ error: "Enrollment not found" }, { status: 404 })
     }
 
-    const updated = await prisma.moduleEnrollment.update({
-      where: { id: enrollmentId },
+    await prisma.moduleEnrollment.updateMany({
+      where: { id: { in: targetEnrollmentIds } },
       data: { status: requestedStatus },
-      select: { id: true, status: true },
     })
 
-    return Response.json({ ok: true, enrollment: updated }, { status: 200 })
+    return Response.json({
+      ok: true,
+      enrollments: targetEnrollmentIds.map((id) => ({ id, status: requestedStatus })),
+    }, { status: 200 })
   } catch (error) {
     console.error("Error in PATCH /api/lecturer/students:", error)
     return Response.json({ error: "Unable to update access" }, { status: 500 })

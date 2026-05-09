@@ -14,6 +14,7 @@ export async function POST(req) {
     }
 
     const body = await req.json().catch(() => ({}))
+    const fullName = typeof body.fullName === "string" ? body.fullName.trim() : ""
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : ""
     const studentNumber = typeof body.studentNumber === "string" ? body.studentNumber.trim() : ""
     const password = typeof body.password === "string" ? body.password : ""
@@ -33,6 +34,9 @@ export async function POST(req) {
     }
     if (!EMAIL_REGEX.test(email)) {
       return Response.json({ error: "Invalid email format" }, { status: 400 })
+    }
+    if (fullName.length > 120) {
+      return Response.json({ error: "Full name is too long" }, { status: 400 })
     }
 
     if (password.length < 8) {
@@ -65,6 +69,7 @@ export async function POST(req) {
     const passwordHash = await hashPassword(password)
     await prisma.user.create({
       data: {
+        fullName: fullName || null,
         email,
         studentNumber: studentNumber || null,
         passwordHash,

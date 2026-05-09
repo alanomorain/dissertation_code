@@ -4,6 +4,7 @@ import { useState } from "react"
 import * as ui from "../styles/ui"
 
 export default function LecturerInviteStudentForm({ modules, initialModuleCode }) {
+  const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [studentNumber, setStudentNumber] = useState("")
   const [moduleCode, setModuleCode] = useState(
@@ -25,7 +26,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
       const res = await fetch("/api/lecturer/students/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, studentNumber, moduleCode }),
+        body: JSON.stringify({ fullName, email, studentNumber, moduleCode }),
       })
 
       const data = await res.json().catch(() => ({}))
@@ -34,6 +35,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
       }
 
       setResult(data)
+      setFullName("")
       setEmail("")
       setStudentNumber("")
       setSubmitting(false)
@@ -63,6 +65,16 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
             Invite a student to a module. They will receive an activation link.
           </p>
         </div>
+
+        <label className="block space-y-2 text-sm">
+          <span className="text-stone-700">Full name</span>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
+            className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
+          />
+        </label>
 
         <label className="block space-y-2 text-sm">
           <span className="text-stone-700">Student email</span>
