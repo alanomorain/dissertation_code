@@ -13,7 +13,7 @@ function statusClass(status) {
 }
 
 export default function LecturerStudentAccessManager({ modules, initialModuleCode = "" }) {
-  const [moduleCode, setModuleCode] = useState(initialModuleCode || "")
+  const moduleCode = initialModuleCode || ""
   const [enrollments, setEnrollments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -120,30 +120,19 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
   return (
     <div className="space-y-4">
       <div className={ui.cardFull}>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="space-y-1">
-            <p className={ui.textLabel}>Filter by module</p>
-            <select
-              value={moduleCode}
-              onChange={(event) => setModuleCode(event.target.value)}
-              className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500"
-            >
-              <option value="">All modules</option>
-              {modules.map((module) => (
-                <option key={module.id} value={module.code}>
-                  {module.code} · {module.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <Link href="/lecturer/students" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>
+            All modules
+          </Link>
+          {modules.map((module) => (
             <Link
-              href={moduleCode ? `/lecturer/students/invite?module=${encodeURIComponent(moduleCode)}` : "/lecturer/students/invite"}
-              className={ui.buttonSecondary}
+              key={module.id}
+              href={`/lecturer/students?module=${encodeURIComponent(module.code)}`}
+              className={moduleCode === module.code ? ui.buttonPrimary : ui.buttonSecondary}
             >
-              Invite new student
+              {module.code}
             </Link>
-          </div>
+          ))}
         </div>
       </div>
 

@@ -93,17 +93,24 @@ export default async function LecturerQuizzesPage({ searchParams }) {
   const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
   const nowTs = new Date().getTime()
-  const quizzes = await prisma.quiz.findMany({
-    where: {
-      ownerId: lecturerUser.id,
-      ...(moduleCodeFilter ? { module: { code: moduleCodeFilter } } : {}),
-    },
-    include: {
-      module: { select: { code: true, name: true } },
-      _count: { select: { questions: true, attempts: true } },
-    },
-    orderBy: [{ module: { code: "asc" } }, { createdAt: "desc" }],
-  })
+  const [modules, quizzes] = await Promise.all([
+    prisma.module.findMany({
+      where: { lecturerId: lecturerUser.id },
+      select: { id: true, code: true, name: true },
+      orderBy: { code: "asc" },
+    }),
+    prisma.quiz.findMany({
+      where: {
+        ownerId: lecturerUser.id,
+        ...(moduleCodeFilter ? { module: { code: moduleCodeFilter } } : {}),
+      },
+      include: {
+        module: { select: { code: true, name: true } },
+        _count: { select: { questions: true, attempts: true } },
+      },
+      orderBy: [{ module: { code: "asc" } }, { createdAt: "desc" }],
+    }),
+  ])
 
   const drafts = quizzes.filter((quiz) => timingStatus(quiz, nowTs) === "DRAFT")
   const scheduled = quizzes.filter((quiz) => timingStatus(quiz, nowTs) === "SCHEDULED")
@@ -140,6 +147,23 @@ export default async function LecturerQuizzesPage({ searchParams }) {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className={ui.cardFull}>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Link href="/lecturer/quizzes" className={!moduleCodeFilter ? ui.buttonPrimary : ui.buttonSecondary}>
+                All modules
+              </Link>
+              {modules.map((module) => (
+                <Link
+                  key={module.id}
+                  href={`/lecturer/quizzes?module=${encodeURIComponent(module.code)}`}
+                  className={moduleCodeFilter === module.code ? ui.buttonPrimary : ui.buttonSecondary}
+                >
+                  {module.code}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <div className="mx-auto grid w-full max-w-[1260px] gap-6 lg:grid-cols-[minmax(0,860px)_minmax(260px,320px)] lg:justify-center">
             <div className="space-y-6">
               {moduleGroups.length === 0 ? (
