@@ -27,7 +27,7 @@ export default async function LecturerLectureDetailPage({ params }) {
           createdAt: true,
           topicsJson: true,
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
       },
     },
   })
