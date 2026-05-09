@@ -45,11 +45,11 @@ export default async function LecturerLecturesPage({ searchParams }) {
         <div className={ui.headerContent}>
           <div>
             <p className={ui.textLabel}>Lecturer · Lectures</p>
-            <h1 className="text-lg font-semibold">Lecture library</h1>
+            <h1 className="text-lg font-semibold">Lecture Dashboard</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
-            <Link href="/lecturer/analogies/upload-slides" className={ui.buttonPrimary}>Upload lecture slides</Link>
+            <Link href="/lecturer" className={ui.buttonSecondary}>Lecturer Dashboard</Link>
+            <Link href="/lecturer/analogies/upload-slides" className={ui.buttonPrimary}>+ New Lecture</Link>
           </div>
         </div>
       </header>

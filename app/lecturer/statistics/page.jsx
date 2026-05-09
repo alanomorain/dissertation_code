@@ -248,11 +248,11 @@ export default async function LecturerStatisticsPage({ searchParams }) {
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
-            <h1 className="text-lg font-semibold">Lecturer statistics</h1>
-            <p className={ui.textSmall}>Module-first analytics with participation, outcomes, and engagement.</p>
+            <p className={ui.textLabel}>Lecturer · Statistics</p>
+            <h1 className="text-lg font-semibold">Stats Dashboard</h1>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
+          <div className="flex items-center gap-3 text-sm">
+            <Link href="/lecturer" className={ui.buttonSecondary}>Lecturer Dashboard</Link>
           </div>
         </div>
       </header>

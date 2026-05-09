@@ -29,11 +29,11 @@ export default async function LecturerModulesPage() {
         <div className={ui.headerContent}>
           <div>
             <p className={ui.textLabel}>Lecturer · Modules</p>
-            <h1 className="text-lg font-semibold">Module management</h1>
+            <h1 className="text-lg font-semibold">Module Dashboard</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
-            <Link href="/lecturer/modules/create" className={ui.buttonPrimary}>+ Create module</Link>
+            <Link href="/lecturer" className={ui.buttonSecondary}>Lecturer Dashboard</Link>
+            <Link href="/lecturer/modules/create" className={ui.buttonPrimary}>+ New Module</Link>
           </div>
         </div>
       </header>

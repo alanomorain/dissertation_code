@@ -26,11 +26,11 @@ export default async function LecturerStudentsPage({ searchParams }) {
         <div className={ui.headerContent}>
           <div>
             <p className={ui.textLabel}>Lecturer · Students</p>
-            <h1 className="text-lg font-semibold">Manage student access</h1>
+            <h1 className="text-lg font-semibold">Student Management</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
-            <Link href="/lecturer/students/invite" className={ui.buttonSecondary}>Invite student</Link>
+            <Link href="/lecturer" className={ui.buttonSecondary}>Lecturer Dashboard</Link>
+            <Link href="/lecturer/students/invite" className={ui.buttonPrimary}>Invite Students</Link>
           </div>
         </div>
       </header>

@@ -124,15 +124,15 @@ export default async function LecturerQuizzesPage({ searchParams }) {
       <header className={ui.header}>
         <div className={ui.headerContent}>
           <div>
-            <h1 className="text-lg font-semibold">Quizzes</h1>
-            <p className={ui.textSmall}>Organised by module with draft, scheduled, active, and past views.</p>
+            <p className={ui.textLabel}>Lecturer · Quizzes</p>
+            <h1 className="text-lg font-semibold">Quiz Dashboard</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/lecturer" className={ui.buttonSecondary}>
-              Back to dashboard
+              Lecturer Dashboard
             </Link>
             <Link href="/lecturer/quizzes/new" className={ui.buttonPrimary}>
-              + New quiz
+              + New Quiz
             </Link>
           </div>
         </div>

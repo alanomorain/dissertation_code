@@ -85,29 +85,21 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
         <div className={ui.headerContent}>
           <div>
             <p className={ui.textLabel}>Lecturer · Analogies</p>
-            <h1 className="text-lg font-semibold">
-              Manage Analogies
-            </h1>
+            <h1 className="text-lg font-semibold">Analogy Dashboard</h1>
           </div>
 
           <div className="flex items-center gap-3 text-sm">
-            <span className="hidden sm:inline text-stone-700">
-              <span className="font-medium">
-                {lecturerUser.email}
-              </span>{" "}
-              signed in as a Lecturer
-            </span>
             <Link
               href="/lecturer"
               className={ui.buttonSecondary}
             >
-              Back to dashboard
+              Lecturer Dashboard
             </Link>
             <Link
               href="/lecturer/lectures"
-              className={ui.buttonSecondary}
+              className={ui.buttonPrimary}
             >
-              Lecture Dashboard
+              Return to Lectures
             </Link>
           </div>
         </div>
