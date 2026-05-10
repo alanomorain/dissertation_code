@@ -3,27 +3,51 @@ import { redirect } from "next/navigation"
 import SignOutButton from "../components/SignOutButton"
 import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
+import {
+  createStudentAttemptStats,
+  getStudentQuizProgressState,
+} from "../lib/quizState"
 import * as ui from "../styles/ui"
 
 const formatDate = (value) => new Date(value).toLocaleDateString()
+const formatDateTime = (value) => new Date(value).toLocaleString()
 
-function QuickStatBar({ label, value, description, barClass }) {
-  const clampedValue = Math.max(0, Math.min(100, value))
+function badgeTextForState(state) {
+  if (state === "UPCOMING") return "Upcoming"
+  if (state === "CLOSED") return "Closed"
+  if (state === "COMPLETED") return "Completed"
+  if (state === "IN_PROGRESS") return "In progress"
+  return "Available"
+}
+
+function QuizLink({ quiz }) {
+  const disabled = quiz.state === "UPCOMING" || quiz.state === "CLOSED"
+  const content = (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="font-semibold text-stone-950">{quiz.title}</p>
+        <p className="text-xs text-stone-600">
+          {quiz.moduleCode} · Due {quiz.dueText}
+        </p>
+        <p className="text-xs text-stone-500">
+          Attempts {quiz.submittedAttempts}/{quiz.maxAttempts}
+          {quiz.bestScore === null ? "" : ` · Best score ${quiz.bestScore}%`}
+        </p>
+      </div>
+      <span className={quiz.state === "CLOSED" ? ui.badgeFailed : quiz.state === "UPCOMING" ? ui.badgeProcessing : quiz.state === "COMPLETED" ? ui.badgeApproved : ui.badgeReady}>
+        {quiz.badgeText}
+      </span>
+    </div>
+  )
+
+  if (disabled) {
+    return <div className={ui.cardList}>{content}</div>
+  }
 
   return (
-    <div className="rounded-xl border border-stone-200 bg-white px-3 py-2">
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <p className="text-stone-700">{label}</p>
-        <p className="font-semibold text-stone-950">{clampedValue}%</p>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-        <div
-          className={`h-full rounded-full transition-all ${barClass}`}
-          style={{ width: `${clampedValue}%` }}
-        />
-      </div>
-      <p className="mt-2 text-xs text-stone-600">{description}</p>
-    </div>
+    <Link href={`/student/quizzes/${quiz.id}/start`} className={`${ui.cardList} block transition hover:border-teal-500`}>
+      {content}
+    </Link>
   )
 }
 
@@ -47,7 +71,6 @@ export default async function StudentDashboard() {
   let quizAttempts = []
   let publishedQuizCount = 0
   let completedQuizCount = 0
-  let completionRate = 0
   let averageScore = 0
   let upcomingQuizzes = []
   let lectureCount = 0
@@ -76,7 +99,7 @@ export default async function StudentDashboard() {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { module: { code: "asc" } },
     })
 
     const moduleIds = activeEnrollments.map((enrollment) => enrollment.moduleId)
@@ -88,7 +111,10 @@ export default async function StudentDashboard() {
             reviewStatus: "APPROVED",
             moduleId: { in: moduleIds },
           },
-          include: { module: { select: { code: true, name: true } } },
+          include: {
+            module: { select: { code: true, name: true } },
+            lecture: { select: { title: true } },
+          },
           orderBy: { createdAt: "desc" },
           take: 4,
         })
@@ -111,7 +137,6 @@ export default async function StudentDashboard() {
     quizAttempts = await prisma.quizAttempt.findMany({
       where: {
         studentId: studentUser.id,
-        status: "SUBMITTED",
         quiz: {
           status: "PUBLISHED",
           module: {
@@ -121,11 +146,12 @@ export default async function StudentDashboard() {
           },
         },
       },
-      select: { score: true, quizId: true },
+      select: { score: true, quizId: true, status: true },
     })
 
-    averageScore = quizAttempts.length
-      ? Math.round(quizAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / quizAttempts.length)
+    const submittedAttempts = quizAttempts.filter((attempt) => attempt.status === "SUBMITTED")
+    averageScore = submittedAttempts.length
+      ? Math.round(submittedAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / submittedAttempts.length)
       : 0
 
     publishedQuizCount = await prisma.quiz.count({
@@ -139,27 +165,49 @@ export default async function StudentDashboard() {
       },
     })
 
-    completedQuizCount = new Set(quizAttempts.map((attempt) => attempt.quizId)).size
-    completionRate = publishedQuizCount ? Math.round((completedQuizCount / publishedQuizCount) * 100) : 0
+    completedQuizCount = new Set(submittedAttempts.map((attempt) => attempt.quizId)).size
 
-    upcomingQuizzes = await prisma.quiz.findMany({
-      where: {
-        status: "PUBLISHED",
-        module: {
-          enrollments: {
-            some: { userId: studentUser.id, status: "ACTIVE" },
+    const dashboardQuizzes = moduleIds.length
+      ? await prisma.quiz.findMany({
+          where: {
+            status: "PUBLISHED",
+            moduleId: { in: moduleIds },
+            module: {
+              enrollments: {
+                some: { userId: studentUser.id, status: "ACTIVE" },
+              },
+            },
           },
-        },
-      },
-      select: {
-        id: true,
-        title: true,
-        dueAt: true,
-        module: { select: { code: true } },
-      },
-      orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
-      take: 4,
-    })
+          include: { module: { select: { code: true, name: true } } },
+          orderBy: [{ module: { code: "asc" } }, { dueAt: "asc" }, { createdAt: "desc" }],
+        })
+      : []
+
+    const nowTs = new Date().getTime()
+    const attemptStatsByQuiz = createStudentAttemptStats(quizAttempts)
+    upcomingQuizzes = dashboardQuizzes
+      .map((quiz) => {
+        const stats = attemptStatsByQuiz[quiz.id] || { submittedCount: 0, inProgressCount: 0, bestScore: null }
+        const state = getStudentQuizProgressState(quiz, stats, nowTs)
+        return {
+          id: quiz.id,
+          title: quiz.title,
+          state,
+          moduleCode: quiz.module.code,
+          moduleName: quiz.module.name,
+          submittedAttempts: stats.submittedCount,
+          maxAttempts: quiz.maxAttempts,
+          bestScore: stats.bestScore,
+          badgeText: badgeTextForState(state),
+          releaseText: quiz.publishedAt ? formatDateTime(quiz.publishedAt) : "Available now",
+          dueText: quiz.dueAt ? formatDate(quiz.dueAt) : "No due date",
+          dueAtTs: quiz.dueAt ? new Date(quiz.dueAt).getTime() : Number.MAX_SAFE_INTEGER,
+          releaseAtTs: quiz.publishedAt ? new Date(quiz.publishedAt).getTime() : 0,
+        }
+      })
+      .filter((quiz) => quiz.state === "TO_DO" || quiz.state === "IN_PROGRESS" || quiz.state === "UPCOMING")
+      .sort((a, b) => a.dueAtTs - b.dueAtTs)
+      .slice(0, 5)
   } catch (error) {
     if (!isDatabaseUnavailableError(error)) {
       throw error
@@ -221,7 +269,7 @@ export default async function StudentDashboard() {
       </header>
 
       <section className={ui.pageSection}>
-        <div className={`${ui.container} py-6 space-y-5`}>
+        <div className={`${ui.container} py-6 space-y-6`}>
           {databaseUnavailable ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
               Database is unavailable in this environment. Showing a safe preview state so UI screenshots can still be captured.
@@ -278,82 +326,31 @@ export default async function StudentDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] gap-6">
-            <div id="modules" className={`${ui.cardFull} relative`}>
-              <Link
-                href="/student/modules"
-                className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
-                aria-label="View enrolled modules"
-              />
-              <div className="relative z-10 pointer-events-none">
-                <div className="mb-4">
-                  <h3 className={ui.cardHeader}>Your active modules</h3>
-                </div>
-                {activeEnrollments.length === 0 ? (
-                  <p className={ui.textSmall}>No active module enrollments yet.</p>
-                ) : (
-                  <div className="space-y-3 text-sm">
-                    {activeEnrollments.map((enrollment) => (
-                      <Link
-                        key={enrollment.id}
-                        href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`}
-                        className={`${ui.linkCard} pointer-events-auto`}
-                      >
-                        <p className="font-medium text-stone-950">{enrollment.module.code} · {enrollment.module.name}</p>
-                        <p className="text-xs text-stone-600">
-                          {enrollment.module._count.lectures} lectures · {enrollment.module._count.quizzes} quizzes
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className={ui.cardFull}>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
+                <Link href="/student/quizzes" className={ui.buttonSecondary}>View all quizzes</Link>
+              </div>
+              <div className="space-y-3 text-sm">
+                {upcomingQuizzes.map((quiz) => <QuizLink key={quiz.id} quiz={quiz} />)}
+                {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No upcoming quizzes right now.</p> : null}
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className={ui.cardFull}>
-                <div className="mb-3">
-                  <h3 className={ui.cardHeader}>Progress snapshot</h3>
-                </div>
-                <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
-                  <div className={ui.cardInner}>
-                    <p className={ui.textLabel}>Completed</p>
-                    <p className="mt-1 text-lg font-semibold">{completedQuizCount}</p>
-                  </div>
-                  <div className={ui.cardInner}>
-                    <p className={ui.textLabel}>Analogies</p>
-                    <p className="mt-1 text-lg font-semibold">{recentAnalogies.length}</p>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <QuickStatBar
-                    label="Quiz completion"
-                    value={completionRate}
-                    description={publishedQuizCount ? `${completedQuizCount} of ${publishedQuizCount} quizzes completed` : "No published quizzes yet"}
-                    barClass="bg-emerald-500"
-                  />
-                  <QuickStatBar
-                    label="Average quiz score"
-                    value={averageScore}
-                    description={quizAttempts.length ? `Based on ${quizAttempts.length} submitted attempts` : "No submitted attempts yet"}
-                    barClass="bg-teal-600"
-                  />
-                </div>
+            <div className={ui.cardFull}>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 className={ui.cardHeader}>Recent analogies</h3>
+                <Link href="/student/analogies" className={ui.buttonSecondary}>View all analogies</Link>
               </div>
-
-              <div className={ui.cardFull}>
-                <div className="mb-3">
-                  <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
-                </div>
-                <div className="space-y-2 text-sm">
-                  {upcomingQuizzes.map((quiz) => (
-                    <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
-                      <p className="font-medium">{quiz.title}</p>
-                      <p className="text-xs text-stone-600">{quiz.module.code} · Due {quiz.dueAt ? formatDate(quiz.dueAt) : "Any time"}</p>
-                    </Link>
-                  ))}
-                  {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No published quizzes available right now.</p> : null}
-                </div>
+              <div className="space-y-2 text-sm">
+                {recentAnalogies.map((analogy) => (
+                  <Link key={analogy.id} href={`/student/analogies/${analogy.id}`} className={ui.linkCard}>
+                    <p className="font-medium">{analogy.title || analogy.lecture?.title || "Analogy set"}</p>
+                    <p className="text-xs text-stone-600">{analogy.module?.code || "Module"}</p>
+                  </Link>
+                ))}
+                {recentAnalogies.length === 0 ? <p className={ui.textSmall}>No approved analogies available yet.</p> : null}
               </div>
             </div>
           </div>
