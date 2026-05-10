@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import SignOutButton from "../../../components/SignOutButton"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import * as ui from "../../../styles/ui"
+import StudentPageHeader from "../../components/StudentPageHeader"
 
 export default async function StudentLectureDetailPage({ params }) {
   const student = await getCurrentUser("STUDENT", { id: true, email: true })
@@ -42,25 +42,28 @@ export default async function StudentLectureDetailPage({ params }) {
   })
 
   if (!lecture) redirect("/student/lectures")
+  const nextQuiz = lecture.quizzes[0] || null
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Lecture</p>
-            <h1 className="text-lg font-semibold">{lecture.title}</h1>
-            <p className={ui.textSmall}>{lecture.module.code} · {lecture.module.name}</p>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <SignOutButton />
-            <Link href="/student/lectures" className={ui.buttonSecondary}>All lectures</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Lecture"
+        title={lecture.title}
+        subtitle={`${lecture.module.code} · ${lecture.module.name}`}
+        actions={<Link href="/student/lectures" className={ui.buttonSecondary}>All lectures</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="grid gap-4 md:grid-cols-3 text-sm">
+            <div className={ui.cardFull}><p className={ui.textLabel}>Module</p><p className="mt-2 text-2xl font-semibold">{lecture.module.code}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Published quizzes</p><p className="mt-2 text-2xl font-semibold">{lecture.quizzes.length}</p></div>
+            <div className={ui.cardFull}>
+              <p className={ui.textLabel}>Next due</p>
+              <p className="mt-2 text-2xl font-semibold">{nextQuiz?.dueAt ? new Date(nextQuiz.dueAt).toLocaleDateString() : "Any time"}</p>
+            </div>
+          </div>
+
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Published quizzes for this lecture</h2>
             {lecture.quizzes.length === 0 ? (
@@ -68,11 +71,16 @@ export default async function StudentLectureDetailPage({ params }) {
             ) : (
               <div className="space-y-2 text-sm">
                 {lecture.quizzes.map((quiz) => (
-                  <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={ui.linkCard}>
-                    <p className="font-medium">{quiz.title || "Untitled"}</p>
-                    <p className="text-xs text-stone-600">
-                      Max attempts: {quiz.maxAttempts} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}
-                    </p>
+                  <Link key={quiz.id} href={`/student/quizzes/${quiz.id}/start`} className={`${ui.cardList} block hover:border-teal-500 transition`}>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-stone-950">{quiz.title || "Untitled"}</p>
+                        <p className="text-xs text-stone-600">
+                          Max attempts: {quiz.maxAttempts} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}
+                        </p>
+                      </div>
+                      <span className={ui.buttonSmall}>Open quiz</span>
+                    </div>
                   </Link>
                 ))}
               </div>

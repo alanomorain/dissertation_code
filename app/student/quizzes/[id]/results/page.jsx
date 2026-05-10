@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
 import * as ui from "../../../../styles/ui"
+import StudentPageHeader from "../../../components/StudentPageHeader"
 
 function getTopicPayload(question) {
   const topicIndex = Number(question?.analogyTopicIndex)
@@ -77,20 +78,25 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Results</p>
-            <h1 className="text-lg font-semibold">Your results</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Results"
+        title="Your results"
+        subtitle={attempt.quiz.title}
+        actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="grid gap-4 md:grid-cols-4 text-sm">
+            <div className={ui.cardFull}><p className={ui.textLabel}>Score</p><p className="mt-2 text-2xl font-semibold">{scoreFromResponses}%</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Auto-graded</p><p className="mt-2 text-2xl font-semibold">{correct}/{gradedResponses.length}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Questions</p><p className="mt-2 text-2xl font-semibold">{orderedResponses.length}</p></div>
+            <div className={ui.cardFull}>
+              <p className={ui.textLabel}>Submitted</p>
+              <p className="mt-2 text-2xl font-semibold">{attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleDateString() : "N/A"}</p>
+            </div>
+          </div>
+
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">

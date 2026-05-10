@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import {
@@ -8,6 +7,7 @@ import {
   getStudentQuizProgressState,
 } from "../../lib/quizState"
 import * as ui from "../../styles/ui"
+import StudentPageHeader from "../components/StudentPageHeader"
 import StudentModuleQuizCard from "./components/StudentModuleQuizCard"
 
 function badgeForState(state, quiz, nowTs) {
@@ -27,19 +27,30 @@ export default async function StudentQuizzesPage({ searchParams }) {
   const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
   const nowTs = new Date().getTime()
-  const quizzes = await prisma.quiz.findMany({
-    where: {
-      status: "PUBLISHED",
-      module: {
+  const [modules, quizzes] = await Promise.all([
+    prisma.module.findMany({
+      where: {
         enrollments: {
-            some: { userId: studentUser.id, status: "ACTIVE" },
-          },
-          ...(moduleCodeFilter ? { code: moduleCodeFilter } : {}),
+          some: { userId: studentUser.id, status: "ACTIVE" },
         },
       },
-    include: { module: { select: { code: true, name: true } } },
-    orderBy: [{ module: { code: "asc" } }, { dueAt: "asc" }, { createdAt: "desc" }],
-  })
+      select: { id: true, code: true, name: true },
+      orderBy: { code: "asc" },
+    }),
+    prisma.quiz.findMany({
+      where: {
+        status: "PUBLISHED",
+        module: {
+          enrollments: {
+              some: { userId: studentUser.id, status: "ACTIVE" },
+            },
+            ...(moduleCodeFilter ? { code: moduleCodeFilter } : {}),
+          },
+        },
+      include: { module: { select: { code: true, name: true } } },
+      orderBy: [{ module: { code: "asc" } }, { dueAt: "asc" }, { createdAt: "desc" }],
+    }),
+  ])
 
   const attempts = await prisma.quizAttempt.findMany({
     where: { studentId: studentUser.id },
@@ -109,21 +120,32 @@ export default async function StudentQuizzesPage({ searchParams }) {
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Quizzes</p>
-            <h1 className="text-lg font-semibold">Quiz library</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <SignOutButton />
-            <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Quizzes"
+        title="Quiz Dashboard"
+        subtitle="Track upcoming, active, completed, and closed quizzes."
+        actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
+      />
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className={ui.cardFull}>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Link href="/student/quizzes" className={!moduleCodeFilter ? ui.buttonPrimary : ui.buttonSecondary}>
+                All modules
+              </Link>
+              {modules.map((module) => (
+                <Link
+                  key={module.id}
+                  href={`/student/quizzes?module=${encodeURIComponent(module.code)}`}
+                  className={moduleCodeFilter === module.code ? ui.buttonPrimary : ui.buttonSecondary}
+                >
+                  {module.code}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <div className="mx-auto grid w-full max-w-[1260px] gap-4 sm:grid-cols-2 lg:grid-cols-5">
             <div className={`${ui.card} p-4`}>
               <p className={ui.textLabel}>To do</p>

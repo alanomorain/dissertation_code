@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
+import StudentPageHeader from "../components/StudentPageHeader"
 
 export default async function StudentModulesPage() {
   const student = await getCurrentUser("STUDENT", { id: true, email: true })
@@ -27,23 +27,28 @@ export default async function StudentModulesPage() {
     orderBy: { createdAt: "desc" },
   })
 
+  const totalLectures = enrollments.reduce((total, enrollment) => total + enrollment.module._count.lectures, 0)
+  const totalQuizzes = enrollments.reduce((total, enrollment) => total + enrollment.module._count.quizzes, 0)
+  const totalAnalogies = enrollments.reduce((total, enrollment) => total + enrollment.module._count.analogySets, 0)
+
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Modules</p>
-            <h1 className="text-lg font-semibold">Your enrolled modules</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <SignOutButton />
-            <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Modules"
+        title="Module Dashboard"
+        subtitle="Your enrolled modules and available learning activity."
+        actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="grid gap-4 md:grid-cols-4 text-sm">
+            <div className={ui.cardFull}><p className={ui.textLabel}>Modules</p><p className="mt-2 text-2xl font-semibold">{enrollments.length}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{totalLectures}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Quizzes</p><p className="mt-2 text-2xl font-semibold">{totalQuizzes}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Analogies</p><p className="mt-2 text-2xl font-semibold">{totalAnalogies}</p></div>
+          </div>
+
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Modules</h2>
             {enrollments.length === 0 ? (
@@ -51,14 +56,16 @@ export default async function StudentModulesPage() {
             ) : (
               <div className="space-y-3 text-sm">
                 {enrollments.map((enrollment) => (
-                  <div key={enrollment.id} className={ui.cardList}>
-                    <p className="font-semibold text-stone-950">{enrollment.module.code} · {enrollment.module.name}</p>
-                    <p className="text-xs text-stone-600">
-                      {enrollment.module._count.lectures} lectures · {enrollment.module._count.quizzes} quizzes
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                      <Link href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`} className="text-stone-700 hover:text-teal-700 transition">Lectures</Link>
-                      <Link href={`/student/quizzes?module=${encodeURIComponent(enrollment.module.code)}`} className="text-stone-700 hover:text-teal-700 transition">Quizzes</Link>
+                  <div key={enrollment.id} className={`${ui.cardList} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
+                    <Link href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`} className="min-w-0 hover:text-teal-700 transition">
+                      <p className="font-semibold text-stone-950">{enrollment.module.code} · {enrollment.module.name}</p>
+                      <p className="text-xs text-stone-600">
+                        {enrollment.module._count.lectures} lectures · {enrollment.module._count.analogySets} analogy sets · {enrollment.module._count.quizzes} quizzes
+                      </p>
+                    </Link>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <Link href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`} className={ui.buttonSecondary}>Lectures</Link>
+                      <Link href={`/student/quizzes?module=${encodeURIComponent(enrollment.module.code)}`} className={ui.buttonPrimary}>Quizzes</Link>
                     </div>
                   </div>
                 ))}

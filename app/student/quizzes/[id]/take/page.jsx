@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import * as ui from "../../../../styles/ui"
+import StudentPageHeader from "../../../components/StudentPageHeader"
 
 function getTopicPayload(question) {
   const topicIndex = Number(question?.analogyTopicIndex)
@@ -274,23 +275,15 @@ export default function StudentQuizTakePage() {
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Quiz</p>
-            <h1 className="text-lg font-semibold">{quiz.title}</h1>
-            <p className="text-xs text-stone-600">
-              Due: {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href={`/student/quizzes/${id}/start`} className={ui.buttonSecondary}>Exit</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Quiz"
+        title={quiz.title}
+        subtitle={`Due: ${quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}`}
+        actions={<Link href={`/student/quizzes/${id}/start`} className={ui.buttonSecondary}>Exit</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
             <div className="mb-4">
               <div className="h-2 overflow-hidden rounded-full bg-stone-100">

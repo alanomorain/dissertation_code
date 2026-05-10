@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
 import * as ui from "../../../../styles/ui"
+import StudentPageHeader from "../../../components/StudentPageHeader"
 
 export default async function StudentQuizStartPage({ params }) {
   const { id } = await params
@@ -44,29 +45,28 @@ export default async function StudentQuizStartPage({ params }) {
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Quiz</p>
-            <h1 className="text-lg font-semibold">Ready to start?</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Quiz"
+        title="Ready to start?"
+        subtitle={quiz.title}
+        actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="grid gap-4 md:grid-cols-4 text-sm">
+            <div className={ui.cardFull}><p className={ui.textLabel}>Questions</p><p className="mt-2 text-2xl font-semibold">{quiz._count.questions}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Attempts used</p><p className="mt-2 text-2xl font-semibold">{submittedAttempts}/{quiz.maxAttempts}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Best score</p><p className="mt-2 text-2xl font-semibold">{bestScore === null ? "N/A" : `${bestScore}%`}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Due</p><p className="mt-2 text-2xl font-semibold">{dueAt ? dueAt.toLocaleDateString() : "Any time"}</p></div>
+          </div>
+
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz overview</h2>
-            <div className="space-y-2 text-sm">
-              <p><span className={ui.textMuted}>Title:</span> {quiz.title}</p>
-              <p><span className={ui.textMuted}>Questions:</span> {quiz._count.questions}</p>
-              <p><span className={ui.textMuted}>Attempts used:</span> {submittedAttempts} / {quiz.maxAttempts}</p>
-              <p><span className={ui.textMuted}>Best score:</span> {bestScore === null ? "No attempts yet" : `${bestScore}%`}</p>
-              <p><span className={ui.textMuted}>Due:</span> {dueAt ? dueAt.toLocaleString() : "No due date"}</p>
-            </div>
+            <p className="font-semibold text-stone-950">{quiz.title}</p>
+            <p className="mt-1 text-sm text-stone-600">
+              Due {dueAt ? dueAt.toLocaleString() : "any time"} · {quiz._count.questions} questions
+            </p>
           </div>
 
           <div className={ui.cardFull}>
@@ -97,7 +97,7 @@ export default async function StudentQuizStartPage({ params }) {
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             {isClosed ? (
               <p className="text-sm text-amber-700">This quiz closed on {dueAt.toLocaleString()}.</p>
             ) : submittedAttempts >= quiz.maxAttempts ? (

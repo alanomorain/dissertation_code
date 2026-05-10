@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import * as ui from "../../styles/ui"
+import StudentPageHeader from "../components/StudentPageHeader"
 
 export default async function StudentLecturesPage({ searchParams }) {
   const student = await getCurrentUser("STUDENT", { id: true, email: true })
@@ -52,23 +52,31 @@ export default async function StudentLecturesPage({ searchParams }) {
       })
     : []
 
+  const selectedModule = moduleCode
+    ? activeEnrollments.find((enrollment) => enrollment.module.code === moduleCode)?.module
+    : null
+  const publishedQuizTotal = lectures.reduce((total, lecture) => total + lecture.quizzes.length, 0)
+
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Lectures</p>
-            <h1 className="text-lg font-semibold">Lecture library</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <SignOutButton />
-            <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Lectures"
+        title="Lecture Dashboard"
+        subtitle="Browse lecture material with published quizzes."
+        actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="grid gap-4 md:grid-cols-3 text-sm">
+            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{lectures.length}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Published quizzes</p><p className="mt-2 text-2xl font-semibold">{publishedQuizTotal}</p></div>
+            <div className={ui.cardFull}>
+              <p className={ui.textLabel}>Module scope</p>
+              <p className="mt-2 text-2xl font-semibold">{selectedModule?.code || "All"}</p>
+            </div>
+          </div>
+
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/student/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All modules</Link>

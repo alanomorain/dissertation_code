@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import SignOutButton from "../../components/SignOutButton"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import {
@@ -8,6 +7,7 @@ import {
   getStudentQuizProgressState,
 } from "../../lib/quizState"
 import * as ui from "../../styles/ui"
+import StudentPageHeader from "../components/StudentPageHeader"
 
 function StackedPipelineBar({ toDo, inProgress, completed }) {
   const total = toDo + inProgress + completed
@@ -261,33 +261,27 @@ export default async function StudentStatisticsPage() {
 
   return (
     <main className={ui.page}>
-      <header className={ui.header}>
-        <div className={ui.headerContentNarrow}>
-          <div>
-            <p className={ui.textLabel}>Student · Statistics</p>
-            <h1 className="text-lg font-semibold">Performance overview</h1>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <SignOutButton />
-            <Link href="/student" className={ui.buttonSecondary}>Back to dashboard</Link>
-          </div>
-        </div>
-      </header>
+      <StudentPageHeader
+        label="Student · Statistics"
+        title="Stats Dashboard"
+        subtitle="Your quiz progress, media usage, and module performance."
+        actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
+      />
 
       <section className={ui.pageSection}>
-        <div className={`${ui.containerNarrow} ${ui.pageSpacing}`}>
-          <div className="mx-auto w-full max-w-[1080px] space-y-6">
+        <div className={`${ui.container} ${ui.pageSpacing}`}>
+          <div className="mx-auto w-full max-w-[1260px] space-y-6">
             <div className={ui.cardFull}>
               <p className={ui.textLabel}>Overview</p>
               <div className="mt-3 grid gap-4 md:grid-cols-3 xl:grid-cols-6">
-                <div className={ui.cardFull}><p className={ui.textLabel}>Total quizzes</p><p className="mt-2 text-2xl font-semibold">{accessibleQuizTotal}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>Average score</p><p className="mt-2 text-2xl font-semibold">{averageScore}%</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>Analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyViews}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>Quiz analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyPopupViews}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>Video views</p><p className="mt-2 text-2xl font-semibold">{videoViews}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>To do</p><p className="mt-2 text-2xl font-semibold">{stateTotals.TO_DO}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>In progress</p><p className="mt-2 text-2xl font-semibold">{stateTotals.IN_PROGRESS}</p></div>
-                <div className={ui.cardFull}><p className={ui.textLabel}>Completed</p><p className="mt-2 text-2xl font-semibold">{stateTotals.COMPLETED}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Total quizzes</p><p className="mt-2 text-2xl font-semibold">{accessibleQuizTotal}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Average score</p><p className="mt-2 text-2xl font-semibold">{averageScore}%</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyViews}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Quiz analogy views</p><p className="mt-2 text-2xl font-semibold">{analogyPopupViews}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Video views</p><p className="mt-2 text-2xl font-semibold">{videoViews}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>To do</p><p className="mt-2 text-2xl font-semibold">{stateTotals.TO_DO}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>In progress</p><p className="mt-2 text-2xl font-semibold">{stateTotals.IN_PROGRESS}</p></div>
+                <div className={ui.cardInner}><p className={ui.textLabel}>Completed</p><p className="mt-2 text-2xl font-semibold">{stateTotals.COMPLETED}</p></div>
               </div>
             </div>
 
