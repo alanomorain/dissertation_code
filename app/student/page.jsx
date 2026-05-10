@@ -12,16 +12,23 @@ import * as ui from "../styles/ui"
 const formatDate = (value) => new Date(value).toLocaleDateString()
 const formatDateTime = (value) => new Date(value).toLocaleString()
 
-function badgeTextForState(state) {
+function getTopics(topicsJson) {
+  return Array.isArray(topicsJson?.topics) ? topicsJson.topics : []
+}
+
+function quizLabelForState(state) {
   if (state === "UPCOMING") return "Upcoming"
-  if (state === "CLOSED") return "Closed"
   if (state === "COMPLETED") return "Completed"
-  if (state === "IN_PROGRESS") return "In progress"
   return "Available"
 }
 
 function QuizLink({ quiz }) {
-  const disabled = quiz.state === "UPCOMING" || quiz.state === "CLOSED"
+  const disabled = quiz.state === "UPCOMING"
+  const badgeClass = quiz.badgeText === "Completed"
+    ? ui.badgeApproved
+    : quiz.badgeText === "Upcoming"
+      ? ui.badgeProcessing
+      : ui.badgeReady
   const content = (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
@@ -34,7 +41,7 @@ function QuizLink({ quiz }) {
           {quiz.bestScore === null ? "" : ` · Best score ${quiz.bestScore}%`}
         </p>
       </div>
-      <span className={quiz.state === "CLOSED" ? ui.badgeFailed : quiz.state === "UPCOMING" ? ui.badgeProcessing : quiz.state === "COMPLETED" ? ui.badgeApproved : ui.badgeReady}>
+      <span className={badgeClass}>
         {quiz.badgeText}
       </span>
     </div>
@@ -67,12 +74,12 @@ function isDatabaseUnavailableError(error) {
 export default async function StudentDashboard() {
   let studentUser = null
   let activeEnrollments = []
-  let recentAnalogies = []
+  let recentAnalogyTopics = []
   let quizAttempts = []
   let publishedQuizCount = 0
   let completedQuizCount = 0
   let averageScore = 0
-  let upcomingQuizzes = []
+  let recentQuizzes = []
   let lectureCount = 0
   let databaseUnavailable = false
 
@@ -80,6 +87,7 @@ export default async function StudentDashboard() {
     studentUser = await getCurrentUser("STUDENT", {
       id: true,
       email: true,
+      fullName: true,
       studentNumber: true,
     })
 
@@ -104,7 +112,7 @@ export default async function StudentDashboard() {
 
     const moduleIds = activeEnrollments.map((enrollment) => enrollment.moduleId)
 
-    recentAnalogies = moduleIds.length
+    const recentAnalogySets = moduleIds.length
       ? await prisma.analogySet.findMany({
           where: {
             status: "ready",
@@ -116,9 +124,18 @@ export default async function StudentDashboard() {
             lecture: { select: { title: true } },
           },
           orderBy: { createdAt: "desc" },
-          take: 4,
+          take: 8,
         })
       : []
+
+    recentAnalogyTopics = recentAnalogySets
+      .flatMap((analogySet) => getTopics(analogySet.topicsJson).map((topic, topicIndex) => ({
+        id: `${analogySet.id}-${topicIndex}`,
+        href: `/student/analogies/${analogySet.id}`,
+        topic: topic.topic || analogySet.lecture?.title || analogySet.title || "Analogy topic",
+        moduleCode: analogySet.module?.code || "Module",
+      })))
+      .slice(0, 4)
 
     lectureCount = moduleIds.length
       ? await prisma.lecture.count({
@@ -179,35 +196,30 @@ export default async function StudentDashboard() {
             },
           },
           include: { module: { select: { code: true, name: true } } },
-          orderBy: [{ module: { code: "asc" } }, { dueAt: "asc" }, { createdAt: "desc" }],
+          orderBy: { createdAt: "desc" },
+          take: 5,
         })
       : []
 
     const nowTs = new Date().getTime()
     const attemptStatsByQuiz = createStudentAttemptStats(quizAttempts)
-    upcomingQuizzes = dashboardQuizzes
-      .map((quiz) => {
-        const stats = attemptStatsByQuiz[quiz.id] || { submittedCount: 0, inProgressCount: 0, bestScore: null }
-        const state = getStudentQuizProgressState(quiz, stats, nowTs)
-        return {
-          id: quiz.id,
-          title: quiz.title,
-          state,
-          moduleCode: quiz.module.code,
-          moduleName: quiz.module.name,
-          submittedAttempts: stats.submittedCount,
-          maxAttempts: quiz.maxAttempts,
-          bestScore: stats.bestScore,
-          badgeText: badgeTextForState(state),
-          releaseText: quiz.publishedAt ? formatDateTime(quiz.publishedAt) : "Available now",
-          dueText: quiz.dueAt ? formatDate(quiz.dueAt) : "No due date",
-          dueAtTs: quiz.dueAt ? new Date(quiz.dueAt).getTime() : Number.MAX_SAFE_INTEGER,
-          releaseAtTs: quiz.publishedAt ? new Date(quiz.publishedAt).getTime() : 0,
-        }
-      })
-      .filter((quiz) => quiz.state === "TO_DO" || quiz.state === "IN_PROGRESS" || quiz.state === "UPCOMING")
-      .sort((a, b) => a.dueAtTs - b.dueAtTs)
-      .slice(0, 5)
+    recentQuizzes = dashboardQuizzes.map((quiz) => {
+      const stats = attemptStatsByQuiz[quiz.id] || { submittedCount: 0, inProgressCount: 0, bestScore: null }
+      const state = getStudentQuizProgressState(quiz, stats, nowTs)
+      return {
+        id: quiz.id,
+        title: quiz.title,
+        state,
+        moduleCode: quiz.module.code,
+        moduleName: quiz.module.name,
+        submittedAttempts: stats.submittedCount,
+        maxAttempts: quiz.maxAttempts,
+        bestScore: stats.bestScore,
+        badgeText: quizLabelForState(state),
+        releaseText: quiz.publishedAt ? formatDateTime(quiz.publishedAt) : "Available now",
+        dueText: quiz.dueAt ? formatDate(quiz.dueAt) : "No due date",
+      }
+    })
   } catch (error) {
     if (!isDatabaseUnavailableError(error)) {
       throw error
@@ -218,6 +230,7 @@ export default async function StudentDashboard() {
     studentUser = {
       id: "offline-preview",
       email: "student@example.com",
+      fullName: "Demo Student",
       studentNumber: "Demo",
     }
 
@@ -237,7 +250,7 @@ export default async function StudentDashboard() {
     {
       title: "Analogies",
       href: "/student/analogies",
-      stat: `${recentAnalogies.length} recent`,
+      stat: `${recentAnalogyTopics.length} recent`,
     },
     {
       title: "Quizzes",
@@ -261,7 +274,7 @@ export default async function StudentDashboard() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-stone-700">
-              <span className="font-medium">{studentUser.email}</span> · Student
+              Logged in as <span className="font-medium">{studentUser.fullName || studentUser.email}</span>
             </span>
             <SignOutButton />
           </div>
@@ -281,9 +294,6 @@ export default async function StudentDashboard() {
               <div>
                 <p className={ui.textLabel}>Overview</p>
                 <h2 className="text-xl font-semibold">Everything important in one place</h2>
-                <p className="mt-2 max-w-2xl text-sm text-stone-700">
-                  Jump quickly into modules, lectures, analogies, quizzes, and statistics while keeping your current progress in view.
-                </p>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                 <div className={ui.cardInner}>
@@ -299,7 +309,7 @@ export default async function StudentDashboard() {
                   <p className="mt-1 text-lg font-semibold">{publishedQuizCount}</p>
                 </div>
                 <div className={ui.cardInner}>
-                  <p className={ui.textLabel}>Avg score</p>
+                  <p className={ui.textLabel}>Average</p>
                   <p className="mt-1 text-lg font-semibold">{averageScore}%</p>
                 </div>
               </div>
@@ -328,29 +338,23 @@ export default async function StudentDashboard() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className={ui.cardFull}>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 className={ui.cardHeader}>Upcoming quizzes</h3>
-                <Link href="/student/quizzes" className={ui.buttonSecondary}>View all quizzes</Link>
-              </div>
+              <h3 className={ui.cardHeader}>Quizzes</h3>
               <div className="space-y-3 text-sm">
-                {upcomingQuizzes.map((quiz) => <QuizLink key={quiz.id} quiz={quiz} />)}
-                {upcomingQuizzes.length === 0 ? <p className={ui.textSmall}>No upcoming quizzes right now.</p> : null}
+                {recentQuizzes.map((quiz) => <QuizLink key={quiz.id} quiz={quiz} />)}
+                {recentQuizzes.length === 0 ? <p className={ui.textSmall}>No quizzes available right now.</p> : null}
               </div>
             </div>
 
             <div className={ui.cardFull}>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 className={ui.cardHeader}>Recent analogies</h3>
-                <Link href="/student/analogies" className={ui.buttonSecondary}>View all analogies</Link>
-              </div>
+              <h3 className={ui.cardHeader}>Recent analogies</h3>
               <div className="space-y-2 text-sm">
-                {recentAnalogies.map((analogy) => (
-                  <Link key={analogy.id} href={`/student/analogies/${analogy.id}`} className={ui.linkCard}>
-                    <p className="font-medium">{analogy.title || analogy.lecture?.title || "Analogy set"}</p>
-                    <p className="text-xs text-stone-600">{analogy.module?.code || "Module"}</p>
+                {recentAnalogyTopics.map((analogy) => (
+                  <Link key={analogy.id} href={analogy.href} className={ui.linkCard}>
+                    <p className="font-medium">{analogy.topic}</p>
+                    <p className="text-xs text-stone-600">{analogy.moduleCode}</p>
                   </Link>
                 ))}
-                {recentAnalogies.length === 0 ? <p className={ui.textSmall}>No approved analogies available yet.</p> : null}
+                {recentAnalogyTopics.length === 0 ? <p className={ui.textSmall}>No approved analogies available yet.</p> : null}
               </div>
             </div>
           </div>

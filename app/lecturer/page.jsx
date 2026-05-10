@@ -11,6 +11,7 @@ export default async function LecturerDashboard() {
   const lecturerUser = await getCurrentUser("LECTURER", {
     id: true,
     email: true,
+    fullName: true,
   })
 
   if (!lecturerUser) {
@@ -101,7 +102,7 @@ export default async function LecturerDashboard() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-stone-700">
-              <span className="font-medium">{lecturerUser.email}</span> signed in as a Lecturer
+              Logged in as <span className="font-medium">{lecturerUser.fullName || lecturerUser.email}</span>
             </span>
             <SignOutButton />
           </div>
@@ -115,9 +116,6 @@ export default async function LecturerDashboard() {
               <div>
                 <p className={ui.textLabel}>Overview</p>
                 <h2 className="text-xl font-semibold">Everything important in one place</h2>
-                <p className="mt-2 max-w-2xl text-sm text-stone-700">
-                  Jump quickly into modules, analogies, quizzes, statistics, and student management without hunting through scattered actions.
-                </p>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                 <div className={ui.cardInner}>

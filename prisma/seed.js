@@ -147,7 +147,7 @@ async function main() {
   })
 
   const lecturerUser = await prisma.user.create({
-    data: { email: 'l@example.com', role: 'LECTURER', passwordHash: hashPassword(lecturerPassword) },
+    data: { fullName: 'Alan Moran', email: 'l@example.com', role: 'LECTURER', passwordHash: hashPassword(lecturerPassword) },
   })
 
   const studentA = await prisma.user.create({
