@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
 import { getModuleDisplayName } from "../../../lib/moduleDisplay"
+import { isLectureRevisionUnlocked } from "../../../lib/studentRevisionAccess"
 import * as ui from "../../../styles/ui"
 import StudentPageHeader from "../../components/StudentPageHeader"
 
@@ -25,7 +26,26 @@ export default async function StudentLectureDetailPage({ params }) {
       },
     },
     include: {
-      module: { select: { code: true, name: true } },
+      module: {
+        select: {
+          code: true,
+          name: true,
+          quizzes: {
+            where: {
+              status: "PUBLISHED",
+              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+            },
+            select: {
+              dueAt: true,
+              maxAttempts: true,
+              attempts: {
+                where: { studentId: student.id },
+                select: { status: true, score: true },
+              },
+            },
+          },
+        },
+      },
       quizzes: {
         where: {
           status: "PUBLISHED",
@@ -36,14 +56,27 @@ export default async function StudentLectureDetailPage({ params }) {
           title: true,
           dueAt: true,
           maxAttempts: true,
+          attempts: {
+            where: { studentId: student.id },
+            select: { status: true, score: true },
+          },
         },
         orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }],
+      },
+      analogySets: {
+        where: {
+          status: "ready",
+          reviewStatus: "APPROVED",
+        },
+        select: { id: true, title: true, topicsJson: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
       },
     },
   })
 
   if (!lecture) redirect("/student/lectures")
   const nextQuiz = lecture.quizzes[0] || null
+  const revisionUnlocked = isLectureRevisionUnlocked(lecture)
 
   return (
     <main className={ui.page}>
@@ -84,6 +117,33 @@ export default async function StudentLectureDetailPage({ params }) {
                     </div>
                   </Link>
                 ))}
+              </div>
+            )}
+          </div>
+
+          <div className={ui.cardFull}>
+            <h2 className={ui.cardHeader}>Revision analogies</h2>
+            {!revisionUnlocked ? (
+              <p className={ui.textSmall}>
+                Analogy sets unlock after you reach the attempt limit for a quiz in this lecture or the quiz due date has passed.
+              </p>
+            ) : lecture.analogySets.length === 0 ? (
+              <p className={ui.textSmall}>No approved analogy sets are available for this lecture yet.</p>
+            ) : (
+              <div className="grid gap-3 text-sm md:grid-cols-2">
+                {lecture.analogySets.map((set) => {
+                  const topics = Array.isArray(set.topicsJson?.topics) ? set.topicsJson.topics : []
+                  return (
+                    <Link
+                      key={set.id}
+                      href={`/student/analogies/${set.id}`}
+                      className={`${ui.cardList} block hover:border-teal-500 transition`}
+                    >
+                      <p className="font-semibold text-stone-950">{set.title || lecture.title || "Analogy set"}</p>
+                      <p className="text-xs text-stone-600">{topics.length} topics</p>
+                    </Link>
+                  )
+                })}
               </div>
             )}
           </div>

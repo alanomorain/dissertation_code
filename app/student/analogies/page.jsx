@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
 import { getModuleDisplayName } from "../../lib/moduleDisplay"
+import { isLectureRevisionUnlocked } from "../../lib/studentRevisionAccess"
 import * as ui from "../../styles/ui"
 import StudentPageHeader from "../components/StudentPageHeader"
 
@@ -39,19 +40,63 @@ export default async function StudentAnalogiesPage({ searchParams }) {
           moduleId: { in: scopedModuleIds },
         },
         include: {
-          module: { select: { code: true, name: true } },
-          lecture: { select: { title: true } },
+          module: {
+            select: {
+              code: true,
+              name: true,
+              quizzes: {
+                where: {
+                  status: "PUBLISHED",
+                  OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+                },
+                select: {
+                  dueAt: true,
+                  maxAttempts: true,
+                  attempts: {
+                    where: { studentId: student.id },
+                    select: { status: true, score: true },
+                  },
+                },
+              },
+            },
+          },
+          lecture: {
+            select: {
+              title: true,
+              quizzes: {
+                where: {
+                  status: "PUBLISHED",
+                  OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+                },
+                select: {
+                  dueAt: true,
+                  maxAttempts: true,
+                  attempts: {
+                    where: { studentId: student.id },
+                    select: { status: true, score: true },
+                  },
+                },
+              },
+            },
+          },
         },
         orderBy: [{ module: { code: "asc" } }, { createdAt: "desc" }],
       })
     : []
+
+  const revisionAnalogySets = analogySets.filter((set) =>
+    isLectureRevisionUnlocked({
+      ...set.lecture,
+      module: { quizzes: set.module?.quizzes || [] },
+    }),
+  )
 
   return (
     <main className={ui.page}>
       <StudentPageHeader
         label="Student · Analogies"
         title="Analogy Dashboard"
-        subtitle="Approved analogy sets from your active modules."
+        subtitle="Revision analogy sets unlocked after quiz completion or close."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 
@@ -76,11 +121,11 @@ export default async function StudentAnalogiesPage({ searchParams }) {
 
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Analogy sets</h2>
-            {analogySets.length === 0 ? (
-              <p className={ui.textSmall}>No approved analogies are available for this view yet.</p>
+            {revisionAnalogySets.length === 0 ? (
+              <p className={ui.textSmall}>No revision analogy sets are unlocked for this view yet.</p>
             ) : (
               <div className="grid gap-3 text-sm md:grid-cols-2">
-                {analogySets.map((set) => {
+                {revisionAnalogySets.map((set) => {
                   const topics = getTopics(set.topicsJson)
                   return (
                     <Link

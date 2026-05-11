@@ -2,6 +2,8 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { getModuleDisplayName } from "../../../lib/moduleDisplay"
+import { isLectureRevisionUnlocked } from "../../../lib/studentRevisionAccess"
 import * as ui from "../../../styles/ui"
 import StudentPageHeader from "../../components/StudentPageHeader"
 
@@ -26,21 +28,64 @@ export default async function StudentAnalogyDetailPage({ params }) {
       },
     },
     include: {
-      module: { select: { code: true, name: true } },
-      lecture: { select: { id: true, title: true } },
+      module: {
+        select: {
+          code: true,
+          name: true,
+          quizzes: {
+            where: {
+              status: "PUBLISHED",
+              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+            },
+            select: {
+              dueAt: true,
+              maxAttempts: true,
+              attempts: {
+                where: { studentId: student.id },
+                select: { status: true, score: true },
+              },
+            },
+          },
+        },
+      },
+      lecture: {
+        select: {
+          id: true,
+          title: true,
+          quizzes: {
+            where: {
+              status: "PUBLISHED",
+              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+            },
+            select: {
+              dueAt: true,
+              maxAttempts: true,
+              attempts: {
+                where: { studentId: student.id },
+                select: { status: true, score: true },
+              },
+            },
+          },
+        },
+      },
     },
   })
 
   if (!analogy) notFound()
+  if (!isLectureRevisionUnlocked({
+    ...analogy.lecture,
+    module: { quizzes: analogy.module?.quizzes || [] },
+  })) notFound()
 
   const topics = getTopics(analogy.topicsJson)
+  const moduleName = analogy.module ? getModuleDisplayName(analogy.module) : "Module"
 
   return (
     <main className={ui.page}>
       <StudentPageHeader
         label="Student · Analogies"
         title={analogy.lecture?.title || analogy.title || "Analogy set"}
-        subtitle={`${analogy.module?.code || "Module"} · ${topics.length} topics`}
+        subtitle={`${moduleName} · ${topics.length} topics`}
         actions={<Link href="/student/analogies" className={ui.buttonSecondary}>Back to analogies</Link>}
       />
 
@@ -49,7 +94,7 @@ export default async function StudentAnalogyDetailPage({ params }) {
           <div className={ui.cardFull}>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className={ui.textLabel}>{analogy.module?.code} · {analogy.module?.name}</p>
+                <p className={ui.textLabel}>{moduleName}</p>
                 <h2 className="mt-1 text-xl font-semibold text-stone-950">
                   {analogy.lecture?.title || analogy.title || "Analogy set"}
                 </h2>
@@ -82,6 +127,12 @@ export default async function StudentAnalogyDetailPage({ params }) {
                       className="mt-4 aspect-video w-full rounded-xl border border-stone-200 bg-cover bg-center"
                       style={{ backgroundImage: `url(${topic.imageUrl})` }}
                     />
+                  ) : null}
+                  {topic.videoUrl ? (
+                    <video src={topic.videoUrl} controls className="mt-4 w-full rounded-xl border border-stone-200 bg-black" />
+                  ) : null}
+                  {topic.videoNotes ? (
+                    <p className="mt-3 text-xs text-stone-500">{topic.videoNotes}</p>
                   ) : null}
                   {topic.feedback ? (
                     <p className="mt-3 text-xs text-stone-500">{topic.feedback}</p>

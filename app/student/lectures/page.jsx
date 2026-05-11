@@ -32,19 +32,19 @@ export default async function StudentLecturesPage({ searchParams }) {
         where: {
           moduleId: { in: moduleIds },
           ...(selectedModuleId ? { moduleId: selectedModuleId } : {}),
-          quizzes: {
+          analogySets: {
             some: {
-              status: "PUBLISHED",
-              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+              status: "ready",
+              reviewStatus: "APPROVED",
             },
           },
         },
         include: {
           module: { select: { code: true, name: true } },
-          quizzes: {
+          analogySets: {
             where: {
-              status: "PUBLISHED",
-              OR: [{ publishedAt: null }, { publishedAt: { lte: new Date() } }],
+              status: "ready",
+              reviewStatus: "APPROVED",
             },
             select: { id: true },
           },
@@ -58,7 +58,7 @@ export default async function StudentLecturesPage({ searchParams }) {
       <StudentPageHeader
         label="Student · Lectures"
         title="Lecture Dashboard"
-        subtitle="Browse lecture material with published quizzes."
+        subtitle="Browse lecture material with approved analogies."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 
@@ -80,7 +80,7 @@ export default async function StudentLecturesPage({ searchParams }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Lectures with available quizzes</h2>
+            <h2 className={ui.cardHeader}>Lectures with approved analogies</h2>
             {lectures.length === 0 ? (
               <p className={ui.textSmall}>No lecture content is available yet.</p>
             ) : (
@@ -89,7 +89,7 @@ export default async function StudentLecturesPage({ searchParams }) {
                   <Link key={lecture.id} href={`/student/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-teal-500 transition`}>
                     <p className="font-semibold text-stone-950">{lecture.title}</p>
                     <p className="text-xs text-stone-600">
-                      {getModuleDisplayName(lecture.module)} · {lecture.quizzes.length} published quizzes
+                      {getModuleDisplayName(lecture.module)} · {lecture.analogySets.length} analogy sets
                     </p>
                   </Link>
                 ))}
