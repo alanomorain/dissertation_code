@@ -161,7 +161,6 @@ export default function LecturerAnalogyReviewPage() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Review Analogy</h1>
-            <p className={ui.textSmall}>{displayTitle}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href={`/lecturer/analogies/${id}`} className={ui.buttonSecondary}>

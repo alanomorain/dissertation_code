@@ -41,7 +41,6 @@ export default async function LecturerLectureDetailPage({ params }) {
           <div>
             <p className={ui.textLabel}>Lecturer · Lecture</p>
             <h1 className="text-lg font-semibold">{lecture.title}</h1>
-            <p className={ui.textSmall}>{lecture.module.code} · {lecture.module.name}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/lecturer/lectures" className={ui.buttonSecondary}>Back to Lectures</Link>

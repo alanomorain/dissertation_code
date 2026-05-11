@@ -270,7 +270,6 @@ export default async function StudentDashboard() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Student Dashboard</h1>
-            <p className={ui.textSmall}>A cleaner home for your modules, quizzes, and progress.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-stone-700">

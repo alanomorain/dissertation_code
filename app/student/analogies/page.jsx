@@ -51,7 +51,7 @@ export default async function StudentAnalogiesPage({ searchParams }) {
     <main className={ui.page}>
       <StudentPageHeader
         label="Student · Analogies"
-        title="Analogy Library"
+        title="Analogy Dashboard"
         subtitle="Approved analogy sets from your active modules."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />

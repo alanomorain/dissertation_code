@@ -58,7 +58,6 @@ export default async function LecturerQuizEditPage({ params }) {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Edit Quiz</h1>
-            <p className={ui.textSmall}>Quiz ID: {id}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href={`/lecturer/quizzes/${id}`} className={ui.buttonSecondary}>Back to overview</Link>

@@ -37,7 +37,6 @@ export default async function LecturerQuizDetailPage({ params }) {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Quiz Overview</h1>
-            <p className={ui.textSmall}>{quiz.title}</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>

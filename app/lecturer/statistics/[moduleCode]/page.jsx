@@ -279,7 +279,6 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
           <div>
             <p className={ui.textLabel}>Lecturer · Module statistics</p>
             <h1 className="text-lg font-semibold">{moduleRecord.code} · {moduleRecord.name}</h1>
-            <p className={ui.textSmall}>Range: {dateRangeLabel(range)}</p>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Link href={`/lecturer/statistics?range=${range}`} className={ui.buttonSecondary}>Back to all modules</Link>

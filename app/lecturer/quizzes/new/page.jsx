@@ -246,7 +246,6 @@ function LecturerQuizWizardPageInner() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Create Quiz</h1>
-            <p className={ui.textSmall}>Persist directly to the database.</p>
           </div>
           <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
         </div>

@@ -98,7 +98,6 @@ export default async function LecturerDashboard() {
         <div className={ui.headerContent}>
           <div>
             <h1 className="text-lg font-semibold">Lecturer Dashboard</h1>
-            <p className={ui.textSmall}>A cleaner home for your core teaching workflows.</p>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden sm:inline text-stone-700">
