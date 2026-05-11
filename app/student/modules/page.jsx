@@ -27,10 +27,6 @@ export default async function StudentModulesPage() {
     orderBy: { createdAt: "desc" },
   })
 
-  const totalLectures = enrollments.reduce((total, enrollment) => total + enrollment.module._count.lectures, 0)
-  const totalQuizzes = enrollments.reduce((total, enrollment) => total + enrollment.module._count.quizzes, 0)
-  const totalAnalogies = enrollments.reduce((total, enrollment) => total + enrollment.module._count.analogySets, 0)
-
   return (
     <main className={ui.page}>
       <StudentPageHeader
@@ -42,13 +38,6 @@ export default async function StudentModulesPage() {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className="grid gap-4 md:grid-cols-4 text-sm">
-            <div className={ui.cardFull}><p className={ui.textLabel}>Modules</p><p className="mt-2 text-2xl font-semibold">{enrollments.length}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{totalLectures}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Quizzes</p><p className="mt-2 text-2xl font-semibold">{totalQuizzes}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Analogies</p><p className="mt-2 text-2xl font-semibold">{totalAnalogies}</p></div>
-          </div>
-
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Modules</h2>
             {enrollments.length === 0 ? (

@@ -43,17 +43,10 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
 
   return (
     <div className={`${ui.card} p-6 md:p-7`}>
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <div className="mb-4">
         <div>
           <p className={ui.textHighlight}>{moduleGroup.moduleCode}</p>
           <h2 className="text-lg font-semibold text-stone-950">{moduleGroup.moduleName}</h2>
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span className={ui.badgeDraft}>To do: {moduleGroup.counts.TO_DO}</span>
-          <span className={ui.badgeProcessing}>In progress: {moduleGroup.counts.IN_PROGRESS}</span>
-          <span className={ui.badgeApproved}>Completed: {moduleGroup.counts.COMPLETED}</span>
-          <span className={ui.badgeProcessing}>Upcoming: {moduleGroup.counts.UPCOMING}</span>
-          <span className={ui.badgeFailed}>Closed: {moduleGroup.counts.CLOSED}</span>
         </div>
       </div>
 

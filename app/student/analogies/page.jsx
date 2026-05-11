@@ -45,8 +45,6 @@ export default async function StudentAnalogiesPage({ searchParams }) {
       })
     : []
 
-  const topicTotal = analogySets.reduce((total, set) => total + getTopics(set.topicsJson).length, 0)
-
   return (
     <main className={ui.page}>
       <StudentPageHeader
@@ -58,21 +56,6 @@ export default async function StudentAnalogiesPage({ searchParams }) {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className="grid gap-4 text-sm md:grid-cols-3">
-            <div className={ui.cardFull}>
-              <p className={ui.textLabel}>Analogy sets</p>
-              <p className="mt-2 text-2xl font-semibold">{analogySets.length}</p>
-            </div>
-            <div className={ui.cardFull}>
-              <p className={ui.textLabel}>Topics</p>
-              <p className="mt-2 text-2xl font-semibold">{topicTotal}</p>
-            </div>
-            <div className={ui.cardFull}>
-              <p className={ui.textLabel}>Module scope</p>
-              <p className="mt-2 text-2xl font-semibold">{selectedEnrollment?.module.code || "All"}</p>
-            </div>
-          </div>
-
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/student/analogies" className={!selectedEnrollment ? ui.buttonPrimary : ui.buttonSecondary}>

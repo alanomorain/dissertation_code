@@ -52,11 +52,6 @@ export default async function StudentLecturesPage({ searchParams }) {
       })
     : []
 
-  const selectedModule = moduleCode
-    ? activeEnrollments.find((enrollment) => enrollment.module.code === moduleCode)?.module
-    : null
-  const publishedQuizTotal = lectures.reduce((total, lecture) => total + lecture.quizzes.length, 0)
-
   return (
     <main className={ui.page}>
       <StudentPageHeader
@@ -68,15 +63,6 @@ export default async function StudentLecturesPage({ searchParams }) {
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className="grid gap-4 md:grid-cols-3 text-sm">
-            <div className={ui.cardFull}><p className={ui.textLabel}>Lectures</p><p className="mt-2 text-2xl font-semibold">{lectures.length}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Published quizzes</p><p className="mt-2 text-2xl font-semibold">{publishedQuizTotal}</p></div>
-            <div className={ui.cardFull}>
-              <p className={ui.textLabel}>Module scope</p>
-              <p className="mt-2 text-2xl font-semibold">{selectedModule?.code || "All"}</p>
-            </div>
-          </div>
-
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/student/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All modules</Link>
