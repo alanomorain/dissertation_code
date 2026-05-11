@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { getModuleDisplayName } from "../../../lib/moduleDisplay"
 import * as ui from "../../../styles/ui"
 
 function NewAnalogyPageInner() {
@@ -258,7 +259,7 @@ function NewAnalogyPageInner() {
                 >
                   {modules.map((module) => (
                     <option key={module.id} value={module.code}>
-                      {module.code} · {module.name}
+                      {getModuleDisplayName(module)}
                     </option>
                   ))}
                   <option value="new" className="text-teal-700">

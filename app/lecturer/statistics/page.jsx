@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 
 function parseRange(searchParams) {
@@ -305,7 +306,7 @@ export default async function LecturerStatisticsPage({ searchParams }) {
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-stone-950">{module.code} · {module.name}</p>
+                      <p className="font-semibold text-stone-950">{getModuleDisplayName(module)}</p>
                       <p className="text-xs text-stone-600">
                         Lecture instances: {module.lectureInstances} · Analogies (active/draft/upcoming): {module.analogyStats.active}/{module.analogyStats.draft}/{module.analogyStats.upcoming}
                       </p>

@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import DeleteLectureButton from "./components/DeleteLectureButton"
 
@@ -65,7 +66,7 @@ export default async function LecturerLecturesPage({ searchParams }) {
                   href={`/lecturer/lectures?module=${encodeURIComponent(module.code)}`}
                   className={moduleCode === module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {module.code}
+                  {getModuleDisplayName(module)}
                 </Link>
               ))}
             </div>
@@ -82,7 +83,7 @@ export default async function LecturerLecturesPage({ searchParams }) {
                     <Link href={`/lecturer/lectures/${lecture.id}`} className="min-w-0 hover:text-teal-700 transition">
                       <p className="font-semibold text-stone-950 truncate">{lecture.title}</p>
                       <p className="text-xs text-stone-600">
-                        {lecture.module.code} · {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
+                        {getModuleDisplayName(lecture.module)} · {lecture._count.analogySets} analogy sets · {new Date(lecture.createdAt).toLocaleDateString()}
                       </p>
                     </Link>
                     <DeleteLectureButton lectureId={lecture.id} lectureTitle={lecture.title} />

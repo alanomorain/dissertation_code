@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 
 function getTopics(topicsJson) {
@@ -56,9 +57,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
   }
 
   const analogies = analogySets.flatMap((set) => {
-    const moduleLabel = set.module
-      ? `${set.module.code} · ${set.module.name}`
-      : "No module"
+    const moduleLabel = set.module ? getModuleDisplayName(set.module) : "No module"
     const lectureLabel = set.lecture?.title || "No lecture"
     const lectureKey = set.lecture?.id || `no-lecture:${set.id}`
     const showSetLabel = (setCountsByLecture.get(lectureKey) || 0) > 1
@@ -119,7 +118,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                   href={`/lecturer/analogies?module=${encodeURIComponent(module.code)}`}
                   className={moduleCode === module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {module.code}
+                  {getModuleDisplayName(module)}
                 </Link>
               ))}
             </div>

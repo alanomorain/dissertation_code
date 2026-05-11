@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { getModuleDisplayName } from "../lib/moduleDisplay"
 import * as ui from "../styles/ui"
 
 const STATUS_OPTIONS = [
@@ -163,7 +164,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
               href={`/lecturer/students?module=${encodeURIComponent(module.code)}`}
               className={moduleCode === module.code ? ui.buttonPrimary : ui.buttonSecondary}
             >
-              {module.code}
+              {getModuleDisplayName(module)}
             </Link>
           ))}
         </div>
@@ -208,7 +209,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
             >
               {modules.map((module) => (
                 <option key={module.id} value={module.code}>
-                  {module.code}
+                  {getModuleDisplayName(module)}
                 </option>
               ))}
             </select>

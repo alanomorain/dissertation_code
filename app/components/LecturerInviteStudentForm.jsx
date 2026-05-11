@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { getModuleDisplayName } from "../lib/moduleDisplay"
 import * as ui from "../styles/ui"
 
 export default function LecturerInviteStudentForm({ modules, initialModuleCode }) {
@@ -107,7 +108,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
           >
             {modules.map((module) => (
               <option key={module.id} value={module.code}>
-                {module.code} · {module.name}
+                {getModuleDisplayName(module)}
               </option>
             ))}
           </select>

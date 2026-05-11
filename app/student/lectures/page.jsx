@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import StudentPageHeader from "../components/StudentPageHeader"
 
@@ -72,7 +73,7 @@ export default async function StudentLecturesPage({ searchParams }) {
                   href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`}
                   className={moduleCode === enrollment.module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {enrollment.module.code}
+                  {getModuleDisplayName(enrollment.module)}
                 </Link>
               ))}
             </div>
@@ -88,7 +89,7 @@ export default async function StudentLecturesPage({ searchParams }) {
                   <Link key={lecture.id} href={`/student/lectures/${lecture.id}`} className={`${ui.cardList} block hover:border-teal-500 transition`}>
                     <p className="font-semibold text-stone-950">{lecture.title}</p>
                     <p className="text-xs text-stone-600">
-                      {lecture.module.code} · {lecture.quizzes.length} published quizzes
+                      {getModuleDisplayName(lecture.module)} · {lecture.quizzes.length} published quizzes
                     </p>
                   </Link>
                 ))}

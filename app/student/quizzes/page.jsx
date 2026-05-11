@@ -6,6 +6,7 @@ import {
   createStudentAttemptStats,
   getStudentQuizProgressState,
 } from "../../lib/quizState"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import StudentPageHeader from "../components/StudentPageHeader"
 import StudentModuleQuizCard from "./components/StudentModuleQuizCard"
@@ -170,7 +171,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
                   href={quizHref({ module: module.code })}
                   className={moduleCodeFilter === module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {module.code}
+                  {getModuleDisplayName(module)}
                 </Link>
               ))}
             </div>

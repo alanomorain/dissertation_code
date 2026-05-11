@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import QuizStatusBadge from "../../components/QuizStatusBadge"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import ModuleQuizCard from "./components/ModuleQuizCard"
 
@@ -75,7 +76,7 @@ function SidebarSection({ title, helperText, quizzes, nowTs }) {
             className={`${ui.cardList} block hover:border-teal-500 transition`}
           >
             <p className="font-medium text-stone-950">{quiz.title}</p>
-            <p className="text-xs text-stone-600">{quiz.module.code}</p>
+            <p className="text-xs text-stone-600">{getModuleDisplayName(quiz.module)}</p>
                 <div className="mt-2">
                   <QuizStatusBadge status={badgeLabelForQuiz(quiz, nowTs)} />
                 </div>
@@ -158,7 +159,7 @@ export default async function LecturerQuizzesPage({ searchParams }) {
                   href={`/lecturer/quizzes?module=${encodeURIComponent(module.code)}`}
                   className={moduleCodeFilter === module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {module.code}
+                  {getModuleDisplayName(module)}
                 </Link>
               ))}
             </div>

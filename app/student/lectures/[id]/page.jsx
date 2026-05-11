@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { getModuleDisplayName } from "../../../lib/moduleDisplay"
 import * as ui from "../../../styles/ui"
 import StudentPageHeader from "../../components/StudentPageHeader"
 
@@ -49,14 +50,14 @@ export default async function StudentLectureDetailPage({ params }) {
       <StudentPageHeader
         label="Student · Lecture"
         title={lecture.title}
-        subtitle={`${lecture.module.code} · ${lecture.module.name}`}
+        subtitle={getModuleDisplayName(lecture.module)}
         actions={<Link href="/student/lectures" className={ui.buttonSecondary}>All lectures</Link>}
       />
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className="grid gap-4 md:grid-cols-3 text-sm">
-            <div className={ui.cardFull}><p className={ui.textLabel}>Module</p><p className="mt-2 text-2xl font-semibold">{lecture.module.code}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Module</p><p className="mt-2 text-2xl font-semibold">{getModuleDisplayName(lecture.module)}</p></div>
             <div className={ui.cardFull}><p className={ui.textLabel}>Published quizzes</p><p className="mt-2 text-2xl font-semibold">{lecture.quizzes.length}</p></div>
             <div className={ui.cardFull}>
               <p className={ui.textLabel}>Next due</p>

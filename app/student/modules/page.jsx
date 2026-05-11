@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import StudentPageHeader from "../components/StudentPageHeader"
 
@@ -47,7 +48,7 @@ export default async function StudentModulesPage() {
                 {enrollments.map((enrollment) => (
                   <div key={enrollment.id} className={`${ui.cardList} flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
                     <Link href={`/student/lectures?module=${encodeURIComponent(enrollment.module.code)}`} className="min-w-0 hover:text-teal-700 transition">
-                      <p className="font-semibold text-stone-950">{enrollment.module.code} · {enrollment.module.name}</p>
+                      <p className="font-semibold text-stone-950">{getModuleDisplayName(enrollment.module)}</p>
                       <p className="text-xs text-stone-600">
                         {enrollment.module._count.lectures} lectures · {enrollment.module._count.analogySets} analogy sets · {enrollment.module._count.quizzes} quizzes
                       </p>

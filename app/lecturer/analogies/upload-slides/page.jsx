@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { getModuleDisplayName } from "../../../lib/moduleDisplay"
 import * as ui from "../../../styles/ui"
 
 const makeTopicState = (topic, candidates = []) => ({
@@ -656,7 +657,7 @@ function UploadSlidesPageInner() {
                     >
                       {modules.map((module) => (
                         <option key={module.id} value={module.code}>
-                          {module.code} · {module.name}
+                          {getModuleDisplayName(module)}
                         </option>
                       ))}
                       <option value="new" className="text-teal-700">

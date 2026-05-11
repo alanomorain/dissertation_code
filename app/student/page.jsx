@@ -7,6 +7,7 @@ import {
   createStudentAttemptStats,
   getStudentQuizProgressState,
 } from "../lib/quizState"
+import { getModuleDisplayName } from "../lib/moduleDisplay"
 import * as ui from "../styles/ui"
 
 const formatDate = (value) => new Date(value).toLocaleDateString()
@@ -34,7 +35,7 @@ function QuizLink({ quiz }) {
       <div className="min-w-0">
         <p className="font-semibold text-stone-950">{quiz.title}</p>
         <p className="text-xs text-stone-600">
-          {quiz.moduleCode} · Due {quiz.dueText}
+          {quiz.moduleName || quiz.moduleCode} · Due {quiz.dueText}
         </p>
         <p className="text-xs text-stone-500">
           Attempts {quiz.submittedAttempts}/{quiz.maxAttempts}
@@ -133,7 +134,7 @@ export default async function StudentDashboard() {
         id: `${analogySet.id}-${topicIndex}`,
         href: `/student/analogies/${analogySet.id}`,
         topic: topic.topic || analogySet.lecture?.title || analogySet.title || "Analogy topic",
-        moduleCode: analogySet.module?.code || "Module",
+        moduleName: analogySet.module ? getModuleDisplayName(analogySet.module) : "Module",
       })))
       .slice(0, 4)
 
@@ -350,7 +351,7 @@ export default async function StudentDashboard() {
                 {recentAnalogyTopics.map((analogy) => (
                   <Link key={analogy.id} href={analogy.href} className={ui.linkCard}>
                     <p className="font-medium">{analogy.topic}</p>
-                    <p className="text-xs text-stone-600">{analogy.moduleCode}</p>
+                    <p className="text-xs text-stone-600">{analogy.moduleName}</p>
                   </Link>
                 ))}
                 {recentAnalogyTopics.length === 0 ? <p className={ui.textSmall}>No approved analogies available yet.</p> : null}

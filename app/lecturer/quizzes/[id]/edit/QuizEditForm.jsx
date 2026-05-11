@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { getModuleDisplayName } from "../../../../lib/moduleDisplay"
 import * as ui from "../../../../styles/ui"
 
 function createEmptyQuestion() {
@@ -189,7 +190,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
         <div className="space-y-1">
           <span className="font-medium">Module</span>
           <p className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-2 text-stone-700">
-            {quiz.module.code} · {quiz.module.name}
+            {getModuleDisplayName(quiz.module)}
           </p>
         </div>
         <div className="space-y-1">

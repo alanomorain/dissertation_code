@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 
 export default async function LecturerModulesPage() {
@@ -52,7 +53,7 @@ export default async function LecturerModulesPage() {
                     href={`/lecturer/modules/${encodeURIComponent(module.code)}`}
                     className={`${ui.cardList} block hover:border-teal-500 transition`}
                   >
-                    <p className="font-semibold text-stone-950">{module.code} · {module.name}</p>
+                    <p className="font-semibold text-stone-950">{getModuleDisplayName(module)}</p>
                     <p className="text-xs text-stone-600">
                       {module._count.lectures} lectures · {module._count.analogySets} analogy sets · {module._count.quizzes} quizzes · {module._count.enrollments} students
                     </p>

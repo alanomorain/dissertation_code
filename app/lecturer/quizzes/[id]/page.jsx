@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import QuizStatusBadge from "../../../components/QuizStatusBadge"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { getModuleDisplayName } from "../../../lib/moduleDisplay"
 import * as ui from "../../../styles/ui"
 
 function statusLabel(quiz) {
@@ -51,7 +52,7 @@ export default async function LecturerQuizDetailPage({ params }) {
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
-              <p><span className={ui.textMuted}>Module:</span> {quiz.module.code}</p>
+              <p><span className={ui.textMuted}>Module:</span> {getModuleDisplayName(quiz.module)}</p>
               <p className="flex items-center gap-2"><span className={ui.textMuted}>Status:</span><QuizStatusBadge status={statusLabel(quiz)} /></p>
               <p><span className={ui.textMuted}>Questions:</span> {quiz.questions.length}</p>
               <p><span className={ui.textMuted}>Attempts:</span> {quiz._count.attempts}</p>

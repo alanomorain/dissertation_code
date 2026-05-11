@@ -45,8 +45,7 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
     <div className={`${ui.card} p-6 md:p-7`}>
       <div className="mb-4">
         <div>
-          <p className={ui.textHighlight}>{moduleGroup.moduleCode}</p>
-          <h2 className="text-lg font-semibold text-stone-950">{moduleGroup.moduleName}</h2>
+          <h2 className="text-lg font-semibold text-stone-950">{moduleGroup.moduleName || moduleGroup.moduleCode}</h2>
         </div>
       </div>
 

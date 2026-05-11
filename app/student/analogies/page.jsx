@@ -2,6 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import StudentPageHeader from "../components/StudentPageHeader"
 
@@ -67,7 +68,7 @@ export default async function StudentAnalogiesPage({ searchParams }) {
                   href={`/student/analogies?module=${encodeURIComponent(enrollment.module.code)}`}
                   className={selectedEnrollment?.module.code === enrollment.module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  {enrollment.module.code}
+                  {getModuleDisplayName(enrollment.module)}
                 </Link>
               ))}
             </div>
@@ -91,7 +92,7 @@ export default async function StudentAnalogiesPage({ searchParams }) {
                         {set.lecture?.title || set.title || "Analogy set"}
                       </p>
                       <p className="text-xs text-stone-600">
-                        {set.module?.code || "Module"} · {topics.length} topics
+                        {set.module ? getModuleDisplayName(set.module) : "Module"} · {topics.length} topics
                       </p>
                       {topics[0]?.topic ? (
                         <p className="mt-2 text-xs text-stone-500">First topic: {topics[0].topic}</p>

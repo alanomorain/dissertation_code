@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
+import { getModuleDisplayName } from "../../../../lib/moduleDisplay"
 import * as ui from "../../../../styles/ui"
 
 export default function EditAnalogyPage() {
@@ -243,7 +244,7 @@ export default function EditAnalogyPage() {
                 >
                   {modules.map((module) => (
                     <option key={module.id} value={module.code}>
-                      {module.code} · {module.name}
+                      {getModuleDisplayName(module)}
                     </option>
                   ))}
                 </select>
