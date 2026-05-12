@@ -9,6 +9,7 @@ import {
   getStudentQuizProgressState,
 } from "../lib/quizState"
 import { getModuleDisplayName } from "../lib/moduleDisplay"
+import { isLectureRevisionUnlocked } from "../lib/studentRevisionAccess"
 import * as ui from "../styles/ui"
 
 function getTopics(topicsJson) {
@@ -71,9 +72,11 @@ function isDatabaseUnavailableError(error) {
 }
 
 export default async function StudentDashboard() {
+  const now = new Date()
+  const nowTs = now.getTime()
   let studentUser = null
   let activeEnrollments = []
-  let recentAnalogyTopics = []
+  let recentAnalogySetLinks = []
   let quizAttempts = []
   let publishedQuizCount = 0
   let completedQuizCount = 0
@@ -119,21 +122,68 @@ export default async function StudentDashboard() {
             moduleId: { in: moduleIds },
           },
           include: {
-            module: { select: { code: true, name: true } },
-            lecture: { select: { title: true } },
+            module: {
+              select: {
+                code: true,
+                name: true,
+                quizzes: {
+                  where: {
+                    status: "PUBLISHED",
+                    OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
+                  },
+                  select: {
+                    dueAt: true,
+                    maxAttempts: true,
+                    attempts: {
+                      where: { studentId: studentUser.id },
+                      select: { status: true, score: true },
+                    },
+                  },
+                },
+              },
+            },
+            lecture: {
+              select: {
+                title: true,
+                quizzes: {
+                  where: {
+                    status: "PUBLISHED",
+                    OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
+                  },
+                  select: {
+                    dueAt: true,
+                    maxAttempts: true,
+                    attempts: {
+                      where: { studentId: studentUser.id },
+                      select: { status: true, score: true },
+                    },
+                  },
+                },
+              },
+            },
           },
           orderBy: { createdAt: "desc" },
-          take: 8,
+          take: 50,
         })
       : []
 
-    recentAnalogyTopics = recentAnalogySets
-      .flatMap((analogySet) => getTopics(analogySet.topicsJson).map((topic, topicIndex) => ({
-        id: `${analogySet.id}-${topicIndex}`,
-        href: `/student/analogies/${analogySet.id}`,
-        topic: topic.topic || analogySet.lecture?.title || analogySet.title || "Analogy topic",
-        moduleName: analogySet.module ? getModuleDisplayName(analogySet.module) : "Module",
-      })))
+    recentAnalogySetLinks = recentAnalogySets
+      .filter((analogySet) =>
+        isLectureRevisionUnlocked({
+          ...analogySet.lecture,
+          module: { quizzes: analogySet.module?.quizzes || [] },
+        }, nowTs),
+      )
+      .map((analogySet) => {
+        const topics = getTopics(analogySet.topicsJson)
+        return {
+          id: analogySet.id,
+          href: `/student/analogies/${analogySet.id}`,
+          title: analogySet.lecture?.title || analogySet.title || "Analogy set",
+          moduleName: analogySet.module ? getModuleDisplayName(analogySet.module) : "Module",
+          topicCount: topics.length,
+        }
+      })
       .slice(0, 4)
 
     lectureCount = moduleIds.length
@@ -200,7 +250,6 @@ export default async function StudentDashboard() {
         })
       : []
 
-    const nowTs = new Date().getTime()
     const attemptStatsByQuiz = createStudentAttemptStats(quizAttempts)
     recentQuizzes = dashboardQuizzes.map((quiz) => {
       const stats = attemptStatsByQuiz[quiz.id] || { submittedCount: 0, inProgressCount: 0, bestScore: null }
@@ -249,7 +298,7 @@ export default async function StudentDashboard() {
     {
       title: "Analogies",
       href: "/student/analogies",
-      stat: `${recentAnalogyTopics.length} recent`,
+      stat: `${recentAnalogySetLinks.length} recent`,
     },
     {
       title: "Quizzes",
@@ -344,15 +393,18 @@ export default async function StudentDashboard() {
             </div>
 
             <div className={ui.cardFull}>
-              <h3 className={ui.cardHeader}>Recent Analogies</h3>
+              <h3 className={ui.cardHeader}>Recent Analogy Sets</h3>
               <div className="space-y-2 text-sm">
-                {recentAnalogyTopics.map((analogy) => (
-                  <Link key={analogy.id} href={analogy.href} className={ui.linkCard}>
-                    <p className="font-medium">{analogy.topic}</p>
-                    <p className="text-xs text-stone-600">{analogy.moduleName}</p>
+                {recentAnalogySetLinks.map((analogySet) => (
+                  <Link key={analogySet.id} href={analogySet.href} className={ui.linkCard}>
+                    <p className="font-medium">{analogySet.title}</p>
+                    <p className="text-xs text-stone-600">{analogySet.moduleName}</p>
+                    <p className="text-xs text-stone-500">
+                      {analogySet.topicCount} {analogySet.topicCount === 1 ? "topic" : "topics"}
+                    </p>
                   </Link>
                 ))}
-                {recentAnalogyTopics.length === 0 ? <p className={ui.textSmall}>No approved analogies available yet.</p> : null}
+                {recentAnalogySetLinks.length === 0 ? <p className={ui.textSmall}>No revision analogy sets are available yet.</p> : null}
               </div>
             </div>
           </div>
