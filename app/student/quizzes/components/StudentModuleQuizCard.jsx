@@ -58,7 +58,7 @@ export default function StudentModuleQuizCard({ moduleGroup }) {
       {hiddenCount > 0 ? (
         <div className="mt-4 pt-2 border-t border-stone-200">
           <button type="button" className={ui.buttonSecondary} onClick={() => setExpanded((prev) => !prev)}>
-            {expanded ? "Show less" : `Show more (${hiddenCount})`}
+            {expanded ? "Show Less" : `Show More (${hiddenCount})`}
           </button>
         </div>
       ) : null}

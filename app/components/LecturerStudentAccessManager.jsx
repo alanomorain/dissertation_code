@@ -156,7 +156,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
       <div className={ui.cardFull}>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Link href="/lecturer/students" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>
-            All modules
+            All Modules
           </Link>
           {modules.map((module) => (
             <Link
@@ -231,7 +231,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
         </div>
 
         <button type="submit" disabled={adding} className={ui.buttonPrimary}>
-          {adding ? "Saving..." : "Save enrollment"}
+          {adding ? "Saving..." : "Save Enrollment"}
         </button>
       </form>
 

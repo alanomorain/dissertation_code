@@ -11,7 +11,7 @@ export default function LecturerLoginPage() {
             <p className={ui.textLabel}>Lecturer access</p>
             <h1 className="text-lg font-semibold">Sign in</h1>
           </div>
-          <Link href="/" className={ui.buttonSecondary}>Back to home</Link>
+          <Link href="/" className={ui.buttonSecondary}>Back to Home</Link>
         </div>
       </header>
 

@@ -236,7 +236,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
               onClick={() => setQuestions((prev) => [...prev, createEmptyQuestion()])}
               className={ui.buttonSecondary}
             >
-              + Add question
+              + Add Question
             </button>
           ) : null}
         </div>
@@ -356,11 +356,11 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       className="hidden"
                       onChange={(e) => handleVideoUpload(questionIndex, e.target.files?.[0])}
                     />
-                    {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload video"}
+                    {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload Video"}
                   </label>
                   {question.videoUrl ? (
                     <a href={question.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-teal-700 hover:text-teal-700">
-                      Preview video
+                      Preview Video
                     </a>
                   ) : null}
                 </div>
@@ -444,7 +444,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       )
                     }
                   >
-                    + Add option
+                    + Add Option
                   </button>
                 ) : null}
               </div>
@@ -457,7 +457,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
 
       <div className="mt-4 flex gap-2">
         <button type="button" disabled={saving} onClick={handleSave} className={ui.buttonPrimary}>
-          {saving ? "Saving..." : "Save changes"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </div>

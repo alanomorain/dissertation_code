@@ -11,7 +11,7 @@ export default function StudentLoginPage() {
             <p className={ui.textLabel}>Student access</p>
             <h1 className="text-lg font-semibold">Sign in</h1>
           </div>
-          <Link href="/" className={ui.buttonSecondary}>Back to home</Link>
+          <Link href="/" className={ui.buttonSecondary}>Back to Home</Link>
         </div>
       </header>
 
@@ -28,8 +28,8 @@ export default function StudentLoginPage() {
               New here? Create a student account or activate an invitation from your lecturer.
             </p>
             <div className="mt-3 flex items-center gap-2">
-              <Link href="/student/register" className={ui.buttonPrimary}>Create account</Link>
-              <Link href="/student/activate" className={ui.buttonSecondary}>Activate invite</Link>
+              <Link href="/student/register" className={ui.buttonPrimary}>Create Account</Link>
+              <Link href="/student/activate" className={ui.buttonSecondary}>Activate Invite</Link>
             </div>
           </div>
         </div>

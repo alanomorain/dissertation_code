@@ -11,7 +11,7 @@ export default function StudentRegisterPage() {
             <p className={ui.textLabel}>Student access</p>
             <h1 className="text-lg font-semibold">Create account</h1>
           </div>
-          <Link href="/student/login" className={ui.buttonSecondary}>Back to sign in</Link>
+          <Link href="/student/login" className={ui.buttonSecondary}>Back to Sign In</Link>
         </div>
       </header>
 

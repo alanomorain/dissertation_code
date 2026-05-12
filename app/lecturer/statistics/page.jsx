@@ -326,7 +326,7 @@ export default async function LecturerStatisticsPage({ searchParams }) {
                         Lecture-scoped avg score: {module.lectureAvgScore}% · Lecture-scoped completions: {module.lectureCompletions}
                       </p>
                     </div>
-                    <span className={ui.buttonSmall}>Open module stats</span>
+                    <span className={ui.buttonSmall}>Open Module Stats</span>
                   </div>
                 </Link>
               ))}

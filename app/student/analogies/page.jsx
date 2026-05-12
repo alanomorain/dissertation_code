@@ -105,7 +105,7 @@ export default async function StudentAnalogiesPage({ searchParams }) {
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/student/analogies" className={!selectedEnrollment ? ui.buttonPrimary : ui.buttonSecondary}>
-                All modules
+                All Modules
               </Link>
               {activeEnrollments.map((enrollment) => (
                 <Link

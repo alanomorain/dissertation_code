@@ -164,7 +164,7 @@ export default function MediaImagePanel({
           disabled={uploadingKind === "image"}
           className="text-xs rounded-lg border border-stone-300 bg-white px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {uploadingKind === "image" ? "Uploading..." : "Upload image"}
+          {uploadingKind === "image" ? "Uploading..." : "Upload Image"}
         </button>
         <button
           type="button"
@@ -172,7 +172,7 @@ export default function MediaImagePanel({
           disabled={uploadingKind === "video"}
           className="text-xs rounded-lg border border-stone-300 bg-white px-3 py-1 hover:border-teal-500 hover:text-teal-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {uploadingKind === "video" ? "Uploading..." : "Upload video"}
+          {uploadingKind === "video" ? "Uploading..." : "Upload Video"}
         </button>
       </div>
 

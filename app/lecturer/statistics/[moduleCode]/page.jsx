@@ -281,7 +281,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
             <h1 className="text-lg font-semibold">{moduleRecord.code} · {moduleRecord.name}</h1>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Link href={`/lecturer/statistics?range=${range}`} className={ui.buttonSecondary}>Back to all modules</Link>
+            <Link href={`/lecturer/statistics?range=${range}`} className={ui.buttonSecondary}>Back to All Modules</Link>
           </div>
         </div>
       </header>
@@ -380,7 +380,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
                 <div key={lecture.id} className={ui.cardInner}>
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-medium">{lecture.title}</p>
-                    <Link href={`/lecturer/lectures/${lecture.id}`} className={ui.buttonSmall}>Open lecture</Link>
+                    <Link href={`/lecturer/lectures/${lecture.id}`} className={ui.buttonSmall}>Open Lecture</Link>
                   </div>
                   <p className="text-xs text-stone-600">
                     Quizzes: {lecture.quizCount} · Completions: {lecture.completions} · Participants: {lecture.participants} · Revisits: {lecture.revisits}

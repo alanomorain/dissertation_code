@@ -110,9 +110,9 @@ export default async function LecturerModuleDetailPage({ params }) {
             <h1 className="text-lg font-semibold">{moduleRecord.code} · {moduleRecord.name}</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer/modules" className={ui.buttonSecondary}>All modules</Link>
+            <Link href="/lecturer/modules" className={ui.buttonSecondary}>All Modules</Link>
             <Link href={`/lecturer/lectures?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSecondary}>Lectures</Link>
-            <Link href={`/lecturer/analogies/upload-slides?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonPrimary}>Upload lecture slides</Link>
+            <Link href={`/lecturer/analogies/upload-slides?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonPrimary}>Upload Lecture Slides</Link>
           </div>
         </div>
       </header>
@@ -130,7 +130,7 @@ export default async function LecturerModuleDetailPage({ params }) {
             <div className={ui.cardFull}>
               <div className="mb-3 flex items-center justify-between">
                 <h2 className={ui.cardHeader}>Lectures</h2>
-                <Link href={`/lecturer/lectures?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>View all</Link>
+                <Link href={`/lecturer/lectures?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>View All</Link>
               </div>
               {moduleRecord.lectures.length === 0 ? (
                 <p className={ui.textSmall}>No lectures yet. Upload lecture slides to create one.</p>
@@ -173,7 +173,7 @@ export default async function LecturerModuleDetailPage({ params }) {
             <div className={ui.cardFull}>
               <div className="mb-3 flex items-center justify-between">
                 <h2 className={ui.cardHeader}>Quizzes</h2>
-                <Link href={`/lecturer/quizzes?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>View all</Link>
+                <Link href={`/lecturer/quizzes?module=${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>View All</Link>
               </div>
               {moduleRecord.quizzes.length === 0 ? (
                 <p className={ui.textSmall}>No quizzes in this module yet.</p>
@@ -194,7 +194,7 @@ export default async function LecturerModuleDetailPage({ params }) {
             <div className={ui.cardFull}>
               <div className="mb-3 flex items-center justify-between">
                 <h2 className={ui.cardHeader}>Statistics snapshot</h2>
-                <Link href={`/lecturer/statistics/${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>Open stats</Link>
+                <Link href={`/lecturer/statistics/${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>Open Stats</Link>
               </div>
               {quizPerformanceRows.length === 0 ? (
                 <p className={ui.textSmall}>No quiz data yet to chart.</p>

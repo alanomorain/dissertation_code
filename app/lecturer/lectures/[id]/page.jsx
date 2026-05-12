@@ -44,7 +44,7 @@ export default async function LecturerLectureDetailPage({ params }) {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href="/lecturer/lectures" className={ui.buttonSecondary}>Back to Lectures</Link>
-            <Link href={`/lecturer/modules/${encodeURIComponent(lecture.module.code)}`} className={ui.buttonSecondary}>Open module</Link>
+            <Link href={`/lecturer/modules/${encodeURIComponent(lecture.module.code)}`} className={ui.buttonSecondary}>Open Module</Link>
           </div>
         </div>
       </header>

@@ -152,7 +152,7 @@ export default async function LecturerQuizzesPage({ searchParams }) {
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/lecturer/quizzes" className={!moduleCodeFilter ? ui.buttonPrimary : ui.buttonSecondary}>
-                All modules
+                All Modules
               </Link>
               {modules.map((module) => (
                 <Link

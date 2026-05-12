@@ -71,7 +71,7 @@ export default function LoginForm({ role, title, redirectTo, subtitle }) {
       {error ? <p className="text-sm text-amber-700">{error}</p> : null}
 
       <button type="submit" disabled={submitting} className={ui.buttonPrimary}>
-        {submitting ? "Signing in..." : "Sign in"}
+        {submitting ? "Signing In..." : "Sign In"}
       </button>
     </form>
   )

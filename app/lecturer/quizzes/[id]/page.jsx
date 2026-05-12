@@ -41,9 +41,9 @@ export default async function LecturerQuizDetailPage({ params }) {
             <h1 className="text-lg font-semibold">Quiz Overview</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
-            <Link href={`/lecturer/quizzes/${id}/edit`} className={ui.buttonSecondary}>Edit quiz</Link>
-            <Link href={`/lecturer/quizzes/${id}/results`} className={ui.buttonPrimary}>View results</Link>
+            <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to Quizzes</Link>
+            <Link href={`/lecturer/quizzes/${id}/edit`} className={ui.buttonSecondary}>Edit Quiz</Link>
+            <Link href={`/lecturer/quizzes/${id}/results`} className={ui.buttonPrimary}>View Results</Link>
           </div>
         </div>
       </header>

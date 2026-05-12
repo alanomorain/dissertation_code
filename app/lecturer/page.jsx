@@ -163,7 +163,7 @@ export default async function LecturerDashboard() {
 
           <div className="grid grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] gap-6">
             <div id="modules" className={`${ui.cardFull} relative`}>
-              <Link href="/lecturer/modules" className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" aria-label="Manage modules" />
+              <Link href="/lecturer/modules" className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" aria-label="Manage Modules" />
               <div className="relative z-10 pointer-events-none">
                 <div className="mb-4">
                   <h3 className={ui.cardHeader}>Modules you teach</h3>

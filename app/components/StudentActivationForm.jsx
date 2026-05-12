@@ -108,10 +108,10 @@ export default function StudentActivationForm() {
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={submitting} className={ui.buttonPrimary}>
-          {submitting ? "Activating..." : "Activate account"}
+          {submitting ? "Activating..." : "Activate Account"}
         </button>
         <Link href="/student/login" className={ui.buttonSecondary}>
-          Back to sign in
+          Back to Sign In
         </Link>
       </div>
     </form>

@@ -309,7 +309,7 @@ export default function StudentQuizTakePage() {
         <section className={ui.pageSection}>
           <div className={`${ui.containerNarrow} py-8 space-y-3`}>
             <p className="text-sm text-amber-700">{error || "Quiz unavailable."}</p>
-            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
+            <Link href="/student/quizzes" className={ui.buttonSecondary}>Back to Quizzes</Link>
           </div>
         </section>
       </main>
@@ -366,7 +366,7 @@ export default function StudentQuizTakePage() {
                 className={ui.buttonSecondary}
                 onClick={() => openMediaModal({ questionId: currentQuestion.id, autoAdvance: null })}
               >
-                View analogy
+                View Analogy
               </button>
             </div>
 
@@ -379,7 +379,7 @@ export default function StudentQuizTakePage() {
                 onClick={() => submitCurrentQuestion({ withAnalogy: false })}
                 className={ui.buttonPrimary}
               >
-                {submitting ? "Saving..." : isFinalQuestion ? "Submit quiz" : "Submit"}
+                {submitting ? "Saving..." : isFinalQuestion ? "Submit Quiz" : "Submit"}
               </button>
               <button
                 type="button"
@@ -387,7 +387,7 @@ export default function StudentQuizTakePage() {
                 onClick={() => submitCurrentQuestion({ withAnalogy: true })}
                 className={ui.buttonSecondary}
               >
-                {isFinalQuestion ? "Submit quiz and view analogy" : "Submit and view analogy"}
+                {isFinalQuestion ? "Submit Quiz and View Analogy" : "Submit and View Analogy"}
               </button>
             </div>
           </div>
@@ -453,7 +453,7 @@ export default function StudentQuizTakePage() {
                         setMediaStage("VIDEO")
                       }}
                     >
-                      View video
+                      View Video
                     </button>
                   ) : null}
                   {modalTopicPayload.analogy ? (
@@ -467,11 +467,11 @@ export default function StudentQuizTakePage() {
                         setMediaStage("ANALOGY")
                       }}
                     >
-                      View analogy
+                      View Analogy
                     </button>
                   ) : null}
                   <button type="button" className={ui.buttonPrimary} onClick={closeMediaModal}>
-                    {pendingAdvance ? "Continue" : "Back to question"}
+                    {pendingAdvance ? "Continue" : "Back to Question"}
                   </button>
                 </div>
               </div>

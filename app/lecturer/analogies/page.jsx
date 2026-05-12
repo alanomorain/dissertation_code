@@ -110,7 +110,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <Link href="/lecturer/analogies" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>
-                All modules
+                All Modules
               </Link>
               {modules.map((module) => (
                 <Link
@@ -201,13 +201,13 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
                           href={`/lecturer/analogies/${analogy.analogySetId}/topics/${analogy.topicIndex}`}
                           className={ui.buttonPrimary}
                         >
-                          Open analogy
+                          Open Analogy
                         </Link>
                         <Link
                           href={`/lecturer/analogies/${analogy.analogySetId}`}
                           className={ui.buttonSecondary}
                         >
-                          Open set
+                          Open Set
                         </Link>
                       </div>
                     </div>

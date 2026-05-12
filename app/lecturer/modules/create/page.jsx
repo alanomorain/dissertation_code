@@ -72,7 +72,7 @@ export default function CreateModulePage() {
             </h1>
           </div>
           <Link href="/lecturer" className={ui.buttonSecondary}>
-            Back to dashboard
+            Back to Dashboard
           </Link>
         </div>
       </header>

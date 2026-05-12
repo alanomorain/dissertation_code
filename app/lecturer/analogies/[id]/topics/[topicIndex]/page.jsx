@@ -53,7 +53,7 @@ export default async function LecturerTopicDetailPage({ params }) {
                 href={`/lecturer/analogies/${id}/topics/${prevIndex}`}
                 className={ui.buttonSecondary}
               >
-                ← Previous topic
+                ← Previous Topic
               </Link>
             )}
             <Link

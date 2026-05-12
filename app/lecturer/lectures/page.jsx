@@ -59,7 +59,7 @@ export default async function LecturerLecturesPage({ searchParams }) {
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <Link href="/lecturer/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All modules</Link>
+              <Link href="/lecturer/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All Modules</Link>
               {modules.map((module) => (
                 <Link
                   key={module.id}

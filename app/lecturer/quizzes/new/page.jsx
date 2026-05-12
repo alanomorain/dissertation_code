@@ -248,7 +248,7 @@ function LecturerQuizWizardPageInner() {
           <div>
             <h1 className="text-lg font-semibold">Create Quiz</h1>
           </div>
-          <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>
+          <Link href="/lecturer/quizzes" className={ui.buttonSecondary}>Back to Quizzes</Link>
         </div>
       </header>
 
@@ -304,7 +304,7 @@ function LecturerQuizWizardPageInner() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold text-stone-950">AI Question Generation</h2>
                 <button type="button" onClick={handleGenerate} disabled={generating || !selectedModule} className={ui.buttonSecondary}>
-                  {generating ? "Generating..." : "Generate from module analogies"}
+                  {generating ? "Generating..." : "Generate from Module Analogies"}
                 </button>
               </div>
               <p className="text-xs text-stone-600">
@@ -338,7 +338,7 @@ function LecturerQuizWizardPageInner() {
                   onClick={() => setQuestions((prev) => [...prev, createEmptyQuestion()])}
                   className={ui.buttonSecondary}
                 >
-                  + Add question
+                  + Add Question
                 </button>
               </div>
 
@@ -462,7 +462,7 @@ function LecturerQuizWizardPageInner() {
                             className="hidden"
                             onChange={(e) => handleVideoUpload(questionIndex, e.target.files?.[0])}
                           />
-                          {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload video"}
+                          {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload Video"}
                         </label>
                         {question.videoUrl ? (
                           <a
@@ -471,7 +471,7 @@ function LecturerQuizWizardPageInner() {
                             rel="noreferrer"
                             className="text-xs text-teal-700 hover:text-teal-700"
                           >
-                            Preview video
+                            Preview Video
                           </a>
                         ) : null}
                       </div>
@@ -552,7 +552,7 @@ function LecturerQuizWizardPageInner() {
                             )
                           }
                         >
-                          + Add option
+                          + Add Option
                         </button>
                       </div>
                     </div>
@@ -565,7 +565,7 @@ function LecturerQuizWizardPageInner() {
 
             <div className="mt-4 flex gap-2">
               <button type="button" disabled={creating} onClick={handleCreate} className={ui.buttonPrimary}>
-                {creating ? "Creating..." : "Create quiz"}
+                {creating ? "Creating..." : "Create Quiz"}
               </button>
             </div>
           </div>

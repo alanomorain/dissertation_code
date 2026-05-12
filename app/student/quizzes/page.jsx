@@ -163,7 +163,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
                 href={quizHref({ module: "" })}
                 className={!moduleCodeFilter ? ui.buttonPrimary : ui.buttonSecondary}
               >
-                All modules
+                All Modules
               </Link>
               {modules.map((module) => (
                 <Link

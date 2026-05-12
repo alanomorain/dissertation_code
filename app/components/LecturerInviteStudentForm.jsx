@@ -118,7 +118,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
         {error ? <p className="text-sm text-amber-700">{error}</p> : null}
 
         <button type="submit" disabled={submitting} className={ui.buttonPrimary}>
-          {submitting ? "Creating invite..." : "Create invite"}
+          {submitting ? "Creating Invite..." : "Create Invite"}
         </button>
       </form>
 

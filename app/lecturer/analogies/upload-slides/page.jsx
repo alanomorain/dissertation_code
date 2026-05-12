@@ -661,7 +661,7 @@ function UploadSlidesPageInner() {
                         </option>
                       ))}
                       <option value="new" className="text-teal-700">
-                        Create new module...
+                        Create New Module...
                       </option>
                     </select>
                   </div>
@@ -724,7 +724,7 @@ function UploadSlidesPageInner() {
                       disabled={saving}
                       className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
-                      {saving ? "Processing..." : "Upload & suggest topics"}
+                      {saving ? "Processing..." : "Upload & Suggest Topics"}
                     </button>
                   </div>
                 </form>
@@ -773,7 +773,7 @@ function UploadSlidesPageInner() {
                       disabled={topics.length === 0 || generating}
                       className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                     >
-                      {generating ? "Generating analogies..." : "Generate analogies for selected topics"}
+                      {generating ? "Generating Analogies..." : "Generate Analogies for Selected Topics"}
                     </button>
                   </section>
                 )}
@@ -884,7 +884,7 @@ function UploadSlidesPageInner() {
                         disabled={!canApproveAnalogies || approving}
                         className={`${ui.buttonPrimary} px-5 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                       >
-                        {approving ? "Approving..." : "Approve analogies and continue"}
+                        {approving ? "Approving..." : "Approve Analogies and Continue"}
                       </button>
                     </div>
                   </section>
@@ -913,7 +913,7 @@ function UploadSlidesPageInner() {
                           className="min-w-[220px] flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         />
                         <label className={`${ui.buttonSecondary} cursor-pointer`}>
-                          {uploadingMediaByKey[`${idx}:image`] ? "Uploading..." : "Upload image"}
+                          {uploadingMediaByKey[`${idx}:image`] ? "Uploading..." : "Upload Image"}
                           <input
                             type="file"
                             accept="image/png,image/jpeg,image/webp,image/gif"
@@ -948,14 +948,14 @@ function UploadSlidesPageInner() {
                     onClick={() => setActiveStep("analogies")}
                     className={ui.buttonSecondary}
                   >
-                    Back to analogies
+                    Back to Analogies
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveStep("videos")}
                     className={ui.buttonPrimary}
                   >
-                    Continue to videos
+                    Continue to Videos
                   </button>
                 </div>
               </>
@@ -981,7 +981,7 @@ function UploadSlidesPageInner() {
                           className="min-w-[220px] flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         />
                         <label className={`${ui.buttonSecondary} cursor-pointer`}>
-                          {uploadingMediaByKey[`${idx}:video`] ? "Uploading..." : "Upload video"}
+                          {uploadingMediaByKey[`${idx}:video`] ? "Uploading..." : "Upload Video"}
                           <input
                             type="file"
                             accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
@@ -1010,14 +1010,14 @@ function UploadSlidesPageInner() {
                     onClick={() => setActiveStep("images")}
                     className={ui.buttonSecondary}
                   >
-                    Back to images
+                    Back to Images
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveStep("summary")}
                     className={ui.buttonPrimary}
                   >
-                    Continue to final summary
+                    Continue to Final Summary
                   </button>
                 </div>
               </>
@@ -1081,7 +1081,7 @@ function UploadSlidesPageInner() {
                     onClick={() => setActiveStep("videos")}
                     className={ui.buttonSecondary}
                   >
-                    Back to videos
+                    Back to Videos
                   </button>
                   <button
                     type="button"

@@ -60,7 +60,7 @@ export default async function LecturerQuizEditPage({ params }) {
             <h1 className="text-lg font-semibold">Edit Quiz</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href={`/lecturer/quizzes/${id}`} className={ui.buttonSecondary}>Back to overview</Link>
+            <Link href={`/lecturer/quizzes/${id}`} className={ui.buttonSecondary}>Back to Overview</Link>
           </div>
         </div>
       </header>

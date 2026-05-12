@@ -153,7 +153,7 @@ export default function EditAnalogyPage() {
           <div className="mx-auto max-w-4xl px-4 py-4 flex items-center justify-between">
             <h1 className="text-lg font-semibold">Loading...</h1>
             <Link href="/lecturer/analogies" className={ui.buttonSecondary}>
-              Back to analogies
+              Back to Analogies
             </Link>
           </div>
         </header>
@@ -174,7 +174,7 @@ export default function EditAnalogyPage() {
               href="/lecturer/analogies"
               className={ui.buttonSecondary}
             >
-              Back to analogies
+              Back to Analogies
             </Link>
           </div>
         </header>
@@ -201,7 +201,7 @@ export default function EditAnalogyPage() {
               href="/lecturer/analogies"
               className={ui.buttonSecondary}
             >
-              Back to analogies
+              Back to Analogies
             </Link>
           </div>
         </div>
@@ -312,7 +312,7 @@ export default function EditAnalogyPage() {
                   disabled={saving}
                   className={`${ui.buttonPrimary} px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
-                  {saving ? "Saving changes..." : "Save changes"}
+                  {saving ? "Saving Changes..." : "Save Changes"}
                 </button>
                 <Link
                   href="/lecturer/analogies"

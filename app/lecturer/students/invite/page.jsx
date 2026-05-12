@@ -29,8 +29,8 @@ export default async function LecturerInviteStudentPage({ searchParams }) {
             <h1 className="text-lg font-semibold">Invite students</h1>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <Link href="/lecturer/students" className={ui.buttonSecondary}>Manage access</Link>
-            <Link href="/lecturer" className={ui.buttonSecondary}>Back to dashboard</Link>
+            <Link href="/lecturer/students" className={ui.buttonSecondary}>Manage Access</Link>
+            <Link href="/lecturer" className={ui.buttonSecondary}>Back to Dashboard</Link>
           </div>
         </div>
       </header>

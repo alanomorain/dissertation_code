@@ -158,7 +158,7 @@ export default function LecturerAnalogyReviewPage() {
           </div>
           <div className="flex items-center gap-3 text-sm">
             <Link href={`/lecturer/analogies/${id}`} className={ui.buttonSecondary}>
-              Back to details
+              Back to Details
             </Link>
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function LecturerAnalogyReviewPage() {
               disabled={working !== ""}
               className={ui.buttonSecondary}
             >
-              {working === "updateFeedback" ? "Saving..." : "Save feedback"}
+              {working === "updateFeedback" ? "Saving..." : "Save Feedback"}
             </button>
             <button
               type="button"
@@ -236,7 +236,7 @@ export default function LecturerAnalogyReviewPage() {
               disabled={working !== ""}
               className={ui.buttonSecondary}
             >
-              {working === "requestChanges" ? "Sending..." : "Request changes"}
+              {working === "requestChanges" ? "Sending..." : "Request Changes"}
             </button>
             <button
               type="button"

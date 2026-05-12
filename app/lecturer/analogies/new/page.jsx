@@ -209,7 +209,7 @@ function NewAnalogyPageInner() {
             href="/lecturer"
             className={ui.buttonSecondary}
           >
-            Back to dashboard
+            Back to Dashboard
           </Link>
         </div>
       </header>
@@ -263,7 +263,7 @@ function NewAnalogyPageInner() {
                     </option>
                   ))}
                   <option value="new" className="text-teal-700">
-                    ➕ Create new module...
+                    ➕ Create New Module...
                   </option>
                 </select>
                 <p className="text-xs text-stone-600">
@@ -373,7 +373,7 @@ function NewAnalogyPageInner() {
                   href="/lecturer"
                   className="text-sm text-stone-700 hover:text-teal-700"
                 >
-                  Cancel and return to dashboard
+                  Cancel and Return to Dashboard
                 </Link>
               </div>
             </form>

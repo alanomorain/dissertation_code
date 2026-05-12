@@ -125,10 +125,10 @@ export default function StudentRegisterForm() {
 
       <div className="flex items-center gap-3">
         <button type="submit" disabled={submitting} className={ui.buttonPrimary}>
-          {submitting ? "Creating account..." : "Create account"}
+          {submitting ? "Creating Account..." : "Create Account"}
         </button>
         <Link href="/student/login" className={ui.buttonSecondary}>
-          Back to sign in
+          Back to Sign In
         </Link>
       </div>
     </form>

@@ -101,7 +101,7 @@ export default async function StudentAnalogyDetailPage({ params }) {
               </div>
               {analogy.lecture?.id ? (
                 <Link href={`/student/lectures/${analogy.lecture.id}`} className={ui.buttonSecondary}>
-                  View lecture
+                  View Lecture
                 </Link>
               ) : null}
             </div>

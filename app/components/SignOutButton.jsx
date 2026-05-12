@@ -14,7 +14,7 @@ export default function SignOutButton({ redirectTo = "/" }) {
 
   return (
     <button type="button" onClick={signOut} className={ui.buttonSecondary}>
-      Log out
+      Log Out
     </button>
   )
 }

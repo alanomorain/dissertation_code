@@ -105,7 +105,7 @@ export default async function StudentQuizStartPage({ params }) {
             ) : submittedAttempts >= quiz.maxAttempts ? (
               <p className="text-sm text-amber-700">You have reached the attempt limit for this quiz.</p>
             ) : (
-              <Link href={`/student/quizzes/${id}/take`} className={ui.buttonPrimary}>Start quiz</Link>
+              <Link href={`/student/quizzes/${id}/take`} className={ui.buttonPrimary}>Start Quiz</Link>
             )}
           </div>
         </div>

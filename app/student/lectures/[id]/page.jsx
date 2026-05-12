@@ -113,7 +113,7 @@ export default async function StudentLectureDetailPage({ params }) {
                           Max attempts: {quiz.maxAttempts} · Due {quiz.dueAt ? new Date(quiz.dueAt).toLocaleDateString() : "Any time"}
                         </p>
                       </div>
-                      <span className={ui.buttonSmall}>Open quiz</span>
+                      <span className={ui.buttonSmall}>Open Quiz</span>
                     </div>
                   </Link>
                 ))}

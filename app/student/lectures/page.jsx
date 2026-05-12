@@ -66,7 +66,7 @@ export default async function StudentLecturesPage({ searchParams }) {
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <Link href="/student/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All modules</Link>
+              <Link href="/student/lectures" className={!moduleCode ? ui.buttonPrimary : ui.buttonSecondary}>All Modules</Link>
               {activeEnrollments.map((enrollment) => (
                 <Link
                   key={enrollment.id}
