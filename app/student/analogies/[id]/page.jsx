@@ -86,7 +86,7 @@ export default async function StudentAnalogyDetailPage({ params }) {
         label="Student · Analogies"
         title={analogy.lecture?.title || analogy.title || "Analogy set"}
         subtitle={`${moduleName} · ${topics.length} topics`}
-        actions={<Link href="/student/analogies" className={ui.buttonSecondary}>Back to analogies</Link>}
+        actions={<Link href="/student/analogies" className={ui.buttonSecondary}>All Analogies</Link>}
       />
 
       <section className={ui.pageSection}>

@@ -49,7 +49,7 @@ export default async function StudentQuizStartPage({ params }) {
         label="Student · Quiz"
         title="Ready to start?"
         subtitle={quiz.title}
-        actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>Back to quizzes</Link>}
+        actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>All Quizzes</Link>}
       />
 
       <section className={ui.pageSection}>

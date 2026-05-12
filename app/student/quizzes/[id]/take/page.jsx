@@ -6,6 +6,16 @@ import { useParams, useRouter } from "next/navigation"
 import * as ui from "../../../../styles/ui"
 import StudentPageHeader from "../../../components/StudentPageHeader"
 
+function getQuestionDisplayPrompt(question, quizTitle) {
+  const prompt = String(question?.prompt || "").trim()
+  const title = String(quizTitle || "").trim()
+
+  if (!prompt || !title) return prompt
+
+  const prefix = `(${title})`
+  return prompt.startsWith(prefix) ? prompt.slice(prefix.length).trim() : prompt
+}
+
 function getTopicPayload(question) {
   const topicIndex = Number(question?.analogyTopicIndex)
   const topics = Array.isArray(question?.analogySet?.topicsJson?.topics)
@@ -180,6 +190,41 @@ export default function StudentQuizTakePage() {
     }
   }
 
+  const saveAndExit = async () => {
+    if (!attemptId || !currentQuestion) {
+      router.push("/student/quizzes")
+      return
+    }
+
+    setSubmitting(true)
+    setError("")
+
+    try {
+      const selectedOptionId = answers[currentQuestion.id] || null
+
+      if (selectedOptionId) {
+        const res = await fetch(`/api/quizzes/${id}/attempts`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "answer",
+            attemptId,
+            questionId: currentQuestion.id,
+            selectedOptionId,
+          }),
+        })
+
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || "Unable to save progress")
+      }
+
+      router.push("/student/quizzes")
+    } catch (err) {
+      setError(err.message || "Unable to save progress")
+      setSubmitting(false)
+    }
+  }
+
   useEffect(() => {
     let cancelled = false
 
@@ -279,7 +324,11 @@ export default function StudentQuizTakePage() {
         label="Student · Quiz"
         title={quiz.title}
         subtitle={`Due: ${quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}`}
-        actions={<Link href={`/student/quizzes/${id}/start`} className={ui.buttonSecondary}>Exit</Link>}
+        actions={
+          <button type="button" className={ui.buttonSecondary} disabled={submitting} onClick={saveAndExit}>
+            {submitting ? "Saving..." : "Save & Exit"}
+          </button>
+        }
       />
 
       <section className={ui.pageSection}>
@@ -294,7 +343,7 @@ export default function StudentQuizTakePage() {
               </div>
             </div>
 
-            <h2 className="text-base font-semibold">{currentQuestion.prompt}</h2>
+            <h2 className="text-base font-semibold">{getQuestionDisplayPrompt(currentQuestion, quiz.title)}</h2>
 
             <div className="mt-4 space-y-2 text-sm">
               {currentQuestion.options.map((option) => (
