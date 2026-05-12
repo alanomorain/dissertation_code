@@ -95,7 +95,7 @@ export default function Home() {
 
           {/* How it works section */}
           <div className="max-w-3xl mx-auto">
-            <h3 className="text-center text-sm font-semibold text-stone-600 uppercase tracking-wide mb-8">How it works</h3>
+            <h3 className="text-center text-sm font-semibold text-stone-600 uppercase tracking-wide mb-8">How It Works</h3>
             <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
               {/* Step 1 */}
               <div className="relative">

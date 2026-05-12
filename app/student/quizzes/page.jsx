@@ -199,7 +199,7 @@ export default async function StudentQuizzesPage({ searchParams }) {
           <div className="w-full space-y-6">
             {filteredModuleGroups.length === 0 ? (
               <div className={ui.cardFull}>
-                <h2 className={ui.cardHeader}>Quiz library</h2>
+                <h2 className={ui.cardHeader}>Quiz Library</h2>
                 <p className={ui.textSmall}>
                   {statusFilter
                     ? `No ${STATUS_FILTERS.find((filter) => filter.key === statusFilter)?.label.toLowerCase()} quizzes for this selection.`

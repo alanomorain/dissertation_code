@@ -80,7 +80,7 @@ export default async function StudentLecturesPage({ searchParams }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Lectures with approved analogies</h2>
+            <h2 className={ui.cardHeader}>Lectures with Approved Analogies</h2>
             {lectures.length === 0 ? (
               <p className={ui.textSmall}>No lecture content is available yet.</p>
             ) : (

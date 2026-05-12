@@ -607,7 +607,7 @@ function UploadSlidesPageInner() {
               {stepPill("analogies", "1. Analogies")}
               {stepPill("images", "2. Images (optional)")}
               {stepPill("videos", "3. Videos (optional)")}
-              {stepPill("summary", "4. Final summary")}
+              {stepPill("summary", "4. Final Summary")}
             </div>
           </div>
           <Link href="/lecturer/analogies" className={ui.buttonSecondary}>
@@ -731,7 +731,7 @@ function UploadSlidesPageInner() {
 
                 {topics.length > 0 && (
                   <section className="mt-8 border-t border-stone-200 pt-4">
-                    <h2 className={`${ui.cardHeader} mb-3`}>Suggested topics for analogies</h2>
+                    <h2 className={`${ui.cardHeader} mb-3`}>Suggested Topics for Analogies</h2>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {topics.map((topic) => (
                         <span
@@ -780,7 +780,7 @@ function UploadSlidesPageInner() {
 
                 {topicStates.length > 0 && (
                   <section className="mt-8 border-t border-stone-200 pt-4">
-                    <h2 className={`${ui.cardHeader} mb-3`}>Select your favourite analogy for each topic</h2>
+                    <h2 className={`${ui.cardHeader} mb-3`}>Select Your Favourite Analogy for Each Topic</h2>
                     <p className="text-xs text-stone-600 mb-4">
                       Selected options are highlighted. Double-click the selected analogy to edit wording, then add feedback and regenerate that topic if needed.
                     </p>
@@ -894,7 +894,7 @@ function UploadSlidesPageInner() {
 
             {activeStep === "images" && (
               <>
-                <h2 className={ui.cardHeader}>Optional image uploads</h2>
+                <h2 className={ui.cardHeader}>Optional Image Uploads</h2>
                 <p className="text-sm text-stone-700 mb-4">Upload supporting images for any topic, or skip.</p>
 
                 <div className="space-y-4">
@@ -963,7 +963,7 @@ function UploadSlidesPageInner() {
 
             {activeStep === "videos" && (
               <>
-                <h2 className={ui.cardHeader}>Optional video uploads and details</h2>
+                <h2 className={ui.cardHeader}>Optional Video Uploads and Details</h2>
                 <p className="text-sm text-stone-700 mb-4">Upload a short video clip or add an existing URL for any topic.</p>
 
                 <div className="space-y-4">
@@ -1025,7 +1025,7 @@ function UploadSlidesPageInner() {
 
             {activeStep === "summary" && (
               <>
-                <h2 className={ui.cardHeader}>Final summary</h2>
+                <h2 className={ui.cardHeader}>Final Summary</h2>
                 <p className="text-sm text-stone-700 mb-4">Review written analogies, images, and videos together before finishing.</p>
 
                 <div className="space-y-4">

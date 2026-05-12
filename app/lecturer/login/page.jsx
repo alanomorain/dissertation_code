@@ -9,7 +9,7 @@ export default function LecturerLoginPage() {
         <div className={ui.headerContentNarrow}>
           <div>
             <p className={ui.textLabel}>Lecturer access</p>
-            <h1 className="text-lg font-semibold">Sign in</h1>
+            <h1 className="text-lg font-semibold">Sign In</h1>
           </div>
           <Link href="/" className={ui.buttonSecondary}>Back to Home</Link>
         </div>
@@ -19,7 +19,7 @@ export default function LecturerLoginPage() {
         <div className={`${ui.containerNarrow} py-10 space-y-5`}>
           <LoginForm
             role="LECTURER"
-            title="Lecturer sign in"
+            title="Lecturer Sign In"
             redirectTo="/lecturer"
             subtitle="Sign in to manage your modules, analogies, quizzes, and analytics."
           />

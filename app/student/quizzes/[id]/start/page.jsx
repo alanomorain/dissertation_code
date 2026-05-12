@@ -49,7 +49,7 @@ export default async function StudentQuizStartPage({ params }) {
     <main className={ui.page}>
       <StudentPageHeader
         label="Student · Quiz"
-        title="Ready to start?"
+        title="Ready to Start?"
         subtitle={quiz.title}
         actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>All Quizzes</Link>}
       />
@@ -64,7 +64,7 @@ export default async function StudentQuizStartPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Quiz overview</h2>
+            <h2 className={ui.cardHeader}>Quiz Overview</h2>
             <p className="font-semibold text-stone-950">{quiz.title}</p>
             <p className="mt-1 text-sm text-stone-600">
               Due {dueDate.toLowerCase()} · {quiz._count.questions} questions
@@ -72,7 +72,7 @@ export default async function StudentQuizStartPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Previous attempts</h2>
+            <h2 className={ui.cardHeader}>Previous Attempts</h2>
             {previousAttempts.length === 0 ? (
               <p className={ui.textSmall}>No previous submitted attempts yet.</p>
             ) : (

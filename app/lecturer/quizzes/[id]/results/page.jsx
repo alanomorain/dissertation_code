@@ -75,7 +75,7 @@ export default async function LecturerQuizResultsPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Question performance</h2>
+            <h2 className={ui.cardHeader}>Question Performance</h2>
             <div className="space-y-3 text-sm">
               {questionPerformance.map((q) => (
                 <div key={q.id} className={ui.cardInner}>
@@ -87,7 +87,7 @@ export default async function LecturerQuizResultsPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Student results</h2>
+            <h2 className={ui.cardHeader}>Student Results</h2>
             <div className="space-y-3 text-sm">
               {attempts.map((attempt) => (
                 <div key={attempt.id} className={ui.cardInner}>

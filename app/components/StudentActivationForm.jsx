@@ -64,7 +64,7 @@ export default function StudentActivationForm() {
     <form onSubmit={activateAccount} className={`${ui.cardFull} space-y-4`}>
       <div>
         <p className={ui.textLabel}>Student invitation</p>
-        <h2 className="mt-1 text-xl font-semibold">Activate your account</h2>
+        <h2 className="mt-1 text-xl font-semibold">Activate Your Account</h2>
         <p className="mt-2 text-sm text-stone-700">
           Set a password to complete your invited student account.
         </p>

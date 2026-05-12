@@ -42,7 +42,7 @@ export default async function LecturerModulesPage() {
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>All modules</h2>
+            <h2 className={ui.cardHeader}>All Modules</h2>
             {modules.length === 0 ? (
               <p className={ui.textSmall}>No modules created yet.</p>
             ) : (

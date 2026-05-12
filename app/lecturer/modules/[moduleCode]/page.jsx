@@ -149,7 +149,7 @@ export default async function LecturerModuleDetailPage({ params }) {
             </div>
 
             <div className={ui.cardFull}>
-              <h2 className={ui.cardHeader}>Recent topics</h2>
+              <h2 className={ui.cardHeader}>Recent Topics</h2>
               {recentTopics.length === 0 ? (
                 <p className={ui.textSmall}>No topics in this module yet.</p>
               ) : (
@@ -193,7 +193,7 @@ export default async function LecturerModuleDetailPage({ params }) {
 
             <div className={ui.cardFull}>
               <div className="mb-3 flex items-center justify-between">
-                <h2 className={ui.cardHeader}>Statistics snapshot</h2>
+                <h2 className={ui.cardHeader}>Statistics Snapshot</h2>
                 <Link href={`/lecturer/statistics/${encodeURIComponent(moduleRecord.code)}`} className={ui.buttonSmall}>Open Stats</Link>
               </div>
               {quizPerformanceRows.length === 0 ? (

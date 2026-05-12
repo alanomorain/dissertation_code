@@ -14,7 +14,7 @@ export default function StudentActivatePage() {
         <div className={ui.headerContentNarrow}>
           <div>
             <p className={ui.textLabel}>Student invitation</p>
-            <h1 className="text-lg font-semibold">Activate account</h1>
+            <h1 className="text-lg font-semibold">Activate Account</h1>
           </div>
           <Link href="/student/login" className={ui.buttonSecondary}>Back to Sign In</Link>
         </div>

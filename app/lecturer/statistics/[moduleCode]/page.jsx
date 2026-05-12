@@ -310,7 +310,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Media impact</h2>
+            <h2 className={ui.cardHeader}>Media Impact</h2>
             <div className="mt-3 grid gap-3 md:grid-cols-3 text-sm">
               <div className={ui.cardInner}>
                 <p className={ui.textLabel}>No analogy/video</p>
@@ -332,7 +332,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
 
           <div className="grid gap-6 lg:grid-cols-[1.2fr,1fr]">
             <div className={ui.cardFull}>
-              <h2 className={ui.cardHeader}>Student participation and outcomes</h2>
+              <h2 className={ui.cardHeader}>Student Participation and Outcomes</h2>
               <div className="space-y-2 text-sm">
                 {studentRows.map((student) => (
                   <div key={student.id} className={ui.cardInner}>
@@ -353,7 +353,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
             </div>
 
             <div className={ui.cardFull}>
-              <h2 className={ui.cardHeader}>Quiz engagement</h2>
+              <h2 className={ui.cardHeader}>Quiz Engagement</h2>
               <div className="space-y-2 text-sm">
                 {quizRows.map((quiz) => (
                   <div key={quiz.id} className={ui.cardInner}>
@@ -374,7 +374,7 @@ export default async function LecturerModuleStatisticsPage({ params, searchParam
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Lecture performance</h2>
+            <h2 className={ui.cardHeader}>Lecture Performance</h2>
             <div className="space-y-2 text-sm">
               {lectureRows.map((lecture) => (
                 <div key={lecture.id} className={ui.cardInner}>

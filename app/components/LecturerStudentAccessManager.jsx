@@ -173,7 +173,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
       <form onSubmit={onAddEnrollment} className={`${ui.cardFull} space-y-4`}>
         <div>
           <p className={ui.textLabel}>Existing account access</p>
-          <h2 className="mt-1 text-xl font-semibold">Assign or update enrollment</h2>
+          <h2 className="mt-1 text-xl font-semibold">Assign or Update Enrollment</h2>
           <p className="mt-2 text-sm text-stone-700">
             Use this for students with an existing account. For new students, use the invite flow.
           </p>
@@ -239,7 +239,7 @@ export default function LecturerStudentAccessManager({ modules, initialModuleCod
       {message ? <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{message}</div> : null}
 
       <div className={ui.cardFull}>
-        <h2 className={ui.cardHeader}>Student access</h2>
+        <h2 className={ui.cardHeader}>Student Access</h2>
         {loading ? (
           <p className={ui.textSmall}>Loading students...</p>
         ) : studentRows.length === 0 ? (

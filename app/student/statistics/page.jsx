@@ -286,7 +286,7 @@ export default async function StudentStatisticsPage() {
             </div>
 
             <div className={ui.cardFull}>
-              <h2 className={ui.cardHeader}>Media impact</h2>
+              <h2 className={ui.cardHeader}>Media Impact</h2>
               <div className="mt-3 grid gap-3 md:grid-cols-3 text-sm">
                 <div className={ui.cardInner}>
                   <p className={ui.textLabel}>No analogy/video</p>
@@ -319,7 +319,7 @@ export default async function StudentStatisticsPage() {
 
             <div className={ui.cardFull}>
               <div className="mb-4">
-                <h2 className={ui.cardHeader}>Module performance</h2>
+                <h2 className={ui.cardHeader}>Module Performance</h2>
               </div>
               <div className="space-y-3 text-sm">
                 {modulePerformance.map((item) => (

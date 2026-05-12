@@ -62,7 +62,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
       <form onSubmit={inviteStudent} className={`${ui.cardFull} space-y-4`}>
         <div>
           <p className={ui.textLabel}>Lecturer tools</p>
-          <h2 className="mt-1 text-xl font-semibold">Invite a student</h2>
+          <h2 className="mt-1 text-xl font-semibold">Invite a Student</h2>
           <p className="mt-2 text-sm text-stone-700">
             Invite a student to a module. They will receive an activation link.
           </p>
@@ -124,7 +124,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
 
       {result ? (
         <div className={ui.cardFull}>
-          <h3 className={ui.cardHeader}>Invite created</h3>
+          <h3 className={ui.cardHeader}>Invite Created</h3>
           <p className="text-sm text-stone-700">Share this activation link with {result.email}:</p>
           <p className="mt-2 break-all rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs text-stone-800">
             {result.activationLink}

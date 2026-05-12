@@ -51,7 +51,7 @@ export default async function LecturerQuizDetailPage({ params }) {
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Quiz summary</h2>
+            <h2 className={ui.cardHeader}>Quiz Summary</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
               <p><span className={ui.textMuted}>Module:</span> {getModuleDisplayName(quiz.module)}</p>
               <p className="flex items-center gap-2"><span className={ui.textMuted}>Status:</span><QuizStatusBadge status={statusLabel(quiz)} /></p>
@@ -63,7 +63,7 @@ export default async function LecturerQuizDetailPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Question preview</h2>
+            <h2 className={ui.cardHeader}>Question Preview</h2>
             <div className="space-y-3 text-sm">
               {quiz.questions.map((question) => (
                 <div key={question.id} className={ui.cardInner}>

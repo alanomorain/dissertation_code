@@ -84,7 +84,7 @@ function createLectureRows(module, fromDate) {
     const attempts = unassignedQuizzes.flatMap((quiz) => quiz.attempts)
     rows.push({
       id: "unassigned",
-      title: "Unassigned quizzes",
+      title: "Unassigned Quizzes",
       analogySetCount: 0,
       interactionCount: 0,
       quizCount: unassignedQuizzes.length,
@@ -296,7 +296,7 @@ export default async function LecturerStatisticsPage({ searchParams }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Module breakdown</h2>
+            <h2 className={ui.cardHeader}>Module Breakdown</h2>
             <div className="space-y-3 text-sm">
               {moduleCards.map((module) => (
                 <Link

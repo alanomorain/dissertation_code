@@ -153,7 +153,7 @@ export default async function AnalogiesDashboardPage({ searchParams }) {
           {/* Analogy list */}
           <div className={ui.cardFull}>
             <div className="flex items-center justify-between mb-3">
-              <h2 className={ui.cardHeader}>All analogies</h2>
+              <h2 className={ui.cardHeader}>All Analogies</h2>
             </div>
 
             {analogies.length === 0 ? (

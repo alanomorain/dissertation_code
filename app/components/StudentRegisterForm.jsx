@@ -59,7 +59,7 @@ export default function StudentRegisterForm() {
     <form onSubmit={handleSubmit} className={`${ui.cardFull} space-y-4`}>
       <div>
         <p className={ui.textLabel}>Student access</p>
-        <h2 className="mt-1 text-xl font-semibold">Create account</h2>
+        <h2 className="mt-1 text-xl font-semibold">Create Account</h2>
         <p className="mt-2 text-sm text-stone-700">
           Create your student account to sign in directly without seeded demo credentials.
         </p>

@@ -101,7 +101,7 @@ export default async function StudentQuizResultsPage({ params, searchParams }) {
     <main className={ui.page}>
       <StudentPageHeader
         label="Student · Results"
-        title="Your results"
+        title="Your Results"
         subtitle={attempt.quiz.title}
         actions={<Link href="/student/quizzes" className={ui.buttonSecondary}>All Quizzes</Link>}
       />

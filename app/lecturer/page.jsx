@@ -114,7 +114,7 @@ export default async function LecturerDashboard() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className={ui.textLabel}>Overview</p>
-                <h2 className="text-xl font-semibold">Everything important in one place</h2>
+                <h2 className="text-xl font-semibold">Everything Important in One Place</h2>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                 <div className={ui.cardInner}>
@@ -139,7 +139,7 @@ export default async function LecturerDashboard() {
 
           <div className={ui.cardFull}>
             <div className="mb-4">
-              <h3 className={ui.cardHeader}>Core areas</h3>
+              <h3 className={ui.cardHeader}>Core Areas</h3>
             </div>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
               {coreAreas.map((area) => (
@@ -166,7 +166,7 @@ export default async function LecturerDashboard() {
               <Link href="/lecturer/modules" className="absolute inset-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" aria-label="Manage Modules" />
               <div className="relative z-10 pointer-events-none">
                 <div className="mb-4">
-                  <h3 className={ui.cardHeader}>Modules you teach</h3>
+                  <h3 className={ui.cardHeader}>Modules You Teach</h3>
                 </div>
 
                 {taughtModules.length === 0 ? (
@@ -192,7 +192,7 @@ export default async function LecturerDashboard() {
 
             <div className={ui.cardFull}>
               <div className="mb-3">
-                <h3 className={ui.cardHeader}>Recent lecture uploads</h3>
+                <h3 className={ui.cardHeader}>Recent Lecture Uploads</h3>
               </div>
               {recentLectureUploads.length === 0 ? (
                 <p className="text-sm text-stone-600">You haven&apos;t uploaded any lectures yet.</p>

@@ -291,7 +291,7 @@ export default async function StudentDashboard() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <p className={ui.textLabel}>Overview</p>
-                <h2 className="text-xl font-semibold">Everything important in one place</h2>
+                <h2 className="text-xl font-semibold">Everything Important in One Place</h2>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
                 <div className={ui.cardInner}>
@@ -316,7 +316,7 @@ export default async function StudentDashboard() {
 
           <div className={ui.cardFull}>
             <div className="mb-4">
-              <h3 className={ui.cardHeader}>Core areas</h3>
+              <h3 className={ui.cardHeader}>Core Areas</h3>
             </div>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               {coreAreas.map((area) => (
@@ -344,7 +344,7 @@ export default async function StudentDashboard() {
             </div>
 
             <div className={ui.cardFull}>
-              <h3 className={ui.cardHeader}>Recent analogies</h3>
+              <h3 className={ui.cardHeader}>Recent Analogies</h3>
               <div className="space-y-2 text-sm">
                 {recentAnalogyTopics.map((analogy) => (
                   <Link key={analogy.id} href={analogy.href} className={ui.linkCard}>

@@ -120,7 +120,7 @@ export default async function StudentAnalogiesPage({ searchParams }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Analogy sets</h2>
+            <h2 className={ui.cardHeader}>Analogy Sets</h2>
             {revisionAnalogySets.length === 0 ? (
               <p className={ui.textSmall}>No revision analogy sets are unlocked for this view yet.</p>
             ) : (
