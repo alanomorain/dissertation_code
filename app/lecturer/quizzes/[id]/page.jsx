@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import QuizStatusBadge from "../../../components/QuizStatusBadge"
 import { prisma } from "../../../lib/db"
 import { getCurrentUser } from "../../../lib/currentUser"
+import { formatDisplayDate } from "../../../lib/dateFormat"
 import { getModuleDisplayName } from "../../../lib/moduleDisplay"
 import * as ui from "../../../styles/ui"
 
@@ -56,8 +57,8 @@ export default async function LecturerQuizDetailPage({ params }) {
               <p className="flex items-center gap-2"><span className={ui.textMuted}>Status:</span><QuizStatusBadge status={statusLabel(quiz)} /></p>
               <p><span className={ui.textMuted}>Questions:</span> {quiz.questions.length}</p>
               <p><span className={ui.textMuted}>Attempts:</span> {quiz._count.attempts}</p>
-              <p><span className={ui.textMuted}>Release:</span> {quiz.publishedAt ? new Date(quiz.publishedAt).toLocaleString() : "Not scheduled"}</p>
-              <p><span className={ui.textMuted}>Due:</span> {quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "Not set"}</p>
+              <p><span className={ui.textMuted}>Release:</span> {formatDisplayDate(quiz.publishedAt, "Not scheduled")}</p>
+              <p><span className={ui.textMuted}>Due:</span> {formatDisplayDate(quiz.dueAt, "Not set")}</p>
             </div>
           </div>
 

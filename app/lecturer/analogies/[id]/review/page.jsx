@@ -3,14 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
+import { formatDisplayDate } from "../../../../lib/dateFormat"
 import * as ui from "../../../../styles/ui"
-
-const formatDateTime = (value) => {
-  if (!value) return "Not approved"
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "Not approved"
-  return date.toLocaleDateString()
-}
 
 export default function LecturerAnalogyReviewPage() {
   const params = useParams()
@@ -23,7 +17,7 @@ export default function LecturerAnalogyReviewPage() {
   const [working, setWorking] = useState("")
 
   const reviewStatus = analogy?.reviewStatus || "DRAFT"
-  const approvedAt = useMemo(() => formatDateTime(analogy?.approvedAt), [analogy?.approvedAt])
+  const approvedAt = useMemo(() => formatDisplayDate(analogy?.approvedAt, "Not approved"), [analogy?.approvedAt])
   const displayTitle = analogy?.lecture?.title || analogy?.title || "Untitled"
 
   const loadAnalogy = useCallback(async () => {

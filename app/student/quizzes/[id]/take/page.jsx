@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { formatDisplayDate } from "../../../../lib/dateFormat"
 import * as ui from "../../../../styles/ui"
 import StudentPageHeader from "../../../components/StudentPageHeader"
 
@@ -323,7 +324,7 @@ export default function StudentQuizTakePage() {
       <StudentPageHeader
         label="Student · Quiz"
         title={quiz.title}
-        subtitle={`Due: ${quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date"}`}
+        subtitle={`Due: ${formatDisplayDate(quiz.dueAt, "No due date")}`}
         actions={
           <button type="button" className={ui.buttonSecondary} disabled={submitting} onClick={saveAndExit}>
             {submitting ? "Saving..." : "Save & Exit"}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { formatDisplayDate } from "../lib/dateFormat"
 import { getModuleDisplayName } from "../lib/moduleDisplay"
 import * as ui from "../styles/ui"
 
@@ -129,7 +130,7 @@ export default function LecturerInviteStudentForm({ modules, initialModuleCode }
             {result.activationLink}
           </p>
           <p className="mt-2 text-xs text-stone-600">
-            Expires at: {new Date(result.expiresAt).toLocaleString()}
+            Expires: {formatDisplayDate(result.expiresAt)}
           </p>
         </div>
       ) : null}

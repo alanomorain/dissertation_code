@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { prisma } from "../../../../lib/db"
 import { getCurrentUser } from "../../../../lib/currentUser"
+import { formatDisplayDate } from "../../../../lib/dateFormat"
 import * as ui from "../../../../styles/ui"
 import StudentPageHeader from "../../../components/StudentPageHeader"
 
@@ -41,6 +42,7 @@ export default async function StudentQuizStartPage({ params }) {
     ? Math.max(...previousAttempts.map((attempt) => attempt.score || 0))
     : null
   const dueAt = quiz.dueAt ? new Date(quiz.dueAt) : null
+  const dueDate = formatDisplayDate(dueAt, "Any time")
   const isClosed = dueAt ? dueAt.getTime() <= now.getTime() : false
 
   return (
@@ -58,14 +60,14 @@ export default async function StudentQuizStartPage({ params }) {
             <div className={ui.cardFull}><p className={ui.textLabel}>Questions</p><p className="mt-2 text-2xl font-semibold">{quiz._count.questions}</p></div>
             <div className={ui.cardFull}><p className={ui.textLabel}>Attempts used</p><p className="mt-2 text-2xl font-semibold">{submittedAttempts}/{quiz.maxAttempts}</p></div>
             <div className={ui.cardFull}><p className={ui.textLabel}>Best score</p><p className="mt-2 text-2xl font-semibold">{bestScore === null ? "N/A" : `${bestScore}%`}</p></div>
-            <div className={ui.cardFull}><p className={ui.textLabel}>Due</p><p className="mt-2 text-2xl font-semibold">{dueAt ? dueAt.toLocaleDateString() : "Any time"}</p></div>
+            <div className={ui.cardFull}><p className={ui.textLabel}>Due</p><p className="mt-2 text-2xl font-semibold">{dueDate}</p></div>
           </div>
 
           <div className={ui.cardFull}>
             <h2 className={ui.cardHeader}>Quiz overview</h2>
             <p className="font-semibold text-stone-950">{quiz.title}</p>
             <p className="mt-1 text-sm text-stone-600">
-              Due {dueAt ? dueAt.toLocaleString() : "any time"} · {quiz._count.questions} questions
+              Due {dueDate.toLowerCase()} · {quiz._count.questions} questions
             </p>
           </div>
 
@@ -81,7 +83,7 @@ export default async function StudentQuizStartPage({ params }) {
                       <div>
                         <p className="font-medium text-stone-950">Attempt #{submittedAttempts - index}</p>
                         <p className="text-xs text-stone-600">
-                          Submitted: {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleString() : "Not submitted"}
+                          Submitted: {formatDisplayDate(attempt.submittedAt, "Not submitted")}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -99,7 +101,7 @@ export default async function StudentQuizStartPage({ params }) {
 
           <div className="flex flex-wrap gap-3">
             {isClosed ? (
-              <p className="text-sm text-amber-700">This quiz closed on {dueAt.toLocaleString()}.</p>
+              <p className="text-sm text-amber-700">This quiz closed on {dueDate}.</p>
             ) : submittedAttempts >= quiz.maxAttempts ? (
               <p className="text-sm text-amber-700">You have reached the attempt limit for this quiz.</p>
             ) : (

@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import {
+  dateInputToEndOfDayIso,
+  dateInputToStartOfDayIso,
+  toDateInputValue,
+} from "../../../../lib/dateFormat"
 import { getModuleDisplayName } from "../../../../lib/moduleDisplay"
 import * as ui from "../../../../styles/ui"
 
@@ -20,14 +25,6 @@ function createEmptyQuestion() {
       { text: "Option D", isCorrect: false },
     ],
   }
-}
-
-function toDateTimeLocal(value) {
-  if (!value) return ""
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return ""
-  const offsetMs = date.getTimezoneOffset() * 60 * 1000
-  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
 }
 
 function normalizeQuestionsForSave(questions) {
@@ -84,8 +81,8 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
   const router = useRouter()
   const [title, setTitle] = useState(quiz.title || "")
   const [status, setStatus] = useState(quiz.status || "DRAFT")
-  const [dueAt, setDueAt] = useState(toDateTimeLocal(quiz.dueAt))
-  const [publishedAt, setPublishedAt] = useState(toDateTimeLocal(quiz.publishedAt))
+  const [dueAt, setDueAt] = useState(toDateInputValue(quiz.dueAt))
+  const [publishedAt, setPublishedAt] = useState(toDateInputValue(quiz.publishedAt))
   const [maxAttempts, setMaxAttempts] = useState(quiz.maxAttempts || 1)
   const [questions, setQuestions] = useState((quiz.questions || []).map(toEditableQuestion))
   const [analogyTopics, setAnalogyTopics] = useState([])
@@ -162,8 +159,8 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
         body: JSON.stringify({
           title,
           status,
-          dueAt: dueAt || null,
-          publishedAt: status === "PUBLISHED" ? (publishedAt || null) : null,
+          dueAt: dateInputToEndOfDayIso(dueAt),
+          publishedAt: status === "PUBLISHED" ? dateInputToStartOfDayIso(publishedAt) : null,
           maxAttempts: Number(maxAttempts) || 1,
           ...(canEditQuestions ? { questions: normalizedQuestions } : {}),
         }),
@@ -208,13 +205,13 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
           </select>
         </label>
         <label className="space-y-1">
-          <span className="font-medium">Due at (optional)</span>
-          <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+          <span className="font-medium">Due date (optional)</span>
+          <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
           <span className="block text-xs text-stone-600">Students can see this deadline. Attempts are blocked after it passes.</span>
         </label>
         <label className="space-y-1">
           <span className="font-medium">Schedule release (optional)</span>
-          <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+          <input type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
           <span className="block text-xs text-stone-600">If status is published, this controls when students can first access the quiz.</span>
         </label>
         <label className="space-y-1">

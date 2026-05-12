@@ -3,15 +3,13 @@ import { redirect } from "next/navigation"
 import SignOutButton from "../components/SignOutButton"
 import { prisma } from "../lib/db"
 import { getCurrentUser } from "../lib/currentUser"
+import { formatDisplayDate } from "../lib/dateFormat"
 import {
   createStudentAttemptStats,
   getStudentQuizProgressState,
 } from "../lib/quizState"
 import { getModuleDisplayName } from "../lib/moduleDisplay"
 import * as ui from "../styles/ui"
-
-const formatDate = (value) => new Date(value).toLocaleDateString()
-const formatDateTime = (value) => new Date(value).toLocaleString()
 
 function getTopics(topicsJson) {
   return Array.isArray(topicsJson?.topics) ? topicsJson.topics : []
@@ -217,8 +215,8 @@ export default async function StudentDashboard() {
         maxAttempts: quiz.maxAttempts,
         bestScore: stats.bestScore,
         badgeText: quizLabelForState(state),
-        releaseText: quiz.publishedAt ? formatDateTime(quiz.publishedAt) : "Available now",
-        dueText: quiz.dueAt ? formatDate(quiz.dueAt) : "No due date",
+        releaseText: formatDisplayDate(quiz.publishedAt, "Available now"),
+        dueText: formatDisplayDate(quiz.dueAt, "No due date"),
       }
     })
   } catch (error) {

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { dateInputToEndOfDayIso, dateInputToStartOfDayIso } from "../../../lib/dateFormat"
 import * as ui from "../../../styles/ui"
 
 function createEmptyQuestion() {
@@ -223,8 +224,8 @@ function LecturerQuizWizardPageInner() {
           moduleCode: selectedModule,
           lectureId: selectedLectureId,
           status,
-          dueAt: dueAt || null,
-          publishedAt: status === "PUBLISHED" ? (publishedAt || null) : null,
+          dueAt: dateInputToEndOfDayIso(dueAt),
+          publishedAt: status === "PUBLISHED" ? dateInputToStartOfDayIso(publishedAt) : null,
           maxAttempts: Number(maxAttempts) || 1,
           questions: normalizedQuestions,
         }),
@@ -284,13 +285,13 @@ function LecturerQuizWizardPageInner() {
                 </select>
               </label>
               <label className="space-y-1">
-                <span className="font-medium">Due at (optional)</span>
-                <input type="datetime-local" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+                <span className="font-medium">Due date (optional)</span>
+                <input type="date" value={dueAt} onChange={(e) => setDueAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
                 <span className="block text-xs text-stone-600">Students can see this deadline. Attempts are blocked after it passes.</span>
               </label>
               <label className="space-y-1">
                 <span className="font-medium">Schedule release (optional)</span>
-                <input type="datetime-local" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
+                <input type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2" />
                 <span className="block text-xs text-stone-600">If status is published, this controls when students can first access the quiz.</span>
               </label>
               <label className="space-y-1">

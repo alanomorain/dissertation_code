@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import QuizStatusBadge from "../../components/QuizStatusBadge"
 import { prisma } from "../../lib/db"
 import { getCurrentUser } from "../../lib/currentUser"
+import { formatDisplayDate } from "../../lib/dateFormat"
 import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 import ModuleQuizCard from "./components/ModuleQuizCard"
@@ -49,8 +50,8 @@ function toQuizView(quiz, nowTs) {
     moduleCode: quiz.module.code,
     questionCount: quiz._count.questions,
     attemptCount: quiz._count.attempts,
-    releaseText: quiz.publishedAt ? new Date(quiz.publishedAt).toLocaleString() : "Not scheduled",
-    dueText: quiz.dueAt ? new Date(quiz.dueAt).toLocaleString() : "No due date",
+    releaseText: formatDisplayDate(quiz.publishedAt, "Not scheduled"),
+    dueText: formatDisplayDate(quiz.dueAt, "No due date"),
     badgeStatus: badgeLabelForQuiz(quiz, nowTs),
   }
 }
