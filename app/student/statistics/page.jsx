@@ -264,7 +264,6 @@ export default async function StudentStatisticsPage() {
       <StudentPageHeader
         label="Student · Statistics"
         title="Stats Dashboard"
-        subtitle="Your quiz progress, media usage, and module performance."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 

@@ -151,7 +151,6 @@ export default async function StudentQuizzesPage({ searchParams }) {
       <StudentPageHeader
         label="Student · Quizzes"
         title="Quiz Dashboard"
-        subtitle="Track upcoming, active, completed, and closed quizzes."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 

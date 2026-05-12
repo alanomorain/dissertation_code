@@ -83,30 +83,14 @@ export default async function StudentAnalogyDetailPage({ params }) {
   return (
     <main className={ui.page}>
       <StudentPageHeader
-        label="Student · Analogies"
+        label="Student · Revision"
         title={analogy.lecture?.title || analogy.title || "Analogy set"}
-        subtitle={`${moduleName} · ${topics.length} topics`}
-        actions={<Link href="/student/analogies" className={ui.buttonSecondary}>All Analogies</Link>}
+        subtitle={`${moduleName} · ${topics.length} ${topics.length === 1 ? "topic" : "topics"}`}
+        actions={<Link href="/student/analogies" className={ui.buttonSecondary}>All Sets</Link>}
       />
 
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
-          <div className={ui.cardFull}>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className={ui.textLabel}>{moduleName}</p>
-                <h2 className="mt-1 text-xl font-semibold text-stone-950">
-                  {analogy.lecture?.title || analogy.title || "Analogy set"}
-                </h2>
-              </div>
-              {analogy.lecture?.id ? (
-                <Link href={`/student/lectures/${analogy.lecture.id}`} className={ui.buttonSecondary}>
-                  View Lecture
-                </Link>
-              ) : null}
-            </div>
-          </div>
-
           {topics.length === 0 ? (
             <div className={ui.cardFull}>
               <p className={ui.textSmall}>No topics are available in this analogy set yet.</p>

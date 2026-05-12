@@ -58,7 +58,6 @@ export default async function StudentLecturesPage({ searchParams }) {
       <StudentPageHeader
         label="Student · Lectures"
         title="Lecture Dashboard"
-        subtitle="Browse lecture material with approved analogies."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 

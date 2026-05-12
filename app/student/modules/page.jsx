@@ -33,7 +33,6 @@ export default async function StudentModulesPage() {
       <StudentPageHeader
         label="Student · Modules"
         title="Module Dashboard"
-        subtitle="Your enrolled modules and available learning activity."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 

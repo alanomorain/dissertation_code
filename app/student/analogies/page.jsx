@@ -96,7 +96,6 @@ export default async function StudentAnalogiesPage({ searchParams }) {
       <StudentPageHeader
         label="Student · Analogies"
         title="Analogy Dashboard"
-        subtitle="Revision analogy sets unlocked after quiz completion or close."
         actions={<Link href="/student" className={ui.buttonSecondary}>Student Dashboard</Link>}
       />
 
