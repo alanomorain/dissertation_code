@@ -84,7 +84,7 @@ export default async function StudentLectureDetailPage({ params }) {
         label="Student · Lecture"
         title={lecture.title}
         subtitle={getModuleDisplayName(lecture.module)}
-        actions={<Link href="/student/lectures" className={ui.buttonSecondary}>All lectures</Link>}
+        actions={<Link href="/student/lectures" className={ui.buttonSecondary}>All Lectures</Link>}
       />
 
       <section className={ui.pageSection}>
@@ -99,7 +99,7 @@ export default async function StudentLectureDetailPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Published quizzes for this lecture</h2>
+            <h2 className={ui.cardHeader}>Published Quizzes</h2>
             {lecture.quizzes.length === 0 ? (
               <p className={ui.textSmall}>No published quizzes are available for this lecture yet.</p>
             ) : (
@@ -122,10 +122,10 @@ export default async function StudentLectureDetailPage({ params }) {
           </div>
 
           <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Revision analogies</h2>
+            <h2 className={ui.cardHeader}>Analogy Revision</h2>
             {!revisionUnlocked ? (
               <p className={ui.textSmall}>
-                Analogy sets unlock after you reach the attempt limit for a quiz in this lecture or the quiz due date has passed.
+                Analogy sets unlock after you reach the attempt limit for a quiz, a quiz due date has passed, or you get 100% in a quiz.
               </p>
             ) : lecture.analogySets.length === 0 ? (
               <p className={ui.textSmall}>No approved analogy sets are available for this lecture yet.</p>
