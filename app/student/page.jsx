@@ -393,7 +393,7 @@ export default async function StudentDashboard() {
             </div>
 
             <div className={ui.cardFull}>
-              <h3 className={ui.cardHeader}>Recent Analogy Sets</h3>
+              <h3 className={ui.cardHeader}>Revision</h3>
               <div className="space-y-2 text-sm">
                 {recentAnalogySetLinks.map((analogySet) => (
                   <Link key={analogySet.id} href={analogySet.href} className={ui.linkCard}>

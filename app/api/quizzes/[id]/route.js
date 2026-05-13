@@ -25,9 +25,6 @@ function normalizeQuestionsForUpdate(questions, analogySetById) {
       const analogyTopicIndex = Number.isInteger(parsedTopicIndex) && parsedTopicIndex >= 0
         ? parsedTopicIndex
         : null
-      const videoUrl = typeof question?.videoUrl === "string"
-        ? question.videoUrl.trim().slice(0, 2000)
-        : ""
 
       const mappedSet = analogySetId ? analogySetById.get(analogySetId) : null
       const topics = Array.isArray(mappedSet?.topicsJson?.topics) ? mappedSet.topicsJson.topics : []
@@ -43,7 +40,6 @@ function normalizeQuestionsForUpdate(questions, analogySetById) {
         options: normalizedOptions,
         analogySetId: mappedSet?.id || null,
         analogyTopicIndex: hasValidTopicIndex ? analogyTopicIndex : null,
-        videoUrl: videoUrl || null,
       }
     })
     .filter((question) => question.prompt.length > 0)
@@ -225,7 +221,6 @@ export async function PATCH(req, { params }) {
               orderIndex: question.orderIndex,
               analogySetId: question.analogySetId,
               analogyTopicIndex: question.analogyTopicIndex,
-              videoUrl: question.videoUrl,
               options: {
                 create: question.options,
               },

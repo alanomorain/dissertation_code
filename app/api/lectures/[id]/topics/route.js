@@ -34,6 +34,7 @@ export async function GET(_req, { params }) {
       select: {
         id: true,
         title: true,
+        createdAt: true,
         topicsJson: true,
       },
       orderBy: { createdAt: "desc" },
@@ -45,6 +46,7 @@ export async function GET(_req, { params }) {
         .map((topic, index) => ({
           analogySetId: set.id,
           analogySetTitle: set.title || "Untitled analogy",
+          analogySetCreatedAt: set.createdAt,
           topicIndex: index,
           topic: String(topic?.topic || "").trim(),
           analogy: String(topic?.analogy || "").trim(),

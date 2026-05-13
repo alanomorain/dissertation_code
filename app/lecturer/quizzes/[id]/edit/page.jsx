@@ -43,7 +43,6 @@ export default async function LecturerQuizEditPage({ params }) {
       difficulty: question.difficulty,
       analogySetId: question.analogySetId,
       analogyTopicIndex: question.analogyTopicIndex,
-      videoUrl: question.videoUrl,
       options: question.options.map((option) => ({
         id: option.id,
         text: option.text,

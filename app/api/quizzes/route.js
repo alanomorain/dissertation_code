@@ -46,10 +46,10 @@ export async function POST(req) {
     }
 
     const body = await req.json()
-    const { title, moduleCode, lectureId, status, dueAt, publishedAt, maxAttempts, questions } = body
+    const { title, moduleCode, lectureId, analogySetId, status, dueAt, publishedAt, maxAttempts, questions } = body
 
-    if (!title || !moduleCode || !lectureId) {
-      return Response.json({ error: "title, moduleCode, and lectureId are required" }, { status: 400 })
+    if (!title || !moduleCode || !lectureId || !analogySetId) {
+      return Response.json({ error: "title, moduleCode, lectureId, and analogySetId are required" }, { status: 400 })
     }
 
     if (!Array.isArray(questions) || questions.length === 0) {
@@ -75,10 +75,13 @@ export async function POST(req) {
       return Response.json({ error: "Unknown lecture for this lecturer/module" }, { status: 400 })
     }
 
-    const lectureAnalogySets = await prisma.analogySet.findMany({
+    const selectedAnalogySet = await prisma.analogySet.findFirst({
       where: {
+        id: String(analogySetId).trim(),
         ownerId: lecturer.id,
         lectureId: lectureRecord.id,
+        status: "ready",
+        reviewStatus: "APPROVED",
       },
       select: {
         id: true,
@@ -86,7 +89,33 @@ export async function POST(req) {
       },
     })
 
-    const analogySetById = new Map(lectureAnalogySets.map((set) => [set.id, set]))
+    if (!selectedAnalogySet) {
+      return Response.json(
+        { error: "Select a ready, approved analogy set for this lecture before creating a quiz" },
+        { status: 400 },
+      )
+    }
+
+    const selectedTopics = Array.isArray(selectedAnalogySet.topicsJson?.topics)
+      ? selectedAnalogySet.topicsJson.topics
+      : []
+    const availableTopicIndexes = new Set(
+      selectedTopics
+        .map((topic, index) => ({
+          index,
+          topic: String(topic?.topic || "").trim(),
+          analogy: String(topic?.analogy || "").trim(),
+        }))
+        .filter((topic) => topic.topic && topic.analogy)
+        .map((topic) => topic.index),
+    )
+
+    if (availableTopicIndexes.size === 0) {
+      return Response.json(
+        { error: "The selected analogy set does not have any topics available for quiz creation" },
+        { status: 400 },
+      )
+    }
 
     const normalizedQuestions = questions
       .slice(0, 50)
@@ -105,13 +134,6 @@ export async function POST(req) {
         const analogyTopicIndex = Number.isInteger(parsedTopicIndex) && parsedTopicIndex >= 0
           ? parsedTopicIndex
           : null
-        const videoUrl = typeof question?.videoUrl === "string"
-          ? question.videoUrl.trim().slice(0, 2000)
-          : ""
-
-        const mappedSet = analogySetId ? analogySetById.get(analogySetId) : null
-        const topics = Array.isArray(mappedSet?.topicsJson?.topics) ? mappedSet.topicsJson.topics : []
-        const hasValidTopicIndex = analogyTopicIndex !== null && analogyTopicIndex < topics.length
 
         return {
           prompt: String(question?.prompt || "").trim().slice(0, 1000),
@@ -121,9 +143,8 @@ export async function POST(req) {
             : "MEDIUM",
           orderIndex: questionIndex,
           options: normalizedOptions,
-          analogySetId: mappedSet?.id || null,
-          analogyTopicIndex: hasValidTopicIndex ? analogyTopicIndex : null,
-          videoUrl: videoUrl || null,
+          analogySetId,
+          analogyTopicIndex,
         }
       })
       .filter((question) => question.prompt.length > 0)
@@ -139,6 +160,31 @@ export async function POST(req) {
     if (hasInvalidMcq) {
       return Response.json(
         { error: "Each MCQ requires at least two options and one correct option" },
+        { status: 400 },
+      )
+    }
+
+    const invalidAnalogyLinks = normalizedQuestions.some(
+      (question) =>
+        question.analogySetId !== selectedAnalogySet.id ||
+        question.analogyTopicIndex === null ||
+        !availableTopicIndexes.has(question.analogyTopicIndex),
+    )
+
+    if (invalidAnalogyLinks) {
+      return Response.json(
+        { error: "Each question must link to a valid topic in the selected analogy set" },
+        { status: 400 },
+      )
+    }
+
+    const linkedTopicIndexes = new Set(normalizedQuestions.map((question) => question.analogyTopicIndex))
+    if (
+      normalizedQuestions.length !== availableTopicIndexes.size ||
+      linkedTopicIndexes.size !== availableTopicIndexes.size
+    ) {
+      return Response.json(
+        { error: "Quiz questions must include exactly one question for each topic in the selected analogy set" },
         { status: 400 },
       )
     }
@@ -180,7 +226,6 @@ export async function POST(req) {
             orderIndex: question.orderIndex,
             analogySetId: question.analogySetId,
             analogyTopicIndex: question.analogyTopicIndex,
-            videoUrl: question.videoUrl,
             options: {
               create: question.options,
             },

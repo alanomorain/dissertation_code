@@ -33,7 +33,7 @@ function getTopicPayload(question) {
     topic: String(topic?.topic || "").trim(),
     analogy: String(topic?.analogy || "").trim(),
     imageUrl: String(topic?.imageUrl || "").trim(),
-    videoUrl: String(question?.videoUrl || topic?.videoUrl || "").trim(),
+    videoUrl: String(topic?.videoUrl || "").trim(),
   }
 }
 

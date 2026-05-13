@@ -17,7 +17,8 @@ function getOpenAIClient() {
 function extractTopicsFromAnalogySet(analogySet) {
   const topics = Array.isArray(analogySet?.topicsJson?.topics) ? analogySet.topicsJson.topics : []
   return topics
-    .map((topic) => ({
+    .map((topic, topicIndex) => ({
+      topicIndex,
       topic: String(topic?.topic || "").trim(),
       analogy: String(topic?.analogy || "").trim(),
     }))
@@ -98,11 +99,15 @@ export async function POST(req) {
 
     const body = await req.json().catch(() => ({}))
     const lectureId = String(body?.lectureId || "").trim()
+    const analogySetId = String(body?.analogySetId || "").trim()
     const feedback = String(body?.feedback || "").trim().slice(0, 1500)
-    const questionCount = Math.max(1, Math.min(Number(body?.questionCount) || 5, 12))
 
     if (!lectureId) {
       return Response.json({ error: "lectureId is required" }, { status: 400 })
+    }
+
+    if (!analogySetId) {
+      return Response.json({ error: "analogySetId is required" }, { status: 400 })
     }
 
     const lectureRecord = await prisma.lecture.findFirst({
@@ -116,26 +121,33 @@ export async function POST(req) {
       return Response.json({ error: "Unknown lecture for this lecturer" }, { status: 400 })
     }
 
-    const analogySets = await prisma.analogySet.findMany({
+    const analogySet = await prisma.analogySet.findFirst({
       where: {
+        id: analogySetId,
         ownerId: lecturer.id,
         lectureId: lectureRecord.id,
         status: "ready",
+        reviewStatus: "APPROVED",
       },
       select: {
         id: true,
         title: true,
         topicsJson: true,
       },
-      orderBy: { createdAt: "desc" },
-      take: 10,
     })
 
-    const topics = analogySets.flatMap(extractTopicsFromAnalogySet).slice(0, 12)
+    if (!analogySet) {
+      return Response.json(
+        { error: "Select a ready, approved analogy set for this lecture before generating questions." },
+        { status: 400 },
+      )
+    }
+
+    const topics = extractTopicsFromAnalogySet(analogySet)
 
     if (topics.length === 0) {
       return Response.json(
-        { error: "No ready analogies found for this module. Create and save at least one first." },
+        { error: "The selected analogy set does not have any approved topics available for quiz generation." },
         { status: 400 },
       )
     }
@@ -149,7 +161,7 @@ export async function POST(req) {
           role: "system",
           content: `
 You are an assessment designer for MSc Software Development modules.
-Generate multiple-choice quiz questions grounded in lecturer-authored analogies.
+Generate multiple-choice quiz questions for lecture topics.
 Return valid JSON only, with no markdown and no prose.
 `,
         },
@@ -158,13 +170,14 @@ Return valid JSON only, with no markdown and no prose.
           content: `
 Module: ${lectureRecord.module.code} - ${lectureRecord.module.name}
 Lecture: ${lectureRecord.title}
+Analogy set: ${analogySet.title || "Untitled analogy set"}
 
-Analogy context:
-${topics.map((item, index) => `${index + 1}. Topic: ${item.topic}\nAnalogy: ${item.analogy}`).join("\n\n")}
+Topics:
+${topics.map((item, index) => `${index + 1}. ${item.topic}`).join("\n")}
 
 ${feedback ? `Lecturer feedback to apply:\n${feedback}\n` : ""}
 
-Generate exactly ${questionCount} MCQ questions.
+Generate exactly ${topics.length} MCQ questions, one question for each topic in the same order as listed above.
 Each question must have 4 options and exactly 1 correct option.
 
 Return JSON with this exact shape:
@@ -189,9 +202,13 @@ Return JSON with this exact shape:
 
     const text = response.choices[0]?.message?.content || ""
     const parsed = parseJsonBlock(text)
-    const questions = normalizeGeneratedQuestions(parsed, questionCount)
+    const questions = normalizeGeneratedQuestions(parsed, topics.length).map((question, index) => ({
+      ...question,
+      analogySetId: analogySet.id,
+      analogyTopicIndex: topics[index].topicIndex,
+    }))
 
-    if (questions.length === 0) {
+    if (questions.length !== topics.length) {
       return Response.json({ error: "AI did not return valid quiz questions" }, { status: 502 })
     }
 
@@ -202,8 +219,11 @@ Return JSON with this exact shape:
         id: lectureRecord.id,
         title: lectureRecord.title,
       },
+      analogySet: {
+        id: analogySet.id,
+        title: analogySet.title || "Untitled analogy set",
+      },
       context: {
-        analogySetCount: analogySets.length,
         topicCount: topics.length,
       },
     })

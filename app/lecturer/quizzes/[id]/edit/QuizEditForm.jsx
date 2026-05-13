@@ -17,7 +17,6 @@ function createEmptyQuestion() {
     difficulty: "MEDIUM",
     analogySetId: "",
     analogyTopicIndex: "",
-    videoUrl: "",
     options: [
       { text: "Option A", isCorrect: true },
       { text: "Option B", isCorrect: false },
@@ -51,7 +50,6 @@ function normalizeQuestionsForSave(questions) {
         analogyTopicIndex: question.analogyTopicIndex === "" || question.analogyTopicIndex === null
           ? null
           : Number(question.analogyTopicIndex),
-        videoUrl: String(question.videoUrl || "").trim() || null,
         options,
       }
     })
@@ -66,7 +64,6 @@ function toEditableQuestion(question) {
     difficulty: question.difficulty || "MEDIUM",
     analogySetId: question.analogySetId || "",
     analogyTopicIndex: Number.isInteger(question.analogyTopicIndex) ? String(question.analogyTopicIndex) : "",
-    videoUrl: question.videoUrl || "",
     options: Array.isArray(question.options) && question.options.length > 0
       ? question.options.map((option) => ({
           id: option.id,
@@ -86,7 +83,6 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
   const [maxAttempts, setMaxAttempts] = useState(quiz.maxAttempts || 1)
   const [questions, setQuestions] = useState((quiz.questions || []).map(toEditableQuestion))
   const [analogyTopics, setAnalogyTopics] = useState([])
-  const [uploadingVideoByQuestion, setUploadingVideoByQuestion] = useState({})
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -111,31 +107,6 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
       cancelled = true
     }
   }, [quiz.lectureId])
-
-  const handleVideoUpload = async (questionIndex, file) => {
-    if (!file || !canEditQuestions) return
-    setUploadingVideoByQuestion((prev) => ({ ...prev, [questionIndex]: true }))
-    setMessage("")
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/quizzes/video-upload", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || "Video upload failed")
-
-      setQuestions((prev) =>
-        prev.map((item, idx) => (idx === questionIndex ? { ...item, videoUrl: data.url || "" } : item)),
-      )
-      setMessage("Video uploaded.")
-    } catch (err) {
-      setMessage(err.message || "Unable to upload video")
-    } finally {
-      setUploadingVideoByQuestion((prev) => ({ ...prev, [questionIndex]: false }))
-    }
-  }
 
   const handleSave = async () => {
     const normalizedQuestions = normalizeQuestionsForSave(questions)
@@ -302,9 +273,6 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                   onChange={(e) => {
                     const value = e.target.value
                     const [analogySetId, topicIndexText] = value ? value.split("::") : ["", ""]
-                    const matchingTopic = analogyTopics.find(
-                      (topic) => `${topic.analogySetId}::${topic.topicIndex}` === value,
-                    )
                     setQuestions((prev) =>
                       prev.map((item, idx) =>
                         idx === questionIndex
@@ -312,7 +280,6 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                               ...item,
                               analogySetId: analogySetId || "",
                               analogyTopicIndex: topicIndexText || "",
-                              videoUrl: item.videoUrl || matchingTopic?.topicVideoUrl || "",
                             }
                           : item,
                       ),
@@ -331,40 +298,6 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                   ))}
                 </select>
               </label>
-
-              <label className="mt-2 block space-y-1 text-sm">
-                <span className="font-medium">Video URL (optional)</span>
-                <input
-                  value={question.videoUrl || ""}
-                  disabled={!canEditQuestions}
-                  onChange={(e) =>
-                    setQuestions((prev) =>
-                      prev.map((item, idx) => (idx === questionIndex ? { ...item, videoUrl: e.target.value } : item)),
-                    )
-                  }
-                  placeholder="https://your-media-url/video.mp4"
-                  className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 disabled:opacity-70"
-                />
-              </label>
-
-              {canEditQuestions ? (
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                  <label className={ui.buttonSecondary}>
-                    <input
-                      type="file"
-                      accept="video/mp4,video/webm,video/quicktime"
-                      className="hidden"
-                      onChange={(e) => handleVideoUpload(questionIndex, e.target.files?.[0])}
-                    />
-                    {uploadingVideoByQuestion[questionIndex] ? "Uploading..." : "Upload Video"}
-                  </label>
-                  {question.videoUrl ? (
-                    <a href={question.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-teal-700 hover:text-teal-700">
-                      Preview Video
-                    </a>
-                  ) : null}
-                </div>
-              ) : null}
 
               <div className="mt-3 space-y-2 text-sm">
                 <p className="font-medium">Options (select one correct answer)</p>
