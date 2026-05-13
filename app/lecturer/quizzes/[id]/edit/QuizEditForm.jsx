@@ -293,7 +293,7 @@ export default function QuizEditForm({ quiz, canEditQuestions }) {
                       key={`${topic.analogySetId}-${topic.topicIndex}`}
                       value={`${topic.analogySetId}::${topic.topicIndex}`}
                     >
-                      {topic.analogySetTitle} · Topic {topic.topicIndex + 1}: {topic.topic}
+                      {topic.topic}
                     </option>
                   ))}
                 </select>

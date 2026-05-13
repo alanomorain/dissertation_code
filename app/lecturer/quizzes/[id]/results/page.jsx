@@ -24,7 +24,7 @@ export default async function LecturerQuizResultsPage({ params }) {
       attempts: {
         where: { status: "SUBMITTED" },
         include: {
-          student: { select: { email: true } },
+          student: { select: { email: true, fullName: true } },
           responses: true,
         },
       },
@@ -91,7 +91,10 @@ export default async function LecturerQuizResultsPage({ params }) {
             <div className="space-y-3 text-sm">
               {attempts.map((attempt) => (
                 <div key={attempt.id} className={ui.cardInner}>
-                  <p className="font-medium">{attempt.student.email}</p>
+                  <p className="font-medium">{attempt.student.fullName || attempt.student.email}</p>
+                  {attempt.student.fullName ? (
+                    <p className="text-xs text-stone-600">{attempt.student.email}</p>
+                  ) : null}
                   <p className="text-xs text-stone-600">Score: {attempt.score || 0}%</p>
                 </div>
               ))}

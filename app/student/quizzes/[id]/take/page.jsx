@@ -291,6 +291,17 @@ export default function StudentQuizTakePage() {
     }
   }, [id])
 
+  useEffect(() => {
+    if (!mediaModalOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [mediaModalOpen])
+
   if (loadingQuiz) {
     return (
       <main className={ui.page}>
@@ -396,7 +407,7 @@ export default function StudentQuizTakePage() {
 
       {mediaModalOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 p-4">
-          <div className="w-full max-w-3xl rounded-2xl border border-stone-300 bg-white p-5">
+          <div className="max-h-[calc(100vh-2rem)] w-full max-w-2xl overflow-y-auto rounded-2xl border border-stone-300 bg-white p-4">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h3 className="text-base font-semibold text-stone-950">
                 {mediaStage === "ANALOGY" ? "Analogy" : "Video"}
@@ -456,7 +467,7 @@ export default function StudentQuizTakePage() {
                       View Video
                     </button>
                   ) : null}
-                  {modalTopicPayload.analogy ? (
+                  {modalTopicPayload.analogy && mediaStage !== "ANALOGY" ? (
                     <button
                       type="button"
                       className={ui.buttonSecondary}
