@@ -5,99 +5,260 @@ import { getCurrentUser } from "../../lib/currentUser"
 import { getModuleDisplayName } from "../../lib/moduleDisplay"
 import * as ui from "../../styles/ui"
 
-function parseRange(searchParams) {
-  const range = String(searchParams?.range || "30d")
-  const now = new Date()
-  if (range === "7d") return { range, from: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }
-  if (range === "90d") return { range, from: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000) }
-  if (range === "all") return { range, from: null }
-  return { range: "30d", from: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) }
+function average(total, count) {
+  return count ? Math.round(total / count) : 0
 }
 
-function dateRangeLabel(range) {
-  if (range === "7d") return "Last 7 days"
-  if (range === "90d") return "Last 90 days"
-  if (range === "all") return "All time"
-  return "Last 30 days"
+function percent(part, total) {
+  return total ? Math.round((part / total) * 100) : 0
 }
 
-function analogyBuckets(analogySets, fromDate) {
-  return analogySets.reduce(
-    (acc, set) => {
-      const inRangeInteractions = fromDate
-        ? set.interactions.filter((interaction) => new Date(interaction.createdAt) >= fromDate)
-        : set.interactions
-      const isApprovedReady = set.status === "ready" && set.reviewStatus === "APPROVED"
+function dateKey(dateValue) {
+  if (!dateValue) return "Unknown"
+  return new Date(dateValue).toISOString().slice(0, 10)
+}
 
-      if (!isApprovedReady) {
-        acc.draft += 1
-      } else if (inRangeInteractions.length > 0) {
-        acc.active += 1
-      } else {
-        acc.upcoming += 1
-      }
-      return acc
-    },
-    { active: 0, draft: 0, upcoming: 0 },
+function dateLabel(key) {
+  if (key === "Unknown") return key
+  return new Date(`${key}T00:00:00`).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  })
+}
+
+function collectAttemptMedia(interactions) {
+  return interactions.reduce((acc, interaction) => {
+    if (!acc[interaction.attemptId]) acc[interaction.attemptId] = { analogy: 0, video: 0 }
+    if (interaction.type === "ANALOGY_VIEW") acc[interaction.attemptId].analogy += 1
+    if (interaction.type === "VIDEO_VIEW") acc[interaction.attemptId].video += 1
+    return acc
+  }, {})
+}
+
+function MetricCard({ label, value, helper }) {
+  return (
+    <div className={`${ui.card} p-4`}>
+      <p className={ui.textLabel}>{label}</p>
+      <p className="mt-1 text-2xl font-semibold">{value}</p>
+      {helper ? <p className="mt-1 text-xs text-stone-600">{helper}</p> : null}
+    </div>
   )
 }
 
-function quizRevisitCount(submittedAttempts) {
-  const perStudent = submittedAttempts.reduce((acc, attempt) => {
-    const key = `${attempt.quizId}:${attempt.studentId}`
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {})
-  return Object.values(perStudent).reduce((total, count) => total + Math.max(0, count - 1), 0)
+function EmptyVisual({ children }) {
+  return (
+    <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center text-sm text-stone-600">
+      {children}
+    </div>
+  )
 }
 
-function createLectureRows(module, fromDate) {
-  const rows = module.lectures.map((lecture) => {
-    const lectureAttempts = lecture.quizzes.flatMap((quiz) => quiz.attempts)
-    const participants = new Set(lectureAttempts.map((attempt) => attempt.studentId)).size
-    const avgScore = lectureAttempts.length
-      ? Math.round(lectureAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / lectureAttempts.length)
-      : 0
-    const revisits = quizRevisitCount(lectureAttempts)
-    const interactions = lecture.analogySets.flatMap((set) => {
-      const scopedInteractions = fromDate
-        ? set.interactions.filter((interaction) => new Date(interaction.createdAt) >= fromDate)
-        : set.interactions
-      return scopedInteractions
-    })
+function PerformanceComparison({ rows }) {
+  const maxScore = Math.max(100, ...rows.map((row) => row.value))
 
+  return (
+    <div className={ui.cardFull}>
+      <h2 className={ui.cardHeader}>Average Student Performance</h2>
+      <div className="space-y-4">
+        {rows.map((row) => (
+          <div key={row.label}>
+            <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+              <p className="font-medium text-stone-950">{row.label}</p>
+              <p className="text-sm font-semibold text-stone-950">{row.value}%</p>
+            </div>
+            <div className="h-8 rounded-lg bg-stone-100">
+              <div
+                className={`flex h-8 items-center rounded-lg px-3 text-xs font-medium text-white ${row.color}`}
+                style={{ width: `${Math.max(4, percent(row.value, maxScore))}%` }}
+              >
+                {row.count} attempt{row.count === 1 ? "" : "s"}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function HorizontalBarChart({ title, rows, emptyText }) {
+  const maxValue = Math.max(100, ...rows.map((row) => row.value))
+
+  return (
+    <div className={ui.cardFull}>
+      <h2 className={ui.cardHeader}>{title}</h2>
+      {rows.length === 0 ? (
+        <EmptyVisual>{emptyText}</EmptyVisual>
+      ) : (
+        <div className="space-y-3">
+          {rows.map((row) => (
+            <div key={row.id}>
+              <div className="mb-1 flex items-start justify-between gap-3 text-sm">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-stone-950">{row.label}</p>
+                  {row.helper ? <p className="text-xs text-stone-600">{row.helper}</p> : null}
+                </div>
+                <p className="shrink-0 text-sm font-semibold text-stone-950">{row.value}%</p>
+              </div>
+              <div className="h-4 rounded-full bg-stone-100">
+                <div
+                  className="h-4 rounded-full bg-teal-600"
+                  style={{ width: `${Math.max(row.value > 0 ? 3 : 0, percent(row.value, maxValue))}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ParticipationTrend({ rows }) {
+  if (rows.length === 0) {
+    return (
+      <div className={ui.cardFull}>
+        <h2 className={ui.cardHeader}>Average Participation Over Time</h2>
+        <EmptyVisual>No submitted quiz attempts yet.</EmptyVisual>
+      </div>
+    )
+  }
+
+  if (rows.length === 1) {
+    return (
+      <div className={ui.cardFull}>
+        <h2 className={ui.cardHeader}>Average Participation Over Time</h2>
+        <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
+          <p className="text-sm font-medium text-stone-950">{rows[0].rate}% participation</p>
+          <p className="text-xs text-stone-600">
+            {dateLabel(rows[0].date)} · {rows[0].participants} participating student{rows[0].participants === 1 ? "" : "s"}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const width = 720
+  const height = 190
+  const paddingX = 34
+  const paddingY = 22
+  const chartWidth = width - paddingX * 2
+  const chartHeight = height - paddingY * 2
+  const points = rows.map((row, index) => {
+    const x = paddingX + (index / (rows.length - 1)) * chartWidth
+    const y = paddingY + chartHeight - (row.rate / 100) * chartHeight
+    return { ...row, x, y }
+  })
+  const polyline = points.map((point) => `${point.x},${point.y}`).join(" ")
+  const area = `${paddingX},${height - paddingY} ${polyline} ${width - paddingX},${height - paddingY}`
+
+  return (
+    <div className={ui.cardFull}>
+      <h2 className={ui.cardHeader}>Average Participation Over Time</h2>
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-64 w-full" role="img" aria-label="Participation trend">
+        <polygon points={area} fill="#ccfbf1" opacity="0.8" />
+        <polyline fill="none" stroke="#0f766e" strokeWidth="4" points={polyline} strokeLinecap="round" strokeLinejoin="round" />
+        {[0, 50, 100].map((tick) => {
+          const y = paddingY + chartHeight - (tick / 100) * chartHeight
+          return (
+            <g key={tick}>
+              <line x1={paddingX} x2={width - paddingX} y1={y} y2={y} stroke="#e7e5e4" />
+              <text x="0" y={y + 4} className="fill-stone-500 text-[11px]">{tick}%</text>
+            </g>
+          )
+        })}
+        {points.map((point) => (
+          <g key={point.date}>
+            <circle cx={point.x} cy={point.y} r="5" fill="#0f766e" />
+            <text x={point.x} y={height - 4} textAnchor="middle" className="fill-stone-500 text-[11px]">
+              {dateLabel(point.date)}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <div className="mt-2 flex flex-wrap gap-2 text-xs text-stone-600">
+        {rows.map((row) => (
+          <span key={row.date} className="rounded-full border border-stone-200 bg-stone-50 px-2 py-1">
+            {dateLabel(row.date)}: {row.rate}%
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function buildModuleStats(module) {
+  const submittedAttempts = module.quizzes.flatMap((quiz) => quiz.attempts)
+  const quizInteractions = module.quizzes.flatMap((quiz) =>
+    quiz.questions.flatMap((question) => question.interactions),
+  )
+  const mediaByAttempt = collectAttemptMedia(quizInteractions)
+  const questionAnalogyViews = new Set(
+    quizInteractions
+      .filter((interaction) => interaction.type === "ANALOGY_VIEW")
+      .map((interaction) => `${interaction.attemptId}:${interaction.questionId}`),
+  )
+  const responses = submittedAttempts.flatMap((attempt) =>
+    attempt.responses.map((response) => ({
+      attemptId: attempt.id,
+      questionId: response.questionId,
+    })),
+  )
+  const noAnalogyResponses = responses.filter(
+    (response) => !questionAnalogyViews.has(`${response.attemptId}:${response.questionId}`),
+  ).length
+
+  const scoreGroups = submittedAttempts.reduce(
+    (acc, attempt) => {
+      const media = mediaByAttempt[attempt.id] || { analogy: 0 }
+      const key = media.analogy > 0 ? "withAnalogy" : "withoutAnalogy"
+      acc[key].count += 1
+      acc[key].total += attempt.score || 0
+      return acc
+    },
+    {
+      withAnalogy: { count: 0, total: 0 },
+      withoutAnalogy: { count: 0, total: 0 },
+    },
+  )
+  const activeStudentIds = new Set(module.enrollments.map((enrollment) => enrollment.userId))
+  const participantIds = new Set(submittedAttempts.map((attempt) => attempt.studentId))
+  const totalAnalogyViews = module.analogySets.reduce((total, set) => total + set.interactions.length, 0)
+
+  const quizRows = module.quizzes.map((quiz) => {
+    const attempts = quiz.attempts
     return {
-      id: lecture.id,
-      title: lecture.title,
-      analogySetCount: lecture.analogySets.length,
-      interactionCount: interactions.length,
-      quizCount: lecture.quizzes.length,
-      completions: lectureAttempts.length,
-      participants,
-      avgScore,
-      revisits,
+      id: quiz.id,
+      label: quiz.title,
+      helper: getModuleDisplayName(module),
+      value: average(
+        attempts.reduce((total, attempt) => total + (attempt.score || 0), 0),
+        attempts.length,
+      ),
+      completions: attempts.length,
     }
   })
 
-  const unassignedQuizzes = module.quizzes.filter((quiz) => !quiz.lectureId)
-  if (unassignedQuizzes.length > 0) {
-    const attempts = unassignedQuizzes.flatMap((quiz) => quiz.attempts)
-    rows.push({
-      id: "unassigned",
-      title: "Unassigned Quizzes",
-      analogySetCount: 0,
-      interactionCount: 0,
-      quizCount: unassignedQuizzes.length,
-      completions: attempts.length,
-      participants: new Set(attempts.map((attempt) => attempt.studentId)).size,
-      avgScore: attempts.length
-        ? Math.round(attempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / attempts.length)
-        : 0,
-      revisits: quizRevisitCount(attempts),
-    })
+  return {
+    id: module.id,
+    code: module.code,
+    name: module.name,
+    activeStudentIds,
+    participantIds,
+    submittedAttempts,
+    responses,
+    noAnalogyResponses,
+    totalAnalogyViews,
+    quizRows,
+    avgScore: average(
+      submittedAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0),
+      submittedAttempts.length,
+    ),
+    withAnalogyAvg: average(scoreGroups.withAnalogy.total, scoreGroups.withAnalogy.count),
+    withAnalogyCount: scoreGroups.withAnalogy.count,
+    withoutAnalogyAvg: average(scoreGroups.withoutAnalogy.total, scoreGroups.withoutAnalogy.count),
+    withoutAnalogyCount: scoreGroups.withoutAnalogy.count,
   }
-
-  return rows
 }
 
 export default async function LecturerStatisticsPage({ searchParams }) {
@@ -105,7 +266,7 @@ export default async function LecturerStatisticsPage({ searchParams }) {
   if (!lecturerUser) redirect("/lecturer/login")
 
   const resolvedSearchParams = await searchParams
-  const { range, from } = parseRange(resolvedSearchParams)
+  const moduleCodeFilter = String(resolvedSearchParams?.module || "").trim().toUpperCase()
 
   const modules = await prisma.module.findMany({
     where: { lecturerId: lecturerUser.id },
@@ -117,50 +278,35 @@ export default async function LecturerStatisticsPage({ searchParams }) {
       analogySets: {
         select: {
           id: true,
-          status: true,
-          reviewStatus: true,
           interactions: {
-            select: { createdAt: true },
+            select: { id: true },
           },
         },
       },
       quizzes: {
         include: {
           attempts: {
-            where: {
-              status: "SUBMITTED",
-              ...(from ? { submittedAt: { gte: from } } : {}),
+            where: { status: "SUBMITTED" },
+            select: {
+              id: true,
+              score: true,
+              studentId: true,
+              submittedAt: true,
+              responses: {
+                select: {
+                  questionId: true,
+                },
+              },
             },
-            select: { id: true, score: true, studentId: true, quizId: true },
           },
           questions: {
             select: {
               interactions: {
-                where: from ? { createdAt: { gte: from } } : {},
-                select: { attemptId: true, type: true },
-              },
-            },
-          },
-        },
-      },
-      lectures: {
-        include: {
-          analogySets: {
-            select: {
-              id: true,
-              interactions: {
-                select: { createdAt: true },
-              },
-            },
-          },
-          quizzes: {
-            include: {
-              attempts: {
-                where: {
-                  status: "SUBMITTED",
-                  ...(from ? { submittedAt: { gte: from } } : {}),
+                select: {
+                  attemptId: true,
+                  questionId: true,
+                  type: true,
                 },
-                select: { score: true, studentId: true, quizId: true },
               },
             },
           },
@@ -170,79 +316,78 @@ export default async function LecturerStatisticsPage({ searchParams }) {
     orderBy: { code: "asc" },
   })
 
-  const moduleCards = modules.map((module) => {
-    const submittedAttempts = module.quizzes.flatMap((quiz) => quiz.attempts)
-    const quizMediaInteractions = module.quizzes.flatMap((quiz) =>
-      quiz.questions.flatMap((question) => question.interactions),
-    )
-    const mediaByAttempt = quizMediaInteractions.reduce((acc, interaction) => {
-      if (!acc[interaction.attemptId]) acc[interaction.attemptId] = { analogy: 0, video: 0 }
-      if (interaction.type === "ANALOGY_VIEW") acc[interaction.attemptId].analogy += 1
-      if (interaction.type === "VIDEO_VIEW") acc[interaction.attemptId].video += 1
+  const selectedModule = moduleCodeFilter
+    ? modules.find((module) => module.code === moduleCodeFilter)
+    : null
+  const scopedModules = moduleCodeFilter ? (selectedModule ? [selectedModule] : []) : modules
+  const moduleStats = scopedModules.map(buildModuleStats)
+  const allAttempts = moduleStats.flatMap((module) => module.submittedAttempts)
+  const activeStudentIds = new Set(moduleStats.flatMap((module) => [...module.activeStudentIds]))
+  const participantIds = new Set(moduleStats.flatMap((module) => [...module.participantIds]))
+  const totalResponses = moduleStats.reduce((total, module) => total + module.responses.length, 0)
+  const totalNoAnalogyResponses = moduleStats.reduce((total, module) => total + module.noAnalogyResponses, 0)
+  const totalCompletions = allAttempts.length
+  const totalAnalogyViews = moduleStats.reduce((total, module) => total + module.totalAnalogyViews, 0)
+  const avgQuizScore = average(
+    allAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0),
+    allAttempts.length,
+  )
+
+  const performanceTotals = moduleStats.reduce(
+    (acc, module) => {
+      acc.withAnalogy.count += module.withAnalogyCount
+      acc.withAnalogy.total += module.withAnalogyAvg * module.withAnalogyCount
+      acc.withoutAnalogy.count += module.withoutAnalogyCount
+      acc.withoutAnalogy.total += module.withoutAnalogyAvg * module.withoutAnalogyCount
       return acc
-    }, {})
-    const scoreGroups = submittedAttempts.reduce(
-      (acc, attempt) => {
-        const media = mediaByAttempt[attempt.id] || { analogy: 0, video: 0 }
-        const key = media.video > 0 ? "withVideo" : media.analogy > 0 ? "analogyOnly" : "noMedia"
-        acc[key].count += 1
-        acc[key].total += attempt.score || 0
-        return acc
-      },
-      {
-        noMedia: { count: 0, total: 0 },
-        analogyOnly: { count: 0, total: 0 },
-        withVideo: { count: 0, total: 0 },
-      },
-    )
-    const averageForGroup = (group) => (group.count ? Math.round(group.total / group.count) : 0)
-    const participants = new Set(submittedAttempts.map((attempt) => attempt.studentId)).size
-    const activeStudents = module.enrollments.length
-    const participationRate = activeStudents
-      ? Math.round((participants / activeStudents) * 100)
-      : 0
-    const avgQuizScore = submittedAttempts.length
-      ? Math.round(
-          submittedAttempts.reduce((total, attempt) => total + (attempt.score || 0), 0) / submittedAttempts.length,
-        )
-      : 0
-    const analogyStats = analogyBuckets(module.analogySets, from)
-    const completions = submittedAttempts.length
-    const revisits = quizRevisitCount(submittedAttempts)
-    const lectureRows = createLectureRows(module, from)
-    const lectureCompletions = lectureRows.reduce((total, lecture) => total + lecture.completions, 0)
-    const lectureAvgScore = lectureCompletions
-      ? Math.round(
-          lectureRows.reduce((total, lecture) => total + (lecture.avgScore * lecture.completions), 0) / lectureCompletions,
-        )
-      : 0
+    },
+    {
+      withAnalogy: { count: 0, total: 0 },
+      withoutAnalogy: { count: 0, total: 0 },
+    },
+  )
+  const performanceRows = [
+    {
+      label: "Without analogy views",
+      value: average(performanceTotals.withoutAnalogy.total, performanceTotals.withoutAnalogy.count),
+      count: performanceTotals.withoutAnalogy.count,
+      color: "bg-stone-500",
+    },
+    {
+      label: "With analogy views",
+      value: average(performanceTotals.withAnalogy.total, performanceTotals.withAnalogy.count),
+      count: performanceTotals.withAnalogy.count,
+      color: "bg-teal-600",
+    },
+  ]
 
-    return {
-      code: module.code,
-      name: module.name,
-      lectureInstances: module.lectures.length,
-      analogyStats,
-      avgQuizScore,
-      participationRate,
-      participants,
-      activeStudents,
-      completions,
-      revisits,
-      analogyQuestionViews: quizMediaInteractions.filter((interaction) => interaction.type === "ANALOGY_VIEW").length,
-      videoViews: quizMediaInteractions.filter((interaction) => interaction.type === "VIDEO_VIEW").length,
-      noMediaScore: averageForGroup(scoreGroups.noMedia),
-      analogyOnlyScore: averageForGroup(scoreGroups.analogyOnly),
-      withVideoScore: averageForGroup(scoreGroups.withVideo),
-      lectureCompletions,
-      lectureAvgScore,
-      lecturesWithQuizActivity: lectureRows.filter((lecture) => lecture.completions > 0).length,
-    }
-  })
+  const participationByDate = allAttempts.reduce((acc, attempt) => {
+    const key = dateKey(attempt.submittedAt)
+    if (!acc[key]) acc[key] = new Set()
+    acc[key].add(attempt.studentId)
+    return acc
+  }, {})
+  const participationRows = Object.entries(participationByDate)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, students]) => ({
+      date,
+      participants: students.size,
+      rate: percent(students.size, activeStudentIds.size),
+    }))
 
-  const totalCompletions = moduleCards.reduce((total, module) => total + module.completions, 0)
-  const totalRevisits = moduleCards.reduce((total, module) => total + module.revisits, 0)
-  const totalAnalogyQuestionViews = moduleCards.reduce((total, module) => total + module.analogyQuestionViews, 0)
-  const totalVideoViews = moduleCards.reduce((total, module) => total + module.videoViews, 0)
+  const quizRows = moduleStats
+    .flatMap((module) => module.quizRows)
+    .filter((quiz) => quiz.completions > 0)
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
+  const moduleRows = moduleStats
+    .filter((module) => module.submittedAttempts.length > 0)
+    .map((module) => ({
+      id: module.id,
+      label: getModuleDisplayName(module),
+      helper: `${module.submittedAttempts.length} completion${module.submittedAttempts.length === 1 ? "" : "s"}`,
+      value: module.avgScore,
+    }))
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
 
   return (
     <main className={ui.page}>
@@ -261,78 +406,56 @@ export default async function LecturerStatisticsPage({ searchParams }) {
       <section className={ui.pageSection}>
         <div className={`${ui.container} ${ui.pageSpacing}`}>
           <div className={ui.cardFull}>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className={ui.textLabel}>Date range: {dateRangeLabel(range)}</p>
-              <div className="flex items-center gap-2 text-xs">
-                <Link href={`/lecturer/statistics?range=7d`} className={range === "7d" ? ui.buttonPrimary : ui.buttonSecondary}>7d</Link>
-                <Link href={`/lecturer/statistics?range=30d`} className={range === "30d" ? ui.buttonPrimary : ui.buttonSecondary}>30d</Link>
-                <Link href={`/lecturer/statistics?range=90d`} className={range === "90d" ? ui.buttonPrimary : ui.buttonSecondary}>90d</Link>
-                <Link href={`/lecturer/statistics?range=all`} className={range === "all" ? ui.buttonPrimary : ui.buttonSecondary}>All</Link>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 md:grid-cols-5 text-sm">
-              <div className={`${ui.card} p-4`}>
-                <p className={ui.textLabel}>Modules</p>
-                <p className="mt-1 text-2xl font-semibold">{moduleCards.length}</p>
-              </div>
-              <div className={`${ui.card} p-4`}>
-                <p className={ui.textLabel}>Quiz completions</p>
-                <p className="mt-1 text-2xl font-semibold">{totalCompletions}</p>
-              </div>
-              <div className={`${ui.card} p-4`}>
-                <p className={ui.textLabel}>Quiz revisits</p>
-                <p className="mt-1 text-2xl font-semibold">{totalRevisits}</p>
-              </div>
-              <div className={`${ui.card} p-4`}>
-                <p className={ui.textLabel}>Analogy views</p>
-                <p className="mt-1 text-2xl font-semibold">{totalAnalogyQuestionViews}</p>
-              </div>
-              <div className={`${ui.card} p-4`}>
-                <p className={ui.textLabel}>Video views</p>
-                <p className="mt-1 text-2xl font-semibold">{totalVideoViews}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className={ui.cardFull}>
-            <h2 className={ui.cardHeader}>Module Breakdown</h2>
-            <div className="space-y-3 text-sm">
-              {moduleCards.map((module) => (
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <Link href="/lecturer/statistics" className={!moduleCodeFilter ? ui.buttonPrimary : ui.buttonSecondary}>
+                All Modules
+              </Link>
+              {modules.map((module) => (
                 <Link
-                  key={module.code}
-                  href={`/lecturer/statistics/${encodeURIComponent(module.code)}?range=${range}`}
-                  className={`${ui.cardList} block hover:border-teal-500 transition`}
+                  key={module.id}
+                  href={`/lecturer/statistics?module=${encodeURIComponent(module.code)}`}
+                  className={moduleCodeFilter === module.code ? ui.buttonPrimary : ui.buttonSecondary}
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-stone-950">{getModuleDisplayName(module)}</p>
-                      <p className="text-xs text-stone-600">
-                        Lecture instances: {module.lectureInstances} · Analogies (active/draft/upcoming): {module.analogyStats.active}/{module.analogyStats.draft}/{module.analogyStats.upcoming}
-                      </p>
-                      <p className="text-xs text-stone-600">
-                        Avg quiz score: {module.avgQuizScore}% · Participation: {module.participationRate}% ({module.participants}/{module.activeStudents})
-                      </p>
-                      <p className="text-xs text-stone-600">
-                        Quiz completions: {module.completions} · Revisits: {module.revisits} · Active lectures: {module.lecturesWithQuizActivity}
-                      </p>
-                      <p className="text-xs text-stone-600">
-                        Quiz analogy views: {module.analogyQuestionViews} · Video views: {module.videoViews}
-                      </p>
-                      <p className="text-xs text-stone-600">
-                        Avg score no media/analogy/video: {module.noMediaScore}%/{module.analogyOnlyScore}%/{module.withVideoScore}%
-                      </p>
-                      <p className="text-xs text-stone-600">
-                        Lecture-scoped avg score: {module.lectureAvgScore}% · Lecture-scoped completions: {module.lectureCompletions}
-                      </p>
-                    </div>
-                    <span className={ui.buttonSmall}>Open Module Stats</span>
-                  </div>
+                  {getModuleDisplayName(module)}
                 </Link>
               ))}
-              {moduleCards.length === 0 ? <p className={ui.textSmall}>No modules available yet.</p> : null}
             </div>
           </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6 text-sm">
+            <MetricCard label="Quiz completions" value={totalCompletions} />
+            <MetricCard label="Analogy views" value={totalAnalogyViews} />
+            <MetricCard label="Questions without analogies" value={`${percent(totalNoAnalogyResponses, totalResponses)}%`} helper={`${totalNoAnalogyResponses}/${totalResponses} answered`} />
+            <MetricCard label="Active students" value={activeStudentIds.size} />
+            <MetricCard label="Participation" value={`${percent(participantIds.size, activeStudentIds.size)}%`} helper={`${participantIds.size}/${activeStudentIds.size} students`} />
+            <MetricCard label="Average quiz score" value={`${avgQuizScore}%`} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <PerformanceComparison rows={performanceRows} />
+            <ParticipationTrend rows={participationRows} />
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <HorizontalBarChart
+              title="Average Score Per Quiz"
+              rows={quizRows}
+              emptyText="No submitted quiz attempts yet."
+            />
+            {!selectedModule ? (
+              <HorizontalBarChart
+                title="Average Score Per Module"
+                rows={moduleRows}
+                emptyText="No module scores yet."
+              />
+            ) : null}
+          </div>
+
+          {moduleCodeFilter && !selectedModule ? (
+            <div className={ui.cardFull}>
+              <p className={ui.textSmall}>No module found for this selection.</p>
+            </div>
+          ) : null}
         </div>
       </section>
     </main>
