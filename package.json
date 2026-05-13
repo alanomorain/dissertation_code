@@ -7,6 +7,11 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run --exclude tests/e2e/**",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "test:all": "npm run lint && npm run build && npm run test && npm run test:e2e",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "npm run db:push && node prisma/seed.js",
@@ -35,11 +40,13 @@
     "react-dom": "19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "25.0.9",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "vitest": "^4.1.6"
   }
 }
